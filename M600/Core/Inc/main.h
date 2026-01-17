@@ -72,8 +72,8 @@ void Error_Handler(void);
 #define IO_SYN_US_GPIO_Port GPIOC
 #define IO_SYN_RF_Pin GPIO_PIN_11
 #define IO_SYN_RF_GPIO_Port GPIOC
-#define IO_SYN_ESW_Pin GPIO_PIN_12
-#define IO_SYN_ESW_GPIO_Port GPIOC
+#define IO_SYN_RFC12_Pin GPIO_PIN_12
+#define IO_SYN_RFC12_GPIO_Port GPIOC
 #define CTR_FAN_Pin GPIO_PIN_2
 #define CTR_FAN_GPIO_Port GPIOD
 #define CTR_HP_motor_Pin GPIO_PIN_3

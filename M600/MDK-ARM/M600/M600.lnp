@@ -33,6 +33,7 @@
 "m600\stm32f1xx_hal_uart.o"
 "m600\system_stm32f1xx.o"
 "m600\app_system.o"
+"m600\app_comm.o"
 "m600\drv_delay.o"
 "m600\drv_wdg.o"
 "m600\log.o"

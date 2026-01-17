@@ -1,5 +1,5 @@
 /***********************************************************************************
-* @file     : example.c
+* @file     : app_ultrasound.c
 * @brief    : 
 * @details  : 
 * @author   : \.rumi
@@ -7,17 +7,16 @@
 * @version  : V1.0.0
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
-#include "example.h"
+#include "app_ultrasound.h"
 
-
-void example_init(void)
+void App_Ultrasound_Init(void)
 {
-    // Initialize the example module
+    
 }
 
-void example_process(void)
+void App_Ultrasound_Process(void)
 {
-    // Process the example module
+    // Process the ultrasound module
 }
 
 /**************************End of file********************************/

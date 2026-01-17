@@ -8,7 +8,7 @@
 #include "app_system.h"
 #include "log.h"
 #include "cm_backtrace.h"
-
+#include "drv_wdg.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
@@ -61,7 +61,7 @@ void SystemManager(void)
 void SystemProcess(void)
 {
     SystemManager();
-    //Drv_WatchDogFeed();
+    Drv_WatchDogFeed();
 }
 /**************************End of file********************************/
 

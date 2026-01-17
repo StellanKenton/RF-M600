@@ -1,0 +1,8 @@
+*.o
+*.d
+*.crf
+*.htm
+*.hex
+*.axf
+*.dep
+*.senki

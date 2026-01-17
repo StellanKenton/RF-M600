@@ -1,5 +1,5 @@
 /***********************************************************************************
-* @file     : example.c
+* @file     : app_negprsheat.c
 * @brief    : 
 * @details  : 
 * @author   : \.rumi
@@ -7,19 +7,16 @@
 * @version  : V1.0.0
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
-#include "example.h"
+#include "app_negprsheat.h"
 
-
-void example_init(void)
+void App_NegPrsHeat_Init(void)
 {
-    // Initialize the example module
+    
 }
 
-void example_process(void)
+void App_NegPrsHeat_Process(void)
 {
-    // Process the example module
+    // Process the negative pressure heat module
 }
 
 /**************************End of file********************************/
-
-

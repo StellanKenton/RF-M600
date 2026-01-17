@@ -50,7 +50,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MCU_Buzzer_Pin|IO_SYN_US_Pin|IO_SYN_RF_Pin|IO_SYN_ESW_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(MCU_Buzzer_GPIO_Port, MCU_Buzzer_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, MCU_CTR_US_RF_Pin|MCU_CTR_US_RFB14_Pin|CTR_HP_motor_Pin|CTR_HP_lose_Pin
@@ -59,18 +59,18 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CTR_FAN_GPIO_Port, CTR_FAN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PCPin PCPin PCPin PCPin */
-  GPIO_InitStruct.Pin = MCU_Buzzer_Pin|IO_SYN_US_Pin|IO_SYN_RF_Pin|IO_SYN_ESW_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = MCU_Buzzer_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(MCU_Buzzer_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = MCU_FOOT_Pin;
+  /*Configure GPIO pins : PCPin PCPin PCPin PCPin */
+  GPIO_InitStruct.Pin = MCU_FOOT_Pin|IO_SYN_US_Pin|IO_SYN_RF_Pin|IO_SYN_RFC12_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(MCU_FOOT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin */

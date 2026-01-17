@@ -1,5 +1,5 @@
 /***********************************************************************************
-* @file     : example.c
+* @file     : app_shockwave.c
 * @brief    : 
 * @details  : 
 * @author   : \.rumi
@@ -7,19 +7,16 @@
 * @version  : V1.0.0
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
-#include "example.h"
+#include "app_shockwave.h"
 
-
-void example_init(void)
+void App_Shockwave_Init(void)
 {
-    // Initialize the example module
+    
 }
 
-void example_process(void)
+void App_Shockwave_Process(void)
 {
-    // Process the example module
+    // Process the shockwave module
 }
 
 /**************************End of file********************************/
-
-

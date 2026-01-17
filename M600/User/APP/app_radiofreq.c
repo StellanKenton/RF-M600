@@ -1,5 +1,5 @@
 /***********************************************************************************
-* @file     : example.c
+* @file     : app_radiofreq.c
 * @brief    : 
 * @details  : 
 * @author   : \.rumi
@@ -7,19 +7,16 @@
 * @version  : V1.0.0
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
-#include "example.h"
+#include "app_radiofreq.h"
 
-
-void example_init(void)
+void App_RadioFreq_Init(void)
 {
-    // Initialize the example module
+    
 }
 
-void example_process(void)
+void App_RadioFreq_Process(void)
 {
-    // Process the example module
+    // Process the radio frequency module
 }
 
 /**************************End of file********************************/
-
-

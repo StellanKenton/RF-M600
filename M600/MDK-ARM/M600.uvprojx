@@ -985,6 +985,31 @@
               <FileType>1</FileType>
               <FilePath>..\User\APP\app_comm.c</FilePath>
             </File>
+            <File>
+              <FileName>app_negprsheat.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_negprsheat.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_radiofreq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_radiofreq.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_shockwave.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_shockwave.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_treatmgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_treatmgr.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_ultrasound.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_ultrasound.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -999,6 +1024,16 @@
               <FileName>drv_wdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\DRV\drv_wdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_iodevice.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_iodevice.c</FilePath>
             </File>
           </Files>
         </Group>

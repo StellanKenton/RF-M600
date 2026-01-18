@@ -21,7 +21,8 @@ extern "C" {
 
 typedef enum
 {
-    E_US_RUN_INIT = 0,
+    E_US_RUN_WAIT = 0,
+    E_US_RUN_INIT,
     E_US_RUN_IDLE,
     E_US_RUN_WORKING,
     E_US_RUN_STOP,

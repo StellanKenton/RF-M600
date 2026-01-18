@@ -28,26 +28,37 @@ typedef enum
     E_US_RUN_IDLE,
     E_US_RUN_WORKING,
     E_US_RUN_STOP,
-    E_US_RUN_ERROR,
     E_US_RUN_MAX,
 } US_RunState_EnumDef;
 
+
+typdef enum {
+    E_US_ERROR_NONE = 0,
+    E_US_ERROR_PROBE_NOT_CONNECTED,
+    E_US_ERROR_READ_PARAMS_FAILED,
+    E_US_ERROR_INVALID_PARAMS,
+    E_US_ERROR_MAX,
+}Ultrasound_ErrorCode_EnumDef;
 
 typedef struct
 {
     US_RunState_EnumDef runState;
     uint16_t Voltage;
-    uint16_t Current;
+    uint16_t CurrentHigh;
+    uint16_t CurrentLow;
     uint16_t Frequency;
     uint16_t TempLimit;
-    uint16_t RemainTime;
-    uint16_t WorkTime;
+    uint16_t TreatTimes;  
+
     uint8_t WorkLevel;
     uint16_t HeadTemp;
+    uint16_t RemainTime;
+    
     uint8_t ConnState;
     uint8_t ErrorCode;
-    uint16_t TreatTimes;
     bool FootSwitchStatus;
+    IODevice_WorkingMode_EnumDef probeStatus;
+    
     US_TreatParams_t TreatParams;
     UltraSound_TransData_t Trans;
 } US_CtrlInfo_t;

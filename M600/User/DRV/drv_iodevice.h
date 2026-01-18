@@ -70,8 +70,11 @@ typedef enum
 typedef enum
 {
     CHANNEL_US = 0,
-    CHANNEL_ESW,
+    CHANNEL_SW,
     CHANNEL_RF,
+    CHANNEL_NH,
+    CHANNEL_CLOSE,
+    CHANNEL_READY,
     CHANNEL_MAX,
 } IODevice_Channel_EnumDef;
 

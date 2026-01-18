@@ -88,12 +88,12 @@ void ProbeStatusCheck()
     }
 }
 
-void App_TreatMgr_ChangeCheck(IODevice_WorkingMode_EnumDef curProbe) 
-{
-    if(curProbe != s_TreatMgr.preProbeStaus){
+// void App_TreatMgr_ChangeCheck(IODevice_WorkingMode_EnumDef curProbe) 
+// {
+//     if(curProbe != s_TreatMgr.preProbeStaus){
         
-    }
-}
+//     }
+// }
 
 void App_TreatMgr_Process(void)
 {
@@ -131,19 +131,15 @@ void App_TreatMgr_Process(void)
             break;
         case E_TREATMGR_STATE_RADIO_FREQUENCY:
             // Handle radio frequency state            
-            App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_RADIO_FREQUENCY);
             break;
         case E_TREATMGR_STATE_SHOCK_WAVE:
             // Handle shock wave state
-            App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_SHOCKWAVE);
             break;
         case E_TREATMGR_STATE_NEGATIVE_PRESSURE_HEAT:
             // Handle negative pressure heat state
-            App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
             break;
         case E_TREATMGR_STATE_ULTRASOUND:
             // Handle ultrasound state
-            App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_ULTRASOUND);
             App_Ultrasound_Process();
             break;
         case E_TREATMGR_STATE_ERROR:

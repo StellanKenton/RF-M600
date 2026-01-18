@@ -10,6 +10,11 @@
 #include "app_treatmgr.h"
 #include "drv_iodevice.h"
 #include "log.h"
+#include "app_ultrasound.h"
+#include "app_shockwave.h"
+#include "app_radiofreq.h"
+#include "app_negprsheat.h"
+#include "drv_delay.h"
 
 TreatMgr_t s_TreatMgr;
 
@@ -92,6 +97,11 @@ void App_TreatMgr_ChangeCheck(IODevice_WorkingMode_EnumDef curProbe)
 
 void App_TreatMgr_Process(void)
 {
+    static Drv_Timer_t TreatMgrTimer;
+
+    if(Drv_Timer_Tick(&TreatMgrTimer, TREAT_TASK_TIME) == false){
+        return;
+    }
     // Process the treatment manager module
     ProbeStatusCheck();
     switch(s_TreatMgr.eState)
@@ -120,7 +130,7 @@ void App_TreatMgr_Process(void)
             }
             break;
         case E_TREATMGR_STATE_RADIO_FREQUENCY:
-            // Handle radio frequency state
+            // Handle radio frequency state            
             App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_RADIO_FREQUENCY);
             break;
         case E_TREATMGR_STATE_SHOCK_WAVE:
@@ -134,6 +144,7 @@ void App_TreatMgr_Process(void)
         case E_TREATMGR_STATE_ULTRASOUND:
             // Handle ultrasound state
             App_TreatMgr_ChangeCheck(E_IODEVICE_MODE_ULTRASOUND);
+            App_Ultrasound_Process();
             break;
         case E_TREATMGR_STATE_ERROR:
             // Handle error state

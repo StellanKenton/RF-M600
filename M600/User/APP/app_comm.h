@@ -138,11 +138,15 @@ typedef struct
 {
     UltraSound_ByteUnion flag;
     US_GetStatus_Reply_t TxStatus;
-    US_SetWorkState_Send_t RxWorkState;
-    US_SetConfig_Send_t RxConfig;
     US_SetConfig_Reply_t TxConfig;
+
+    US_SetWorkState_Send_t RxWorkState;
+    US_SetConfig_Send_t RxConfig; 
+    bool RxValidFlag[3];
+
 } UltraSound_TransData_t;
 
+UltraSound_TransData_t *App_Comm_GetUSTransData(void);
 /* =============================================================================
  * Radio Frequency Module Structures
  * ============================================================================= */

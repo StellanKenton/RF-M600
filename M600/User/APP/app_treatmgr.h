@@ -20,6 +20,10 @@ extern "C" {
 #endif
 
 #include "drv_iodevice.h"
+
+#define   TREAT_TASK_TIME     5       // 5ms
+
+
 typedef enum
 {
     E_TREATMGR_STATE_IDLE = 0,
@@ -42,7 +46,7 @@ typedef struct
 
 void App_TreatMgr_Init(void);
 void App_TreatMgr_Process(void);
-
+void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState);
 
 #ifdef __cplusplus
 }

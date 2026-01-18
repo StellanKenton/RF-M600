@@ -19,10 +19,12 @@
 extern "C" {
 #endif
 
+#include "app_comm.h"
+#include "app_memory.h"
+
 typedef enum
 {
-    E_US_RUN_WAIT = 0,
-    E_US_RUN_INIT,
+    E_US_RUN_INIT = 0,
     E_US_RUN_IDLE,
     E_US_RUN_WORKING,
     E_US_RUN_STOP,
@@ -44,7 +46,10 @@ typedef struct
     uint16_t HeadTemp;
     uint8_t ConnState;
     uint8_t ErrorCode;
-    uint16_t RemainTreatTime;
+    uint16_t TreatTimes;
+    bool FootSwitchStatus;
+    US_TreatParams_t TreatParams;
+    UltraSound_TransData_t Trans;
 } US_CtrlInfo_t;
 
 

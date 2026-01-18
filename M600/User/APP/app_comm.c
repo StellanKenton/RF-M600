@@ -72,6 +72,51 @@ static void App_Comm_AddFrameTail(uint8_t *pTxData, uint8_t idx)
     pTxData[idx++] = PROTOCOL_TAIL_1;
 }
 
+void App_Comm_RecvDataHandle(uint8_t *Data)
+{
+    if(Data == NULL){
+        return;
+    }
+
+    switch(Data[3])
+    {
+        case PROTOCOL_MODULE_ULTRASOUND:
+            switch(Data[4]) 
+            {
+                case PROTOCOL_CMD_GET_STATUS:
+                    s_AppCommInfo.US.flag.bits.Rely_Status = 1;
+                    break;
+                case PROTOCOL_CMD_SET_WORK_STATE:
+                    s_AppCommInfo.US.RxWorkState.work_state = Data[6];
+                    s_AppCommInfo.US.RxWorkState.work_time = Data[7]  | Data[8] << 8;
+                    s_AppCommInfo.US.RxWorkState.work_level = Data[9];
+                    s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_WORK_STATE] = true;
+                    break; 
+                case PROTOCOL_CMD_SET_CONFIG:
+                    s_AppCommInfo.US.RxConfig.frequency = Data[6] | Data[7] << 8;
+                    s_AppCommInfo.US.RxConfig.voltage = Data[8] | Data[9] << 8;
+                    s_AppCommInfo.US.RxConfig.temp_limit = Data[10] | Data[11] << 8;
+                    s_AppCommInfo.US.flag.bits.Rely_Config = 1;
+                    s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_CONFIG] = true;
+                    break;
+            }
+            break;
+        case PROTOCOL_MODULE_RADIO_FREQ:
+            break;
+        case PROTOCOL_MODULE_SHOCKWAVE:
+            break;
+        case PROTOCOL_MODULE_HEAT:
+            break;
+        default:
+            break;
+    }
+}
+
+
+UltraSound_TransData_t *App_Comm_GetUSTransData(void)
+{
+    return &s_AppCommInfo.US;
+}
 
 
 /* =============================================================================

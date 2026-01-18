@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;..\User\APP;..\User\BSP;..\User\LIB;..\User\DRV;..\User\SEGGER;..\User\BackTrace;..\User\DAL</IncludePath>
+              <IncludePath>../Core/Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy; ../Drivers/CMSIS/Device/ST/STM32F1xx/Include; ../Drivers/CMSIS/Include; ..\User\APP; ..\User\BSP; ..\User\LIB; ..\User\DRV; ..\User\SEGGER; ..\User\BackTrace; ..\User\DAL</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1010,6 +1010,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\APP\app_ultrasound.c</FilePath>
             </File>
+            <File>
+              <FileName>app_memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\APP\app_memory.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1034,6 +1039,11 @@
               <FileName>drv_iodevice.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\DRV\drv_iodevice.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_memory.c</FilePath>
             </File>
           </Files>
         </Group>

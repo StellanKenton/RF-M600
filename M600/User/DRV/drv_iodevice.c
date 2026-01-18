@@ -248,4 +248,9 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
 }
 
 
+bool Drv_IODevice_GetFootSwitchState(void)
+{
+    return Dal_Read_Pin(E_GPIO_IN_FOOT);
+}
+
 /**************************End of file********************************/

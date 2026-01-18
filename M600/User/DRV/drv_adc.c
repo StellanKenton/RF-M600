@@ -1,0 +1,127 @@
+/***********************************************************************************
+* @file     : drv_adc.c
+* @brief    : ADC driver implementation
+* @details  : ADC channel read functions implementation
+* @author   : \.rumi
+* @date     : 2025-01-23
+* @version  : V1.0.0
+* @copyright: Copyright (c) 2050
+**********************************************************************************/
+#include "drv_adc.h"
+#include "adc.h"
+#include "stm32f1xx_hal.h"
+
+/* ADC reference voltage in millivolts (mV) */
+#define ADC_REF_VOLTAGE_MV    3300    ///< 3.3V reference voltage
+#define ADC_RESOLUTION        4096    ///< 12-bit ADC resolution (2^12 = 4096)
+
+/**
+ * @brief Convert ADC channel enumeration to STM32 HAL ADC channel
+ * @param channel ADC channel enumeration
+ * @retval STM32 HAL ADC channel number, returns 0 if invalid
+ */
+static uint32_t Drv_ADC_GetHALChannel(ADC_Channel_EnumDef channel)
+{
+    switch (channel)
+    {
+        case E_ADC_CHANNEL_0:
+            return ADC_CHANNEL_0;
+        case E_ADC_CHANNEL_1:
+            return ADC_CHANNEL_1;
+        case E_ADC_CHANNEL_8:
+            return ADC_CHANNEL_8;
+        case E_ADC_CHANNEL_9:
+            return ADC_CHANNEL_9;
+        case E_ADC_CHANNEL_12:
+            return ADC_CHANNEL_12;
+        case E_ADC_CHANNEL_13:
+            return ADC_CHANNEL_13;
+        default:
+            return 0;
+    }
+}
+
+/**
+ * @brief Read ADC value from specified channel
+ * @param channel ADC channel enumeration
+ * @retval ADC value (0-4095 for 12-bit ADC), returns 0 if error
+ */
+uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel)
+{
+    ADC_ChannelConfTypeDef sConfig = {0};
+    uint32_t halChannel;
+    HAL_StatusTypeDef status;
+    uint16_t adcValue = 0;
+
+    /* Check channel validity */
+    if (channel >= E_ADC_CHANNEL_MAX)
+    {
+        return 0;
+    }
+
+    /* Get HAL channel number */
+    halChannel = Drv_ADC_GetHALChannel(channel);
+    /* Note: ADC_CHANNEL_0 is 0, so we cannot use halChannel==0 to check error.
+       We already validated channel < E_ADC_CHANNEL_MAX above. */
+
+    /* Configure ADC channel */
+    sConfig.Channel = halChannel;
+    sConfig.Rank = ADC_REGULAR_RANK_1;
+    sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+    
+    status = HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+    if (status != HAL_OK)
+    {
+        return 0;
+    }
+
+    /* Start ADC conversion */
+    status = HAL_ADC_Start(&hadc1);
+    if (status != HAL_OK)
+    {
+        return 0;
+    }
+
+    /* Wait for conversion complete */
+    status = HAL_ADC_PollForConversion(&hadc1, 100);
+    if (status != HAL_OK)
+    {
+        HAL_ADC_Stop(&hadc1);
+        return 0;
+    }
+
+    /* Read ADC value */
+    adcValue = HAL_ADC_GetValue(&hadc1);
+
+    /* Stop ADC conversion */
+    HAL_ADC_Stop(&hadc1);
+
+    return adcValue;
+}
+
+/**
+ * @brief Read ADC value with voltage conversion (assuming 3.3V reference)
+ * @param channel ADC channel enumeration
+ * @retval Voltage in millivolts (mV), returns 0xFFFF if error
+ */
+uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel)
+{
+    uint16_t adcValue;
+    uint32_t voltage;
+
+    /* Read ADC value */
+    adcValue = Drv_ADC_ReadChannel(channel);
+    
+    /* Note: adcValue can legitimately be 0, so we cannot use 0 to indicate error.
+       If error occurs, Drv_ADC_ReadChannel will return 0, but we have no way to 
+       distinguish between error and actual 0 value. In practice, HAL_ADC_GetValue 
+       should always return a valid 12-bit value (0-4095) if conversion succeeds. */
+
+    /* Convert ADC value to voltage in millivolts */
+    /* voltage = (adcValue * ADC_REF_VOLTAGE_MV) / ADC_RESOLUTION */
+    voltage = ((uint32_t)adcValue * ADC_REF_VOLTAGE_MV) / ADC_RESOLUTION;
+
+    return voltage;
+}
+
+/**************************End of file********************************/

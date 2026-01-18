@@ -123,6 +123,12 @@ bool Dal_Read_Pin(GPIO_Input_EnumDef pin);
  * @param state The state of the GPIO pin (0=Low, 1=High)
  */
 void Dal_Write_Pin(GPIO_Output_EnumDef pin, uint8_t state);
+
+/**
+ * @brief Get foot switch state
+ * @retval The state of the foot switch (0=Open, 1=Closed)
+ */
+bool Drv_IODevice_GetFootSwitchState(void);
 #ifdef __cplusplus
 }
 #endif

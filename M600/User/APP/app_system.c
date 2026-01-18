@@ -9,6 +9,7 @@
 #include "log.h"
 #include "cm_backtrace.h"
 #include "drv_wdg.h"
+#include "app_treatmgr.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
@@ -18,7 +19,22 @@ void System_ChangeMode(System_Mode_EnumDef newMode)
 {
     if(newMode != s_SystemMgr.eMode && newMode < E_SYSTEM_MODE_MAX){
         s_SystemMgr.eMode = newMode;
-        LOG_I("System mode changed to %d", newMode);
+        switch(newMode)
+        {
+            case E_SYSTEM_STANDBY_MODE:
+                LOG_I("System mode changed to STANDBY_MODE");
+                break;
+            case E_SYSTEM_NORMAL_MODE:
+                LOG_I("System mode changed to NORMAL_MODE");
+                break;
+            case E_SYSTEM_UPDATE_MODE:
+                LOG_I("System mode changed to UPDATE_MODE");
+                break;
+            case E_SYSTEM_MODE_MAX:
+            default:
+                LOG_I("System mode changed to UNKNOWN");
+                break;
+        }
     }
 }
 
@@ -30,6 +46,10 @@ void System_Init(void)
     LOG_I("&&&&&&&&&&&&&&&&& BOOT LOADER &&&&&&&&&&&&&&&&&");
     LOG_I("System initialized.");
     LOG_I("Firmware: %s, Version: %s, Hardware: %s", FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);        
+
+    // Initialize the treatment manager
+    App_TreatMgr_Init();
+    LOG_I("Treatment manager initialized.");
 }
 
 void SystemManager(void)
@@ -38,10 +58,11 @@ void SystemManager(void)
     {
         case E_SYSTEM_STANDBY_MODE:
             // Handle standby mode
+            System_ChangeMode(E_SYSTEM_NORMAL_MODE);
             break;
         case E_SYSTEM_NORMAL_MODE:
             // Handle normal mode
-            // Do nothing for now
+            App_TreatMgr_Process();
             break;
         case E_SYSTEM_UPDATE_MODE:
             // Handle update mode

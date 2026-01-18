@@ -8,9 +8,9 @@
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
 #include "drv_iodevice.h"
-#include "dal_pinctrl.h"
 #include "stm32f1xx_hal.h"
 #include "main.h"
+#include <stdint.h>
 /* Debounce configuration */
 #define IODEVICE_DEBOUNCE_TIME_MS   50   ///< Debounce time in milliseconds
 
@@ -19,7 +19,6 @@ static IODevice_WorkingMode_EnumDef s_lastStableMode = E_IODEVICE_MODE_NOT_CONNE
 static IODevice_WorkingMode_EnumDef s_pendingMode = E_IODEVICE_MODE_NOT_CONNECTED;
 static uint32_t s_debounceStartTick = 0;
 static uint8_t s_debounceActive = 0;
-static IODevice_Channel_State_t s_CurChannel;
 
 
 bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
@@ -34,8 +33,11 @@ bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
             return HAL_GPIO_ReadPin((GPIO_TypeDef*)IO_SYN_RF_GPIO_Port, IO_SYN_RF_Pin);
         case E_GPIO_IN_SYN_ESW:
             return HAL_GPIO_ReadPin((GPIO_TypeDef*)IO_SYN_ESW_GPIO_Port, IO_SYN_ESW_Pin);
+        case E_GPIO_IN_MAX:
+            return false;
+        default:
+            return false;
     }
-    return false;
 }
 
 void Dal_Write_Pin(GPIO_Output_EnumDef pin, uint8_t state)
@@ -78,6 +80,8 @@ void Dal_Write_Pin(GPIO_Output_EnumDef pin, uint8_t state)
         case E_GPIO_OUT_CTR_HEAT_HP:
             HAL_GPIO_WritePin((GPIO_TypeDef*)CTR_HEAT_HP_GPIO_Port, CTR_HEAT_HP_Pin, (GPIO_PinState)state);
             break;
+        case E_GPIO_OUT_MAX:
+            break;
         default:
             break;
     }
@@ -99,13 +103,13 @@ void Drv_IODevice_ReadSyncSignals(IODevice_SyncSignals_t *pSignals)
     }
     
     // Read IO synchronization signals from hardware
-    us_state = Dal_Read_Pin(E_GPIO_IN_SYN_US);
+    us_state = (GPIO_PinState)Dal_Read_Pin(E_GPIO_IN_SYN_US);
     
     // Read ESW signal - if IO_SYN_ESW is not defined, use IO_SYN_RFC12 as alternative
-    esw_state = Dal_Read_Pin(E_GPIO_IN_SYN_ESW);
+    esw_state = (GPIO_PinState)Dal_Read_Pin(E_GPIO_IN_SYN_ESW);
     
     // Read RF signal
-    rf_state = Dal_Read_Pin(E_GPIO_IN_SYN_RF);
+    rf_state = (GPIO_PinState)Dal_Read_Pin(E_GPIO_IN_SYN_RF);
     
     // Convert GPIO_PinState to boolean (GPIO_PIN_SET = High, GPIO_PIN_RESET = Low)
     pSignals->us = (us_state == GPIO_PIN_SET) ? 1 : 0;
@@ -226,22 +230,21 @@ IODevice_WorkingMode_EnumDef Drv_IODevice_GetProbeStatus(void)
 
 void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
 {
-    s_CurChannel = channel;
+//    s_CurChannel = channel;
     switch (channel)
     {
         case CHANNEL_US:
             Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 1);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_OUT, 1);
             break;
-        case CHANNEL_ESW:
-            Dal_Write_Pin(E_GPIO_OUT_CTR_ESW, 1);
-            break;
-        case CHANNEL_HP:
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HP, 1);
-            break;
-        case CHANNEL_RF:
-            Dal_Write_Pin(E_GPIO_OUT_CTR_RF, 1);
-            break;
+//        case CHANNEL_ESW:
+//            Dal_Write_Pin(E_GPIO_OUT_CTR_ESW, 1);
+//            break;
+//        case CHANNEL_HP:
+//            Dal_Write_Pin(E_GPIO_OUT_CTR_HP, 1);
+//            break;
+//        case CHANNEL_RF:
+//            Dal_Write_Pin(E_GPIO_OUT_CTR_RF, 1);
+//            break;
         default:
             break;
     }

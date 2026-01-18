@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#include "drv_iodevice.h"
 typedef enum
 {
     E_TREATMGR_STATE_IDLE = 0,
@@ -27,12 +28,15 @@ typedef enum
     E_TREATMGR_STATE_NEGATIVE_PRESSURE_HEAT,
     E_TREATMGR_STATE_ULTRASOUND,   
     E_TREATMGR_STATE_ERROR,
+    E_TREATMGR_STATE_MAX,
 } TreatMgr_State_EnumDef;
 
 typedef struct
 {
     TreatMgr_State_EnumDef eState;
-    
+    TreatMgr_State_EnumDef preState;
+    IODevice_WorkingMode_EnumDef eProbeStatus;
+    IODevice_WorkingMode_EnumDef preProbeStaus;
 } TreatMgr_t;
 
 

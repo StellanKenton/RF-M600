@@ -164,6 +164,24 @@ IODevice_WorkingMode_EnumDef Drv_IODevice_GetProbeStatus(void)
 void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
 {
     s_CurChannel = channel;
+    switch (channel)
+    {
+        case CHANNEL_US:
+            Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 1);
+            
+            break;
+        case CHANNEL_ESW:
+            Dal_Write_Pin(E_GPIO_OUT_CTR_ESW, 1);
+            break;
+        case CHANNEL_HP:
+            Dal_Write_Pin(E_GPIO_OUT_CTR_HP, 1);
+            break;
+        case CHANNEL_RF:
+            Dal_Write_Pin(E_GPIO_OUT_CTR_RF, 1);
+            break;
+        default:
+            break;
+    }
 }
 
 

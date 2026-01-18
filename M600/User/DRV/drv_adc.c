@@ -24,18 +24,26 @@ static uint32_t Drv_ADC_GetHALChannel(ADC_Channel_EnumDef channel)
 {
     switch (channel)
     {
-        case E_ADC_CHANNEL_0:
+        case E_ADC_CHANNEL_US_I:
             return ADC_CHANNEL_0;
-        case E_ADC_CHANNEL_1:
+        case E_ADC_CHANNEL_RF_I:
             return ADC_CHANNEL_1;
-        case E_ADC_CHANNEL_8:
+        case E_ADC_CHANNEL_Heat_REF02:
+            return ADC_CHANNEL_5;
+        case E_ADC_CHANNEL_Heat_REF01:
+            return ADC_CHANNEL_6;
+        case E_ADC_CHANNEL_ESW_U:
             return ADC_CHANNEL_8;
-        case E_ADC_CHANNEL_9:
+        case E_ADC_CHANNEL_ESW_I:
             return ADC_CHANNEL_9;
-        case E_ADC_CHANNEL_12:
+        case E_ADC_CHANNEL_HP_PRE:
             return ADC_CHANNEL_12;
-        case E_ADC_CHANNEL_13:
+        case E_ADC_CHANNEL_HAND_NTC:
             return ADC_CHANNEL_13;
+        case E_ADC_CHANNEL_VER_ID:
+            return ADC_CHANNEL_14;
+        case E_ADC_CHANNEL_VOUT:
+            return ADC_CHANNEL_15;
         default:
             return 0;
     }
@@ -46,7 +54,7 @@ static uint32_t Drv_ADC_GetHALChannel(ADC_Channel_EnumDef channel)
  * @param channel ADC channel enumeration
  * @retval ADC value (0-4095 for 12-bit ADC), returns 0 if error
  */
-uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel)
+uint16_t Dal_ADC_ReadChannel(ADC_Channel_EnumDef channel)
 {
     ADC_ChannelConfTypeDef sConfig = {0};
     uint32_t halChannel;
@@ -110,7 +118,7 @@ uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel)
     uint32_t voltage;
 
     /* Read ADC value */
-    adcValue = Drv_ADC_ReadChannel(channel);
+    adcValue = Dal_ADC_ReadChannel(channel);
     
     /* Note: adcValue can legitimately be 0, so we cannot use 0 to indicate error.
        If error occurs, Drv_ADC_ReadChannel will return 0, but we have no way to 

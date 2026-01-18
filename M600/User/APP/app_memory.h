@@ -31,7 +31,8 @@ typedef struct
     uint16_t Voltage;           ///< Voltage in mV (电压)
     uint16_t Current;           ///< Current in mA (电流)
     uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[3];        ///< Reserved bytes (保留字节)
+    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } RF_TreatParams_t;
 
 /**
@@ -46,7 +47,8 @@ typedef struct
     uint16_t Voltage;           ///< Voltage in mV (电压)
     uint16_t Current;           ///< Current in mA (电流)
     uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[3];        ///< Reserved bytes (保留字节)
+    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } SW_TreatParams_t;
 
 /**
@@ -61,7 +63,8 @@ typedef struct
     uint16_t HeatPower;         ///< Heat power in mW (加热功率)
     uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制)
     uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[3];        ///< Reserved bytes (保留字节)
+    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } NPH_TreatParams_t;
 
 /**
@@ -72,7 +75,8 @@ typedef struct
     uint16_t Frequency;         ///< Frequency in Hz (频率)
     uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制)
     uint16_t Voltage;           ///< Voltage in mV (电压)
-    uint16_t Current;           ///< Current in mA (电流)
+    uint16_t CurrentHigh;       ///< Current in mA (电流)
+    uint16_t CurrentLow;        ///< Current in mA (电流)
     uint16_t RemainTimes;       ///< Remaining treatment times (次数)
     uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } US_TreatParams_t;

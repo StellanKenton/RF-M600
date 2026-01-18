@@ -23,8 +23,8 @@ extern "C" {
 
 //#define OS_PLATFORM 
 
-void Drv_Delay(uint32_t ms);
-uint32_t Drv_GetTick(void);
+void Dal_Delay(uint32_t ms);
+uint32_t Dal_GetTick(void);
 #ifdef OS_PLATFORM
 void Drv_osDelay(uint32_t ms);
 #endif

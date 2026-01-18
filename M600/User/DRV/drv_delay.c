@@ -19,12 +19,12 @@ void Drv_osDelay(uint32_t ms)
 #endif
 
 
-void Drv_Delay(uint32_t ms)
+void Dal_Delay(uint32_t ms)
 {
     HAL_Delay(ms);
 }
 
-uint32_t Drv_GetTick(void)
+uint32_t Dal_GetTick(void)
 {
     return HAL_GetTick();
 }

@@ -1036,16 +1036,6 @@
           <GroupName>Bsp</GroupName>
         </Group>
         <Group>
-          <GroupName>Dal</GroupName>
-          <Files>
-            <File>
-              <FileName>dal_pinctrl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\DAL\dal_pinctrl.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>

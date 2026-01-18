@@ -8,6 +8,19 @@
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
 #include "drv_iodevice.h"
+#include "dal_pinctrl.h"
+/* Debounce configuration */
+#define IODEVICE_DEBOUNCE_TIME_MS   50   ///< Debounce time in milliseconds
+
+/* Static variables for debounce */
+static IODevice_WorkingMode_EnumDef s_lastStableMode = E_IODEVICE_MODE_NOT_CONNECTED;
+static IODevice_WorkingMode_EnumDef s_pendingMode = E_IODEVICE_MODE_NOT_CONNECTED;
+static uint32_t s_debounceStartTick = 0;
+static uint8_t s_debounceActive = 0;
+static IODevice_Channel_State_t s_CurChannel;
+
+
+
 
 /**
  * @brief Read IO synchronization signals from hardware
@@ -23,17 +36,13 @@ void Drv_IODevice_ReadSyncSignals(IODevice_SyncSignals_t *pSignals)
     }
     
     // Read IO synchronization signals from hardware
-    us_state = HAL_GPIO_ReadPin(IO_SYN_US_GPIO_Port, IO_SYN_US_Pin);
+    us_state = Dal_Read_Pin(E_GPIO_IN_SYN_US);
     
     // Read ESW signal - if IO_SYN_ESW is not defined, use IO_SYN_RFC12 as alternative
-    #ifdef IO_SYN_ESW_Pin
-    esw_state = HAL_GPIO_ReadPin(IO_SYN_ESW_GPIO_Port, IO_SYN_ESW_Pin);
-    #else
-    // Use IO_SYN_RFC12 as ESW signal if IO_SYN_ESW is not defined
-    esw_state = HAL_GPIO_ReadPin(IO_SYN_RFC12_GPIO_Port, IO_SYN_RFC12_Pin);
-    #endif
+    esw_state = Dal_Read_Pin(E_GPIO_IN_SYN_ESW);
     
-    rf_state = HAL_GPIO_ReadPin(IO_SYN_RF_GPIO_Port, IO_SYN_RF_Pin);
+    // Read RF signal
+    rf_state = Dal_Read_Pin(E_GPIO_IN_SYN_RF);
     
     // Convert GPIO_PinState to boolean (GPIO_PIN_SET = High, GPIO_PIN_RESET = Low)
     pSignals->us = (us_state == GPIO_PIN_SET) ? 1 : 0;
@@ -42,7 +51,7 @@ void Drv_IODevice_ReadSyncSignals(IODevice_SyncSignals_t *pSignals)
 }
 
 /**
- * @brief Get working mode based on IO synchronization signals (logic only)
+ * @brief Decode working mode from IO synchronization signals (no debounce)
  * 
  * Working mode truth table:
  * IO_SYN_US | IO_SYN_ESW | IO_SYN_RF | Working Mode
@@ -55,15 +64,10 @@ void Drv_IODevice_ReadSyncSignals(IODevice_SyncSignals_t *pSignals)
  *   Others  |   Others   |   Others  | Connection Error (治疗头连接报错)
  * 
  * @param pSignals Pointer to structure containing the signal states
- * @retval IODevice_WorkingMode_EnumDef The working mode state
+ * @retval IODevice_WorkingMode_EnumDef The working mode state (raw, no debounce)
  */
-IODevice_WorkingMode_EnumDef Drv_IODevice_GetWorkingMode(const IODevice_SyncSignals_t *pSignals)
+static IODevice_WorkingMode_EnumDef Drv_IODevice_DecodeWorkingMode(const IODevice_SyncSignals_t *pSignals)
 {
-    if (pSignals == NULL)
-    {
-        return E_IODEVICE_MODE_ERROR;
-    }
-    
     // Determine working mode based on truth table
     // IO_SYN_US = L, IO_SYN_ESW = H, IO_SYN_RF = H -> Ultrasound
     if (pSignals->us == 0 && pSignals->esw == 1 && pSignals->rf == 1)
@@ -97,6 +101,57 @@ IODevice_WorkingMode_EnumDef Drv_IODevice_GetWorkingMode(const IODevice_SyncSign
     }
 }
 
+/**
+ * @brief Get working mode based on IO synchronization signals with debounce
+ * 
+ * This function applies debounce logic to prevent mode flickering caused by 
+ * signal noise during probe connection/disconnection. The mode will only 
+ * change after the new mode has been stable for IODEVICE_DEBOUNCE_TIME_MS.
+ * 
+ * @param pSignals Pointer to structure containing the signal states
+ * @retval IODevice_WorkingMode_EnumDef The working mode state (debounced)
+ */
+IODevice_WorkingMode_EnumDef Drv_IODevice_GetWorkingMode(const IODevice_SyncSignals_t *pSignals)
+{
+    IODevice_WorkingMode_EnumDef currentMode;
+    uint32_t currentTick;
+    
+    if (pSignals == NULL)
+    {
+        return E_IODEVICE_MODE_ERROR;
+    }
+    
+    // Decode the current mode from signals
+    currentMode = Drv_IODevice_DecodeWorkingMode(pSignals);
+    currentTick = HAL_GetTick();
+    
+    // If current mode matches the last stable mode, reset debounce
+    if (currentMode == s_lastStableMode)
+    {
+        s_debounceActive = 0;
+        return s_lastStableMode;
+    }
+    
+    // If this is a new pending mode, start debounce timer
+    if (!s_debounceActive || currentMode != s_pendingMode)
+    {
+        s_pendingMode = currentMode;
+        s_debounceStartTick = currentTick;
+        s_debounceActive = 1;
+        return s_lastStableMode;
+    }
+    
+    // Check if debounce time has elapsed
+    if ((currentTick - s_debounceStartTick) >= IODEVICE_DEBOUNCE_TIME_MS)
+    {
+        // Mode has been stable for debounce period, update stable mode
+        s_lastStableMode = s_pendingMode;
+        s_debounceActive = 0;
+    }
+    
+    return s_lastStableMode;
+}
+
 
 IODevice_WorkingMode_EnumDef Drv_IODevice_GetProbeStatus(void)
 {
@@ -104,5 +159,12 @@ IODevice_WorkingMode_EnumDef Drv_IODevice_GetProbeStatus(void)
     Drv_IODevice_ReadSyncSignals(&s_SyncSignals);
     return Drv_IODevice_GetWorkingMode(&s_SyncSignals);
 }
+
+
+void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
+{
+    s_CurChannel = channel;
+}
+
 
 /**************************End of file********************************/

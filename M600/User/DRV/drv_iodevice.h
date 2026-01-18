@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+
 /**
  * @brief IO Device working mode enumeration
  */
@@ -32,6 +33,20 @@ typedef enum
     E_IODEVICE_MODE_NOT_CONNECTED,               ///< Treatment head not connected (治疗头未连接)
     E_IODEVICE_MODE_ERROR,                       ///< Connection error (治疗头连接报错)
 } IODevice_WorkingMode_EnumDef;
+
+typedef enum
+{
+    CHANNEL_US = 0,
+    CHANNEL_ESW,
+    CHANNEL_RF,
+    CHANNEL_MAX,
+} IODevice_Channel_EnumDef;
+
+typedef struct
+{
+    IODevice_Channel_EnumDef channel;
+    uint8_t state;
+} IODevice_Channel_State_t;
 
 /**
  * @brief IO synchronization signals state structure

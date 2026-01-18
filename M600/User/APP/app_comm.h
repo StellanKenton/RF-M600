@@ -125,6 +125,24 @@ typedef struct
     uint8_t temp_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
 } US_SetConfig_Reply_t;
 
+typedef union {
+    uint16_t byte;  
+    struct {
+        uint16_t Rely_Status : 1;
+        uint16_t Rely_Config : 1;
+        uint16_t Reserved : 14;
+    } bits;
+} UltraSound_ByteUnion;
+
+typedef struct
+{
+    UltraSound_ByteUnion flag;
+    US_GetStatus_Reply_t TxStatus;
+    US_SetWorkState_Send_t RxWorkState;
+    US_SetConfig_Send_t RxConfig;
+    US_SetConfig_Reply_t TxConfig;
+} UltraSound_TransData_t;
+
 /* =============================================================================
  * Radio Frequency Module Structures
  * ============================================================================= */
@@ -167,6 +185,23 @@ typedef struct
     uint8_t temp_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
 } RF_SetConfig_Reply_t;
 
+typedef union {
+    uint16_t byte;  
+    struct {
+        uint16_t Rely_Status : 1;
+        uint16_t Rely_Config : 1;
+        uint16_t Reserved : 14;
+    } bits;
+} RF_ByteUnion;
+
+typedef struct
+{
+    RF_ByteUnion flag;
+    RF_GetStatus_Reply_t TxStatus;
+    RF_SetWorkState_Send_t RxWorkState;
+    RF_SetConfig_Send_t RxConfig;
+    RF_SetConfig_Reply_t TxConfig;
+} RF_TransData_t;
 /* =============================================================================
  * Shockwave Module Structures
  * ============================================================================= */
@@ -198,6 +233,20 @@ typedef struct
     uint8_t frequency;           ///< Frequency: 0-16
 } SW_SetWorkState_Send_t;
 
+typedef union {
+    uint16_t byte;  
+    struct {
+        uint16_t Rely_Status : 1;
+        uint16_t Reserved : 15;
+    } bits;
+} SW_ByteUnion;
+
+typedef struct
+{
+    SW_ByteUnion flag;
+    SW_GetStatus_Reply_t TxStatus;
+    SW_SetWorkState_Send_t RxWorkState;
+} SW_TransData_t;
 /* =============================================================================
  * Heat Therapy Module Structures
  * ============================================================================= */
@@ -214,8 +263,8 @@ typedef struct
     uint8_t work_state;          ///< 0x00: Stop, 0x01: Working
     uint16_t temp_limit;         ///< 350-480 (35-48℃), 0xFFFF: Over limit
     uint16_t remain_heat_time;   ///< Remaining heat time (seconds), max 3600
-    uint8_t suck_time;            ///< Suck time: unit 10ms, 10-60000
-    uint8_t release_time;        ///< Release time: unit 10ms, 10-60000
+    uint16_t suck_time;            ///< Suck time: unit 10ms, 10-60000
+    uint16_t release_time;        ///< Release time: unit 10ms, 10-60000
     uint8_t pressure;            ///< Pressure: 10-100 KPa
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t preheat_state;       ///< Preheat state: 0x00: Stop, 0x01: Working
@@ -231,8 +280,8 @@ typedef struct
     uint8_t work_state;          ///< 0x01: Start, 0x00: Stop, 0x02: Reset
     uint16_t work_time;          ///< Work time (seconds), max 3600
     uint8_t pressure;            ///< Pressure: -10KPa to -100KPa (send positive value)
-    uint8_t suck_time;           ///< Suck time: unit 100ms, 0.1s-60s
-    uint8_t release_time;        ///< Release time: unit 100ms, 0.1s-60s
+    uint16_t suck_time;           ///< Suck time: unit 100ms, 0.1s-60s
+    uint16_t release_time;        ///< Release time: unit 100ms, 0.1s-60s
     uint16_t temp_limit;         ///< 350-480 (35-48℃)
 } Heat_SetWorkState_Send_t;
 
@@ -245,12 +294,34 @@ typedef struct
 } Heat_SetPreheat_Send_t;
 
 
+typedef union {
+    uint16_t byte;  
+    struct {
+        uint16_t Rely_Status : 1;
+        uint16_t Rely_Config : 1;
+        uint16_t Reserved : 14;
+    } bits;
+} Heat_ByteUnion;
 
 typedef struct
 {
-    uint8_t RevData[64];
-    uint8_t TxData[64];
+    Heat_ByteUnion flag;
+    Heat_GetStatus_Reply_t TxStatus;
+    Heat_SetWorkState_Send_t RxWorkState;
+    Heat_SetPreheat_Send_t RxPreheat;
+} Heat_TransData_t;
+
+typedef struct
+{
+    uint8_t RxData[128];
+    uint8_t TxData[128];
+    UltraSound_TransData_t US;
+    RF_TransData_t RF;
+    SW_TransData_t SW;
+    Heat_TransData_t Heat;
 } App_Comm_Info_t;
+
+
 
 
 /* =============================================================================

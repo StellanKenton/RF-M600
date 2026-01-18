@@ -41,6 +41,7 @@
 "m600\segger_rtt_printf.o"
 "m600\cm_backtrace.o"
 "m600\cmb_fault.o"
+"m600\dal_pinctrl.o"
 --strict --scatter "M600\M600.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

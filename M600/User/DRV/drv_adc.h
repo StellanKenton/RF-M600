@@ -53,6 +53,12 @@ uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
  */
 uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel);
 
+/**
+ * @brief Read VOUT voltage (DAC output voltage monitoring)
+ * @retval Voltage in millivolts (mV)
+ */
+uint16_t Drv_ADC_ReadVOUT(void);
+
 
 
 #ifdef __cplusplus

@@ -29,10 +29,19 @@ extern "C" {
 bool Drv_DAC_SetVoltage(uint16_t voltage_mv);
 
 /**
- * @brief Get current DAC output voltage
+ * @brief Get current DAC output voltage (from internal record)
  * @retval Current voltage in millivolts (mV)
  */
 uint16_t Drv_DAC_GetVoltage(void);
+
+/**
+ * @brief Get actual output voltage by reading ADC_VOUT
+ * @retval Actual voltage in millivolts (mV) read from ADC_VOUT
+ * @note This function reads the actual output voltage from ADC_VOUT channel
+ *       Note: The actual voltage may be different from set voltage due to
+ *       hardware amplification or other factors
+ */
+uint16_t Drv_DAC_GetActualVoltage(void);
 
 /**
  * @brief Initialize DAC driver

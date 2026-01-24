@@ -152,12 +152,25 @@ uint16_t Drv_ADC_ReadHandNTC(void)
     return voltage;
 }
 
+uint16_t Drv_ADC_ReadRFCurrent(void)
+{
+    uint16_t adcValue;
+    uint32_t voltage;
+    
+    /* Read ADC value */
+    adcValue = Dal_ADC_ReadChannel(E_ADC_CHANNEL_RF_I);
+    voltage = ((uint32_t)adcValue * ADC_REF_VOLTAGE_MV) / ADC_RESOLUTION;
+    return voltage;
+}
+
 uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel)
 {
     switch(channel)
     {
         case E_ADC_CHANNEL_US_I:
             return Drv_ADC_ReadWorkCurrent();
+        case E_ADC_CHANNEL_RF_I:
+            return Drv_ADC_ReadRFCurrent();
         case E_ADC_CHANNEL_HAND_NTC:
             return Drv_ADC_ReadHandNTC();
         default:

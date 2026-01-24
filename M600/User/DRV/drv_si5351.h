@@ -23,6 +23,7 @@ extern "C" {
 void Drv_SI5351_Init(void);
 uint16_t Drv_SI5351_SetFrequency(uint16_t frequency);
 uint16_t Drv_SI5351_SetPulseWidthus(uint16_t pulse_width_us);
+void Drv_SI5351_SetComplementaryPWM(uint16_t frequency_khz, uint16_t dead_time_ns);
 
 
 #ifdef __cplusplus

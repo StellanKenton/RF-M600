@@ -102,6 +102,21 @@ void App_Comm_RecvDataHandle(uint8_t *Data)
             }
             break;
         case PROTOCOL_MODULE_RADIO_FREQ:
+            switch(Data[4]) 
+            {
+                case PROTOCOL_CMD_GET_STATUS:
+                    s_AppCommInfo.RF.flag.bits.Rely_Status = 1;
+                    break;
+                case PROTOCOL_CMD_SET_WORK_STATE:
+                    s_AppCommInfo.RF.RxWorkState.work_state = Data[6];
+                    s_AppCommInfo.RF.RxWorkState.work_time = Data[7] | Data[8] << 8;
+                    s_AppCommInfo.RF.RxWorkState.work_level = Data[9];
+                    break; 
+                case PROTOCOL_CMD_SET_CONFIG:
+                    s_AppCommInfo.RF.RxConfig.temp_limit = Data[6] | Data[7] << 8;
+                    s_AppCommInfo.RF.flag.bits.Rely_Config = 1;
+                    break;
+            }
             break;
         case PROTOCOL_MODULE_SHOCKWAVE:
             break;
@@ -116,6 +131,11 @@ void App_Comm_RecvDataHandle(uint8_t *Data)
 UltraSound_TransData_t *App_Comm_GetUSTransData(void)
 {
     return &s_AppCommInfo.US;
+}
+
+RF_TransData_t *App_Comm_GetRFTransData(void)
+{
+    return &s_AppCommInfo.RF;
 }
 
 

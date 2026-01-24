@@ -147,6 +147,7 @@ typedef struct
 } UltraSound_TransData_t;
 
 UltraSound_TransData_t *App_Comm_GetUSTransData(void);
+RF_TransData_t *App_Comm_GetRFTransData(void);
 /* =============================================================================
  * Radio Frequency Module Structures
  * ============================================================================= */

@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 
+void Drv_SI5351_Init(void);
 uint16_t Drv_SI5351_SetFrequency(uint16_t frequency);
 uint16_t Drv_SI5351_SetPulseWidthus(uint16_t pulse_width_us);
 

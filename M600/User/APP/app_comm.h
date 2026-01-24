@@ -95,7 +95,7 @@ typedef struct
     uint16_t frequency;          ///< 1000-1400 (kHz)
     uint16_t temp_limit;         ///< 350-480 (35-48℃), 0xFFFF: Over limit
     uint16_t remain_time;        ///< Remaining work time (seconds), max 3600
-    uint8_t work_level;          ///< Work level: 1-6
+    uint8_t work_level;          ///< Work level: 0-39 (40 levels)
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
@@ -106,7 +106,7 @@ typedef struct
 {
     uint8_t work_state;          ///< 0x01: Start, 0x00: Stop, 0x02: Reset
     uint16_t work_time;          ///< Work time (seconds), max 3600
-    uint8_t work_level;          ///< Work level: 1-6
+    uint8_t work_level;          ///< Work level: 0-39 (40 levels)
 } US_SetWorkState_Send_t;
 
 /* Ultrasound - Set Config (0x02) - Send */
@@ -174,7 +174,7 @@ typedef struct
 {
     uint8_t work_state;          ///< 0x01: Start, 0x00: Stop, 0x02: Reset
     uint16_t work_time;          ///< Work time (seconds), max 3600
-    uint8_t work_level;          ///< Work level: 1-6
+    uint8_t work_level;          ///< Work level: 0-39 (40 levels)
 } RF_SetWorkState_Send_t;
 
 /* RF - Set Config (0x02) - Send */

@@ -132,4 +132,38 @@ uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel)
     return voltage;
 }
 
+uint16_t Drv_ADC_ReadWorkCurrent(void)
+{
+    uint16_t adcValue;
+    uint32_t voltage;
+
+    /* Read ADC value */
+    adcValue = Dal_ADC_ReadChannel(E_ADC_CHANNEL_US_I);
+    voltage = ((uint32_t)adcValue * ADC_REF_VOLTAGE_MV) / ADC_RESOLUTION;
+    return voltage;
+}
+
+uint16_t Drv_ADC_ReadHandNTC(void)
+{
+    uint16_t adcValue;
+    uint32_t voltage;
+    adcValue = Dal_ADC_ReadChannel(E_ADC_CHANNEL_HAND_NTC);
+    voltage = ((uint32_t)adcValue * ADC_REF_VOLTAGE_MV) / ADC_RESOLUTION;
+    return voltage;
+}
+
+uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel)
+{
+    swtich(channel)
+    {
+        case E_ADC_CHANNEL_US_I:
+            return Drv_ADC_ReadWorkCurrent();
+        case E_ADC_CHANNEL_HAND_NTC:
+            return Drv_ADC_ReadHandNTC();
+        default:
+            return 0;
+    }
+}
+
+
 /**************************End of file********************************/

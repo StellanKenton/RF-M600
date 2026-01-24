@@ -135,9 +135,11 @@ void App_TreatMgr_Process(void)
             break;
         case E_TREATMGR_STATE_SHOCK_WAVE:
             // Handle shock wave state
+            App_Shockwave_Process();
             break;
         case E_TREATMGR_STATE_NEGATIVE_PRESSURE_HEAT:
             // Handle negative pressure heat state
+            App_NegPrsHeat_Process();
             break;
         case E_TREATMGR_STATE_ULTRASOUND:
             // Handle ultrasound state

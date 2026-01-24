@@ -20,6 +20,12 @@ static IODevice_WorkingMode_EnumDef s_pendingMode = E_IODEVICE_MODE_NOT_CONNECTE
 static uint32_t s_debounceStartTick = 0;
 static uint8_t s_debounceActive = 0;
 
+/* Buzzer control variables */
+#define BUZZER_DEFAULT_DURATION_MS  2000    ///< Default buzzer duration (2s)
+static bool s_buzzerActive = false;         ///< Buzzer active state
+static uint32_t s_buzzerStartTime = 0;      ///< Buzzer start time
+static uint32_t s_buzzerDuration = 0;        ///< Buzzer duration in ms
+
 
 bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
 {
@@ -271,6 +277,45 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
 bool Drv_IODevice_GetFootSwitchState(void)
 {
     return Dal_Read_Pin(E_GPIO_IN_FOOT);
+}
+
+/**
+ * @brief Start buzzer beep for specified duration
+ * @param duration_ms Duration in milliseconds (default: 2000ms if 0)
+ * @note If buzzer is already beeping, the new request will restart the beep timer
+ */
+void Drv_IODevice_StartBuzzer(uint32_t duration_ms)
+{
+    if(duration_ms == 0)
+    {
+        duration_ms = BUZZER_DEFAULT_DURATION_MS;
+    }
+    
+    // 启动蜂鸣器
+    Dal_Write_Pin(E_GPIO_OUT_BUZZER, 1);
+    s_buzzerActive = true;
+    s_buzzerStartTime = HAL_GetTick();
+    s_buzzerDuration = duration_ms;
+}
+
+/**
+ * @brief Process buzzer control (should be called periodically)
+ * @note This function manages buzzer timing and should be called in main loop
+ */
+void Drv_IODevice_ProcessBuzzer(void)
+{
+    if(s_buzzerActive)
+    {
+        uint32_t currentTime = HAL_GetTick();
+        uint32_t elapsedTime = currentTime - s_buzzerStartTime;
+        
+        if(elapsedTime >= s_buzzerDuration)
+        {
+            // 时间到，关闭蜂鸣器
+            Dal_Write_Pin(E_GPIO_OUT_BUZZER, 0);
+            s_buzzerActive = false;
+        }
+    }
 }
 
 /**************************End of file********************************/

@@ -164,9 +164,13 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
                 break;
             case E_SW_RUN_WORKING:
                 LOG_I("SW state changed to WORKING");
+                // 启动工作时蜂鸣器提示（2s）
+                Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_SW_RUN_STOP:
                 LOG_I("SW state changed to STOP");
+                // 结束工作时蜂鸣器提示（2s）
+                Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
                 break;

@@ -138,6 +138,20 @@ bool Drv_IODevice_GetFootSwitchState(void);
  * @param channel The channel to change
  */
 void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel);
+
+/**
+ * @brief Start buzzer beep for specified duration
+ * @param duration_ms Duration in milliseconds
+ * @note If buzzer is already beeping, the new request will extend or restart the beep
+ */
+void Drv_IODevice_StartBuzzer(uint32_t duration_ms);
+
+/**
+ * @brief Process buzzer control (should be called periodically)
+ * @note This function manages buzzer timing and should be called in main loop
+ */
+void Drv_IODevice_ProcessBuzzer(void);
+
 #ifdef __cplusplus
 }
 #endif

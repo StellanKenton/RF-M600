@@ -154,7 +154,7 @@ uint16_t Drv_ADC_ReadHandNTC(void)
 
 uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel)
 {
-    swtich(channel)
+    switch(channel)
     {
         case E_ADC_CHANNEL_US_I:
             return Drv_ADC_ReadWorkCurrent();

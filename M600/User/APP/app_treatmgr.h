@@ -21,7 +21,7 @@ extern "C" {
 
 #include "drv_iodevice.h"
 
-#define   TREAT_TASK_TIME     5       // 5ms
+#define   TREAT_TASK_TIME     10       // 10ms
 
 
 typedef enum

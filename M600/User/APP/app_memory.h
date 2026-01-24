@@ -24,14 +24,10 @@ extern "C" {
  */
 typedef struct
 {
-    uint16_t Power;             ///< Power level (功率等级)
-    uint16_t Frequency;         ///< Frequency in Hz (频率)
-    uint16_t WorkTime;          ///< Working time in seconds (工作时间)
-    uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制)
-    uint16_t Voltage;           ///< Voltage in mV (电压)
-    uint16_t Current;           ///< Current in mA (电流)
-    uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制，35-48℃)
+    uint16_t RemainTimes;       ///< Remaining treatment times (剩余可治疗次数)
+    uint16_t CurrentHigh;       ///< Current high limit in mV (工作电流上限，采样电压)
+    uint16_t CurrentLow;        ///< Current low limit in mV (工作电流下限，采样电压)
     uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } RF_TreatParams_t;
 

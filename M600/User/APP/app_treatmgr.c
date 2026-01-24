@@ -130,7 +130,8 @@ void App_TreatMgr_Process(void)
             }
             break;
         case E_TREATMGR_STATE_RADIO_FREQUENCY:
-            // Handle radio frequency state            
+            // Handle radio frequency state
+            App_RadioFreq_Process();
             break;
         case E_TREATMGR_STATE_SHOCK_WAVE:
             // Handle shock wave state

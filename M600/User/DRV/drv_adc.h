@@ -53,6 +53,8 @@ uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
  */
 uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel);
 
+
+
 #ifdef __cplusplus
 }
 #endif

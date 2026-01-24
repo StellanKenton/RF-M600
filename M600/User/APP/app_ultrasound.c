@@ -101,9 +101,13 @@ void App_Ultrasound_ChangeState(US_RunState_EnumDef newState)
                 break;
             case E_US_RUN_WORKING:
                 LOG_I("Ultrasound state changed to WORKING");
+                // 启动工作时蜂鸣器提示（2s）
+                Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_US_RUN_STOP:
                 LOG_I("Ultrasound state changed to STOP");
+                // 结束工作时蜂鸣器提示（2s）
+                Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
                 break;

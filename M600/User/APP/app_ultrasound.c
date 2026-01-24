@@ -83,9 +83,6 @@ void App_Ultrasound_ChangeState(US_RunState_EnumDef newState)
             case E_US_RUN_STOP:
                 LOG_I("Ultrasound state changed to STOP");
                 break;
-            case E_US_RUN_ERROR:
-                LOG_I("Ultrasound state changed to ERROR");
-                break;
             default:
                 break;
         }
@@ -120,7 +117,7 @@ void App_Ultrasound_SetFrequency(uint16_t frequency)
 
 void App_UltraSound_SetLevel(uint8_t level)
 {
-    if(level > 6 || level < 0)
+    if(level > 6)
     {
         LOG_E("Invalid level");
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;

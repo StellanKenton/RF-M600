@@ -132,6 +132,12 @@ void Dal_Write_Pin(GPIO_Output_EnumDef pin, uint8_t state);
  * @retval The state of the foot switch (0=Open, 1=Closed)
  */
 bool Drv_IODevice_GetFootSwitchState(void);
+
+/**
+ * @brief Change channel
+ * @param channel The channel to change
+ */
+void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel);
 #ifdef __cplusplus
 }
 #endif

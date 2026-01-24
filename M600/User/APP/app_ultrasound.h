@@ -21,7 +21,7 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
-
+#include "drv_iodevice.h"
 typedef enum
 {
     E_US_RUN_INIT = 0,
@@ -32,7 +32,7 @@ typedef enum
 } US_RunState_EnumDef;
 
 
-typdef enum {
+typedef enum {
     E_US_ERROR_NONE = 0,
     E_US_ERROR_PROBE_NOT_CONNECTED,
     E_US_ERROR_READ_PARAMS_FAILED,

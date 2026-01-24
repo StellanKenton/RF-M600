@@ -119,8 +119,40 @@ void App_Comm_RecvDataHandle(uint8_t *Data)
             }
             break;
         case PROTOCOL_MODULE_SHOCKWAVE:
+            switch(Data[4]) 
+            {
+                case PROTOCOL_CMD_GET_STATUS:
+                    s_AppCommInfo.SW.flag.bits.Rely_Status = 1;
+                    break;
+                case PROTOCOL_CMD_SET_WORK_STATE:
+                    s_AppCommInfo.SW.RxWorkState.work_state = Data[6];
+                    s_AppCommInfo.SW.RxWorkState.work_time = Data[7] | Data[8] << 8;
+                    s_AppCommInfo.SW.RxWorkState.work_level = Data[9];
+                    s_AppCommInfo.SW.RxWorkState.frequency = Data[10];
+                    break; 
+            }
             break;
         case PROTOCOL_MODULE_HEAT:
+            switch(Data[4]) 
+            {
+                case PROTOCOL_CMD_GET_STATUS:
+                    s_AppCommInfo.Heat.flag.bits.Rely_Status = 1;
+                    break;
+                case PROTOCOL_CMD_SET_WORK_STATE:
+                    s_AppCommInfo.Heat.RxWorkState.work_state = Data[6];
+                    s_AppCommInfo.Heat.RxWorkState.work_time = Data[7] | Data[8] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.pressure = Data[9];
+                    s_AppCommInfo.Heat.RxWorkState.suck_time = Data[10] | Data[11] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.release_time = Data[12] | Data[13] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.temp_limit = Data[14] | Data[15] << 8;
+                    break; 
+                case PROTOCOL_CMD_SET_CONFIG:
+                    s_AppCommInfo.Heat.RxPreheat.preheat_state = Data[6];
+                    s_AppCommInfo.Heat.RxPreheat.work_time = Data[7] | Data[8] << 8;
+                    s_AppCommInfo.Heat.RxPreheat.temp_limit = Data[9] | Data[10] << 8;
+                    s_AppCommInfo.Heat.flag.bits.Rely_Config = 1;
+                    break;
+            }
             break;
         default:
             break;
@@ -136,6 +168,16 @@ UltraSound_TransData_t *App_Comm_GetUSTransData(void)
 RF_TransData_t *App_Comm_GetRFTransData(void)
 {
     return &s_AppCommInfo.RF;
+}
+
+SW_TransData_t *App_Comm_GetSWTransData(void)
+{
+    return &s_AppCommInfo.SW;
+}
+
+Heat_TransData_t *App_Comm_GetHeatTransData(void)
+{
+    return &s_AppCommInfo.Heat;
 }
 
 

@@ -36,14 +36,12 @@ typedef struct
  */
 typedef struct
 {
-    uint16_t Energy;            ///< Energy level (能量等级)
-    uint16_t Frequency;         ///< Frequency in Hz (频率)
-    uint16_t WorkTime;          ///< Working time in seconds (工作时间)
-    uint16_t PulseCount;        ///< Pulse count (脉冲计数)
-    uint16_t Voltage;           ///< Voltage in mV (电压)
-    uint16_t Current;           ///< Current in mA (电流)
-    uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制，35-48℃)
+    uint16_t RemainTimes;       ///< Remaining treatment times (剩余可治疗次数)
+    uint16_t CurrentHigh_ESW_P; ///< PWM_ESW+ work current high limit in mV (PWM_ESW+工作电流上限，采样电压)
+    uint16_t CurrentLow_ESW_P;  ///< PWM_ESW+ work current low limit in mV (PWM_ESW+工作电流下限，采样电压)
+    uint16_t CurrentHigh_ESW_N; ///< PWM_ESW- work current high limit in mV (PWM_ESW-工作电流上限，采样电压)
+    uint16_t CurrentLow_ESW_N;  ///< PWM_ESW- work current low limit in mV (PWM_ESW-工作电流下限，采样电压)
     uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } SW_TreatParams_t;
 
@@ -52,14 +50,11 @@ typedef struct
  */
 typedef struct
 {
-    uint16_t Pressure;          ///< Pressure level (压力等级)
-    uint16_t Temperature;       ///< Temperature in 0.1°C (温度)
-    uint16_t WorkTime;          ///< Working time in seconds (工作时间)
-    uint16_t VacuumLevel;       ///< Vacuum level (真空度)
-    uint16_t HeatPower;         ///< Heat power in mW (加热功率)
-    uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制)
-    uint8_t WorkLevel;          ///< Working level (工作等级)
-    uint8_t Reserved[1];        ///< Reserved byte (保留字节)
+    uint16_t TempLimit;         ///< Temperature limit in 0.1°C (温度限制，35-48℃)
+    uint16_t RemainTimes;       ///< Remaining treatment times (剩余可治疗次数)
+    uint8_t PreheatEnable;      ///< Preheat function enable (预热功能是否开启: 0=关闭, 1=开启)
+    uint16_t PreheatTempLimit;  ///< Preheat temperature limit in 0.1°C (预热温度上限，35-48℃)
+    uint16_t PreheatTime;       ///< Preheat time in seconds (预热时间，秒)
     uint16_t CrcCode;           ///< CRC code (CRC校验码)
 } NPH_TreatParams_t;
 

@@ -252,6 +252,8 @@ typedef struct
     SW_GetStatus_Reply_t TxStatus;
     SW_SetWorkState_Send_t RxWorkState;
 } SW_TransData_t;
+
+SW_TransData_t *App_Comm_GetSWTransData(void);
 /* =============================================================================
  * Heat Therapy Module Structures
  * ============================================================================= */
@@ -315,6 +317,8 @@ typedef struct
     Heat_SetWorkState_Send_t RxWorkState;
     Heat_SetPreheat_Send_t RxPreheat;
 } Heat_TransData_t;
+
+Heat_TransData_t *App_Comm_GetHeatTransData(void);
 
 typedef struct
 {

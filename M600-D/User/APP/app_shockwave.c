@@ -13,13 +13,10 @@
 #include "app_comm.h"
 #include "drv_iodevice.h"
 #include "drv_adc.h"
-#include "log.h"
+#include "drv_tim.h"
 #include "drv_delay.h"
-#include "tim.h"
-#include "stm32f1xx_hal.h"
+#include "log.h"
 #include <string.h>
-
-extern TIM_HandleTypeDef htim4;
 
 static SW_CtrlInfo_t s_SWCtrlInfo;
 
@@ -57,40 +54,6 @@ static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
     // 3ms = 3000微秒，0.28ms = 280微秒
     uint32_t time_us = 3000 + (level - 1) * 280;  // 微秒
     return (time_us + 500) / 1000;  // 四舍五入到毫秒
-}
-
-/**
- * @brief Control PWM_ESW+ output (TIM4_CH3)
- * @param state true = high, false = low
- */
-static void App_Shockwave_SetESW_P(bool state)
-{
-    if(state) {
-        // 设置PWM输出高电平（通过设置占空比为100%）
-        __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, htim4.Init.Period);
-        HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-    } else {
-        // 设置PWM输出低电平（通过设置占空比为0%）
-        __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 0);
-        HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
-    }
-}
-
-/**
- * @brief Control PWM_ESW- output (TIM4_CH4)
- * @param state true = high, false = low
- */
-static void App_Shockwave_SetESW_N(bool state)
-{
-    if(state) {
-        // 设置PWM输出高电平
-        __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, htim4.Init.Period);
-        HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-    } else {
-        // 设置PWM输出低电平
-        __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0);
-        HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
-    }
 }
 
 void App_Shockwave_UpdateStatus(void)
@@ -265,8 +228,8 @@ void App_Shockwave_SetWorkParams(void)
             // 初始化PWM状态
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;  // 重置周期开始时间
-            App_Shockwave_SetESW_P(false);
-            App_Shockwave_SetESW_N(false);
+            Drv_TIM4_SetESW_P(false);
+            Drv_TIM4_SetESW_N(false);
     
     LOG_I("SW: Work params set - level=%d, freq=%d, points=%d, period=%d ms, ESW_N_high=%d ms", 
           s_SWCtrlInfo.WorkLevel, s_SWCtrlInfo.FreqLevel, s_SWCtrlInfo.RemainPoints,
@@ -362,7 +325,7 @@ bool App_Shockwave_IsHeadTempNormal(void)
 
 void App_Shockwave_ProcessPWM(void)
 {
-    uint32_t currentTime = HAL_GetTick();
+    uint32_t currentTime = Drv_Delay_GetTickMs();
     uint32_t elapsedTime;
     
     switch(s_SWCtrlInfo.pwmState)
@@ -375,8 +338,8 @@ void App_Shockwave_ProcessPWM(void)
                 s_SWCtrlInfo.cycleStartTime = currentTime;
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
-                App_Shockwave_SetESW_P(true);
-                App_Shockwave_SetESW_N(false);
+                Drv_TIM4_SetESW_P(true);
+                Drv_TIM4_SetESW_N(false);
             }
             else
             {
@@ -388,8 +351,8 @@ void App_Shockwave_ProcessPWM(void)
                     s_SWCtrlInfo.cycleStartTime = currentTime;
                     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                     s_SWCtrlInfo.pwmStateStartTime = currentTime;
-                    App_Shockwave_SetESW_P(true);
-                    App_Shockwave_SetESW_N(false);
+                    Drv_TIM4_SetESW_P(true);
+                    Drv_TIM4_SetESW_N(false);
                     s_SWCtrlInfo.RemainPoints--;  // 工作点数减一
                 }
                 // 否则继续等待
@@ -401,7 +364,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= SW_PWM_ESW_P_HIGH_TIME_MS)
             {
                 // PWM_ESW+高电平5ms后切换为低电平，进入等待状态
-                App_Shockwave_SetESW_P(false);
+                Drv_TIM4_SetESW_P(false);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_WAIT;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
             }
@@ -412,7 +375,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= SW_PWM_ESW_P_WAIT_TIME_MS)
             {
                 // 等待17ms后，PWM_ESW-高电平
-                App_Shockwave_SetESW_N(true);
+                Drv_TIM4_SetESW_N(true);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_N_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
             }
@@ -423,7 +386,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= s_SWCtrlInfo.pwmESW_NHighTimeMs)
             {
                 // PWM_ESW-高电平时间到，切换为低电平
-                App_Shockwave_SetESW_N(false);
+                Drv_TIM4_SetESW_N(false);
                 
                 // PWM_ESW-高电平时间到，切换为低电平
                 // 等待周期结束，然后开始新周期
@@ -515,8 +478,8 @@ void App_Shockwave_Process(void)
             
         case E_SW_RUN_STOP:
             // 关闭PWM输出
-            App_Shockwave_SetESW_P(false);
-            App_Shockwave_SetESW_N(false);
+            Drv_TIM4_SetESW_P(false);
+            Drv_TIM4_SetESW_N(false);
             // 重置PWM状态
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;
@@ -547,12 +510,10 @@ void App_Shockwave_Init(void)
     s_SWCtrlInfo.RemainPoints = 0;
     s_SWCtrlInfo.TreatTimes = 0;
     
-    // 初始化TIM4（PWM输出）
-    MX_TIM4_Init();
-    
-    // 确保PWM输出为低电平
-    App_Shockwave_SetESW_P(false);
-    App_Shockwave_SetESW_N(false);
+    /* TIM4 已在 BSP_Init -> BSP_TIM4_Init 中初始化 */
+    /* 确保PWM输出为低电平 */
+    Drv_TIM4_SetESW_P(false);
+    Drv_TIM4_SetESW_N(false);
     
     LOG_I("Shockwave module initialized");
 }

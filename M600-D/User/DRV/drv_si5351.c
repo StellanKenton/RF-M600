@@ -8,7 +8,7 @@
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
 #include "drv_si5351.h"
-
+#include "bsp_i2c.h"
 
 void Drv_SI5351_Init(void)
 {
@@ -76,10 +76,7 @@ void Drv_SI5351_SetComplementaryPWM(uint16_t frequency_khz, uint16_t dead_time_n
     // Placeholder: Set frequency (this may need to be called separately)
     Drv_SI5351_SetFrequency(frequency_khz);
     
-    // TODO: Add I2C write operations to configure complementary PWM
-    // Example:
-    // uint8_t reg_addr, reg_value;
-    // HAL_I2C_Mem_Write(&hi2c1, SI5351_I2C_ADDR, reg_addr, 1, &reg_value, 1, HAL_MAX_DELAY);
+    /* TODO: DAL -> BSP_I2C1_Transmit(addr, buf, len) for SI5351 I2C config */
 }
 
 

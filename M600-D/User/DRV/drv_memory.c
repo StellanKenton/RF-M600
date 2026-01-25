@@ -132,9 +132,6 @@ bool Drv_Memory_Write(uint16_t address, const uint8_t *data, uint16_t length)
     // Note: EEPROM writes may need page boundaries consideration
     // Note: Flash writes may need erase before write
     
-    // Simulate write delay (EEPROM typically needs 5-10ms per page)
-    // HAL_Delay(10);
-    
     return true;
 }
 

@@ -1,9 +1,9 @@
 /************************************************************************************
- * @file     : drv_wdg.h
- * @brief    : Watchdog driver - DRV API, DAL calls BSP (Std lib)
+ * @file     : drv_usart.h
+ * @brief    : USART driver - DRV API, DAL calls BSP (Std lib)
  ***********************************************************************************/
-#ifndef DRV_WDG_H
-#define DRV_WDG_H
+#ifndef DRV_USART_H
+#define DRV_USART_H
 
 #include "stm32f10x.h"
 #include <stdint.h>
@@ -12,12 +12,10 @@
 extern "C" {
 #endif
 
-uint8_t Drv_WatchDog_Init(uint8_t data);
-void Drv_WatchDogFeed(void);
-void Drv_WatchDogResartCheck(void);
+void Drv_USART2_Send(const uint8_t *pData, uint32_t Len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* DRV_WDG_H */
+#endif /* DRV_USART_H */

@@ -56,7 +56,34 @@ extern "C" {
 #define CTR_FAN_ON()         GPIO_SetBits(CTR_FAN_Port, CTR_FAN_Pin)
 #define CTR_FAN_OFF()        GPIO_ResetBits(CTR_FAN_Port, CTR_FAN_Pin)
 
+/* BSP GPIO pin enums for ReadPin/WritePin (DAL maps DRV enums to these) */
+typedef enum {
+    BSP_GPIO_IN_FOOT = 0,
+    BSP_GPIO_IN_SYN_US,
+    BSP_GPIO_IN_SYN_RF,
+    BSP_GPIO_IN_SYN_ESW,
+    BSP_GPIO_IN_MAX
+} BSP_GPIO_Input_t;
+
+typedef enum {
+    BSP_GPIO_OUT_BUZZER = 0,
+    BSP_GPIO_OUT_CTR_US_RF,
+    BSP_GPIO_OUT_CTR_OUT,
+    BSP_GPIO_OUT_MCU_IO,
+    BSP_GPIO_OUT_PWR_CTRL1,
+    BSP_GPIO_OUT_PWR_CTRL2,
+    BSP_GPIO_OUT_PWR_CTRL3,
+    BSP_GPIO_OUT_PWR_CTRL4,
+    BSP_GPIO_OUT_CTR_FAN,
+    BSP_GPIO_OUT_CTR_HP_MOTOR,
+    BSP_GPIO_OUT_CTR_HP_LOSE,
+    BSP_GPIO_OUT_CTR_HEAT_HP,
+    BSP_GPIO_OUT_MAX
+} BSP_GPIO_Output_t;
+
 void BSP_GPIO_Init(void);
+uint8_t BSP_GPIO_ReadPin(BSP_GPIO_Input_t pin);   /* 0=low, 1=high */
+void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state);  /* 0=low, 1=high */
 
 /** Call all M600 BSP inits: GPIO, ADC, TIM1, TIM4, USART1(115200), USART2(115200). */
 void BSP_Init(void);

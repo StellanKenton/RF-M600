@@ -78,7 +78,7 @@ ARM Macro Assembler    Page 2
    47 0000000C                 END
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=m600\cmb_fault.d -om600\cmb_fault.o -I.\RTE\_M600 -IC:\Keil_v5\ARM
-\PACK\ARM\CMSIS\5.4.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_D
+\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_D
 FP\2.4.1\Device\Include --predefine="__UVISION_VERSION SETA 526" --predefine="_
 RTE_ SETA 1" --predefine="STM32F10X_HD SETA 1" --list=cmb_fault.lst ..\User\Bac
 kTrace\fault_handler\keil\cmb_fault.S

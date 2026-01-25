@@ -1045,6 +1045,16 @@
               <FileType>1</FileType>
               <FilePath>..\User\DRV\drv_memory.c</FilePath>
             </File>
+            <File>
+              <FileName>drv_dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_dac.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_si5351.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_si5351.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -1655,11 +1655,11 @@ Removing Unused input sections from the image.
     Removing app_negprsheat.o(i.App_NegPrsHeat_ChangeState), (308 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_ControlTemperature), (224 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_Init), (152 bytes).
-    Removing app_negprsheat.o(i.App_NegPrsHeat_IsHeadTempNormal), (416 bytes).
+    Removing app_negprsheat.o(i.App_NegPrsHeat_IsHeadTempNormal), (420 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_Monitor), (24 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_PressureToVoltage), (30 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_Process), (556 bytes).
-    Removing app_negprsheat.o(i.App_NegPrsHeat_ProcessVacuum), (636 bytes).
+    Removing app_negprsheat.o(i.App_NegPrsHeat_ProcessVacuum), (632 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_RxDataHandle), (336 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_SetWorkParams), (172 bytes).
     Removing app_negprsheat.o(i.App_NegPrsHeat_StartCheck), (656 bytes).

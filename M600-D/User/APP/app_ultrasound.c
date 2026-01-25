@@ -324,7 +324,7 @@ bool App_UltraSound_IsCurrentNormal(void)
             {
                 newVoltage = 3300;
             }
-            else if(newVoltage < 0)
+            else if(newVoltage <= 0)
             {
                 newVoltage = 0;
             }

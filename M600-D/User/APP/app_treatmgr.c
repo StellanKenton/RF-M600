@@ -70,7 +70,7 @@ static void App_TreatMgr_ControlFan(void)
         {
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_FAN, 1);
             fanState = true;
-            LOG_I("Board temperature too high (%d * 0.1℃), fan started", boardTemp);
+            LOG_I("Board temperature too high (%d * 0.1°C), fan started", boardTemp);
         }
     }
     else if(boardTemp < BOARD_TEMP_FAN_OFF_THRESHOLD)
@@ -80,7 +80,7 @@ static void App_TreatMgr_ControlFan(void)
         {
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_FAN, 0);
             fanState = false;
-            LOG_I("Board temperature normal (%d * 0.1℃), fan stopped", boardTemp);
+            LOG_I("Board temperature normal (%d * 0.1°C), fan stopped", boardTemp);
         }
     }
     // 在80-85℃之间保持当前状态

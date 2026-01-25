@@ -32,6 +32,7 @@
 ".\objects\bsp_tim.o"
 ".\objects\bsp_usart.o"
 ".\objects\bsp_delay.o"
+".\objects\bsp_si5351.o"
 ".\objects\drv_adc.o"
 ".\objects\drv_dac.o"
 ".\objects\drv_delay.o"

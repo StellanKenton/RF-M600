@@ -17,9 +17,10 @@
 ***********************************************************************************************/
 
 
-/**************************°üº¬µÄÍ·ÎÄ¼þ*************************/
+/**************************ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½*************************/
 #include <stdio.h>
 #include "stm32f10x.h"
+#include "app_system.h"
 #include "drv_init.h"
 
 int main(void)
@@ -31,10 +32,12 @@ int main(void)
     Drv_System_Init();   /* DAL -> BSP: GPIO, ADC, DAC, TIM, USART, I2C, SysTick */
 
     __disable_irq();
+    System_Init();
     __enable_irq();
 
     while (1)
     {
+        SystemProcess();
     }
 }
 

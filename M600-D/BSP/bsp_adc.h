@@ -33,6 +33,7 @@ typedef enum {
 void BSP_ADC_Init(void);
 uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch);
 uint32_t BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch);
+const uint16_t* BSP_ADC_GetDmaBuffer(void);
 
 #ifdef __cplusplus
 }

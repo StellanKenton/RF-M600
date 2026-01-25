@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-uint8_t Drv_WatchDog_Init(uint8_t data);
+uint8_t Drv_WatchDog_Init(void);
 void Drv_WatchDogFeed(void);
 void Drv_WatchDogResartCheck(void);
 

@@ -10,7 +10,7 @@
 #ifndef DRV_MEMORY_H
 #define DRV_MEMORY_H
 
-#include "main.h"
+#include "stm32f10x.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

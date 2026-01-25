@@ -215,7 +215,7 @@ void App_RadioFreq_SetWorkParams(void)
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
     // CTR_HEAT_HP为高电平为治疗头检测板供电
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 1);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
     
     LOG_I("RF: Work params set - level=%d, time=%d, voltage_target=%d", 
           s_RFCtrlInfo.WorkLevel, s_RFCtrlInfo.RemainTime, s_RFCtrlInfo.VoltageTarget);
@@ -378,7 +378,7 @@ void App_RadioFreq_Process(void)
             // 停止DAC输出
             Drv_DAC_SetVoltage(0);
             // CTR_HEAT_HP恢复为低电平
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
             break;
             

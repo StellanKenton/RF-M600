@@ -1,52 +1,36 @@
-/**
-* Copyright (c) 2023, AstroCeta, Inc. All rights reserved.
-* \file drv_wdg.h
-* \brief Implementation of a ring buffer for efficient data handling.
-* \date 2025-07-30
-* \author AstroCeta, Inc.
-**/
+/************************************************************************************
+ * @file     : drv_wdg.c
+ * @brief    : Watchdog driver - DRV calls DAL, DAL calls BSP (Std lib)
+ ***********************************************************************************/
 #include "drv_wdg.h"
-#include "log.h"
+#include "bsp_iwdg.h"
+#include "stm32f10x_rcc.h"
 
-/**
-* @brief Initialize the WatchDog timer with the specified configuration.
-* @param data Configuration data for the WatchDog timer.
-* @return Status of the initialization (0 for success, non-zero for failure).
-**/
-uint8_t Drv_WatchDog_Init(uint8_t data)
+static void Dal_WDG_Init(void)
 {
-	/* data parameter currently unused; use generated MX_IWDG_Init to configure IWDG */
-	MX_IWDG_Init();
-	return 0;
+    BSP_IWDG_Init();
 }
 
+static void Dal_WDG_Feed(void)
+{
+    BSP_IWDG_Feed();
+}
 
-/**
- * @brief Feed (refresh) the independent watchdog to prevent reset.
- */
+uint8_t Drv_WatchDog_Init(uint8_t data)
+{
+    (void)data;
+    Dal_WDG_Init();
+    return 0;
+}
+
 void Drv_WatchDogFeed(void)
 {
-	/* Refresh the watchdog counter; if refresh fails attempt re-init */
-	if (HAL_IWDG_Refresh(&hiwdg) != HAL_OK) {
-		/* Try to re-initialize watchdog as a recovery action */
-		MX_IWDG_Init();
-	}
+    Dal_WDG_Feed();
 }
 
 void Drv_WatchDogResartCheck(void)
 {
-	/* 检查是否由独立看门狗复位导致开机 */
-	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
-		// 由看门狗复位导致
-        LOG_E("####################################");
-        LOG_E("###System restarted by IWDG reset###");
-        LOG_E("####################################");
-        /* 清除复位标志 */
-		__HAL_RCC_CLEAR_RESET_FLAGS();
-	}
-    
+    if (RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET) {
+        RCC_ClearFlag();
+    }
 }
-
-/**************************End of file********************************/
-
-

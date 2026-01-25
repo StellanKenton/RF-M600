@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "main.h" // 包含 HAL 库定义，用于获取 HAL_GetTick
-#include "stdbool.h"
+#include <stdbool.h>
 
 /* ================= 配置区域 ================= */
 

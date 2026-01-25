@@ -68,7 +68,7 @@ static void App_TreatMgr_ControlFan(void)
         // 温度超过85℃，启动风扇
         if(!fanState)
         {
-            Dal_Write_Pin(E_GPIO_OUT_CTR_FAN, 1);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_FAN, 1);
             fanState = true;
             LOG_I("Board temperature too high (%d * 0.1℃), fan started", boardTemp);
         }
@@ -78,7 +78,7 @@ static void App_TreatMgr_ControlFan(void)
         // 温度低于80℃，关闭风扇（添加回差避免频繁开关）
         if(fanState)
         {
-            Dal_Write_Pin(E_GPIO_OUT_CTR_FAN, 0);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_FAN, 0);
             fanState = false;
             LOG_I("Board temperature normal (%d * 0.1℃), fan stopped", boardTemp);
         }

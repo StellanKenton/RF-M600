@@ -5,6 +5,7 @@
  ***********************************************************************************/
 #include "stm32f103_it.h"
 #include "stm32f10x_conf.h"
+#include "bsp_delay.h"
 
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
@@ -15,10 +16,10 @@ void NMI_Handler(void)
     while (1) { }
 }
 
-void HardFault_Handler(void)
-{
-    while (1) { }
-}
+//void HardFault_Handler(void)
+//{
+//    while (1) { }
+//}
 
 void MemManage_Handler(void)
 {
@@ -47,9 +48,10 @@ void PendSV_Handler(void)
 {
 }
 
-/* SysTick: delay.c uses polling, no IRQ. Leave weak or empty. */
+/* SysTick: 1ms tick for BSP_Delay / BSP_GetTick_ms */
 void SysTick_Handler(void)
 {
+    BSP_SysTick_Inc();
 }
 
 /* -----------------------------------------------------------------------------

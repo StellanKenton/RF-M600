@@ -15,7 +15,6 @@
 #include "drv_adc.h"
 #include "log.h"
 #include "drv_delay.h"
-#include "stm32f1xx_hal.h"
 #include <string.h>
 
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
@@ -287,11 +286,11 @@ void App_NegPrsHeat_SetWorkParams(void)
     // 初始化负压状态
     s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
     s_NPHCtrlInfo.motorState = false;
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
     
     // 初始化加热控制
     s_NPHCtrlInfo.heatControlActive = false;
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
     
     LOG_I("NPH: Work params set - temp_limit=%d, work_time=%d, pressure=%d, suck=%d, release=%d", 
           s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.RemainTime, 
@@ -301,7 +300,7 @@ void App_NegPrsHeat_SetWorkParams(void)
 bool App_NegPrsHeat_IsHeadTempNormal(void)
 {
     uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
-    uint32_t currentTime = HAL_GetTick();
+    uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
     
     // 检查温度传感器是否出错（NTC开路或短路）
@@ -379,7 +378,7 @@ void App_NegPrsHeat_ControlTemperature(void)
     else
     {
         // 不在工作状态，关闭加热
-        Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
         s_NPHCtrlInfo.heatControlActive = false;
         return;
     }
@@ -403,7 +402,7 @@ void App_NegPrsHeat_ControlTemperature(void)
     // 控制CTR_HEAT_HP
     if(needHeat != s_NPHCtrlInfo.heatControlActive)
     {
-        Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, needHeat ? 1 : 0);
+        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, needHeat ? 1 : 0);
         s_NPHCtrlInfo.heatControlActive = needHeat;
         LOG_I("NPH: Heat control %s (temp=%d, target=%d)", 
               needHeat ? "ON" : "OFF", temp, targetTemp);
@@ -412,7 +411,7 @@ void App_NegPrsHeat_ControlTemperature(void)
 
 void App_NegPrsHeat_ProcessVacuum(void)
 {
-    uint32_t currentTime = HAL_GetTick();
+    uint32_t currentTime = Drv_Delay_GetTickMs();
     uint16_t pressureVoltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HP_PRE);
     s_NPHCtrlInfo.currentPressure = App_NegPrsHeat_VoltageToPressure(pressureVoltage);
     
@@ -424,7 +423,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
             s_NPHCtrlInfo.vacuumStateStartTime = currentTime;
             s_NPHCtrlInfo.suckStartTime = currentTime;
             s_NPHCtrlInfo.motorState = true;
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
             LOG_I("NPH: Start sucking, target pressure: %d KPa", s_NPHCtrlInfo.Pressure);
             break;
             
@@ -447,7 +446,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
                 if(!s_NPHCtrlInfo.motorState)
                 {
                     s_NPHCtrlInfo.motorState = true;
-                    Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
+                    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
                 }
             }
             break;
@@ -464,9 +463,9 @@ void App_NegPrsHeat_ProcessVacuum(void)
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_RELEASING;
                 s_NPHCtrlInfo.releaseStartTime = currentTime;
                 s_NPHCtrlInfo.motorState = false;
-                Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
                 // 打开释放阀（如果有的话，这里使用CTR_HP_lose）
-                Dal_Write_Pin(E_GPIO_OUT_CTR_HP_LOSE, 1);
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 1);
                 LOG_I("NPH: Maintain time reached, start releasing");
             }
             else
@@ -484,7 +483,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
                     if(!s_NPHCtrlInfo.motorState)
                     {
                         s_NPHCtrlInfo.motorState = true;
-                        Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
+                        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
                     }
                 }
                 else if(pressureVoltage > targetVoltage + thresholdVoltage)  // 负压过高（电压高于目标）
@@ -493,7 +492,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
                     if(s_NPHCtrlInfo.motorState)
                     {
                         s_NPHCtrlInfo.motorState = false;
-                        Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+                        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
                     }
                 }
             }
@@ -507,7 +506,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
             if(releaseElapsed >= releaseTimeMs)
             {
                 // 放气时间到，关闭释放阀，准备下一个循环
-                Dal_Write_Pin(E_GPIO_OUT_CTR_HP_LOSE, 0);
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
                 LOG_I("NPH: Release time reached, ready for next cycle");
             }
@@ -630,12 +629,12 @@ void App_NegPrsHeat_Process(void)
             
         case E_NPH_RUN_STOP:
             // 关闭加热
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             s_NPHCtrlInfo.heatControlActive = false;
             
             // 关闭负压控制
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HP_LOSE, 0);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
             s_NPHCtrlInfo.motorState = false;
             s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
             
@@ -667,9 +666,9 @@ void App_NegPrsHeat_Init(void)
     s_NPHCtrlInfo.motorState = false;
     
     // 确保所有控制引脚为低电平
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
-    Dal_Write_Pin(E_GPIO_OUT_CTR_HP_LOSE, 0);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
     
     LOG_I("Negative Pressure Heat module initialized");
 }

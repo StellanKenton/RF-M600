@@ -1,4 +1,6 @@
 #include "log.h"
+#include "drv_delay.h"
+#include "drv_usart.h"
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
@@ -6,10 +8,6 @@
 
 #if LOG_USE_RTT
 #include "SEGGER_RTT.h"
-#endif
-
-#if LOG_USE_UART
-#include "usart.h"
 #endif
 #if LOG_USE_BACK_FIRED
 #include "cm_backtrace.h"
@@ -24,16 +22,12 @@ static LogFun_Def LogFunList[10];
 
 void Log_LoopFun(char *data);
 
-// 串口发送函数
 int Log_UART_Transmit(uint8_t *data, uint16_t len) {
 #if LOG_USE_UART
-    // 使用阻塞方式发送，确保日志完整性
-    // 超时时间设为 100ms，避免卡死
-    if (HAL_UART_Transmit(&huart3, data, len, 100) != HAL_OK) {
-        return -1;
-    }
+    if (!data || len == 0) return -1;
+    Drv_USART2_Send(data, len);
 #endif
-    return 0; 
+    return 0;
 }
 
 void Log_Init(void) {
@@ -93,7 +87,7 @@ void Log_Printf(uint8_t level, const char *file, int line, const char *fmt, ...)
     // 时间戳
 #if LOG_ENABLE_TIMESTAMP
     //offset += snprintf(log_buf + offset, LOG_BUF_SIZE - offset, "[%08lu] ", (unsigned long)Log_TimeStamp);
-    offset += snprintf(log_buf + offset, LOG_BUF_SIZE - offset, "[%08lu] ", (unsigned long)HAL_GetTick());
+    offset += snprintf(log_buf + offset, LOG_BUF_SIZE - offset, "[%08lu] ", (unsigned long)Drv_Delay_GetTickMs());
 #endif
 
     // 标签

@@ -19,28 +19,23 @@
 
 /**************************包含的头文件*************************/
 #include <stdio.h>
-#include "delay.h"
+#include "stm32f10x.h"
+#include "drv_init.h"
 
-
-int main()
+int main(void)
 {
-	SystemInit();									// 系统初始化
-		
-	SystemCoreClockUpdate();						// 时钟更新函数
-	
-//	CopyIntVertorTable();               			// 中断向量偏移地址重定义
-	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);	// 设置中断优先级分组为组2：2位抢占优先级，2位响应优先级
-	
-	
-	__disable_irq();
-	
-	__enable_irq();
-	
-	while(1)
-	{
+    SystemInit();
+    SystemCoreClockUpdate();
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-	}
+    Drv_System_Init();   /* DAL -> BSP: GPIO, ADC, DAC, TIM, USART, I2C, SysTick */
+
+    __disable_irq();
+    __enable_irq();
+
+    while (1)
+    {
+    }
 }
 
 /*************************************************************************************************

@@ -45,6 +45,8 @@
 "m600\drv_adc.o"
 "m600\drv_iodevice.o"
 "m600\drv_memory.o"
+"m600\drv_dac.o"
+"m600\drv_si5351.o"
 "m600\log.o"
 "m600\segger_rtt.o"
 "m600\segger_rtt_printf.o"

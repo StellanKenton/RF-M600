@@ -14,6 +14,9 @@
 extern "C" {
 #endif
 
+#define BSP_DAC_REF_MV    3300u
+#define BSP_DAC_RES       4096u
+
 void BSP_DAC_Init(void);
 void BSP_DAC_SetValue(uint16_t value);   /* 12-bit, 0..4095 */
 void BSP_DAC_SetVoltage(uint16_t mv);    /* 0..3300 mV, 3.3V ref */

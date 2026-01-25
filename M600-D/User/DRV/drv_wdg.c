@@ -16,9 +16,8 @@ static void Dal_WDG_Feed(void)
     BSP_IWDG_Feed();
 }
 
-uint8_t Drv_WatchDog_Init(uint8_t data)
+uint8_t Drv_WatchDog_Init()
 {
-    (void)data;
     Dal_WDG_Init();
     return 0;
 }

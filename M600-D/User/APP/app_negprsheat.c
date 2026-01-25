@@ -416,7 +416,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
 	uint32_t maintainTimeMs;
 	uint32_t releaseElapsed;  
 	uint32_t releaseTimeMs;	
-	uint16_t voltageDiff;
+//	int16_t voltageDiff;
     uint32_t currentTime = Drv_Delay_GetTickMs();
     uint16_t pressureVoltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HP_PRE);
     s_NPHCtrlInfo.currentPressure = App_NegPrsHeat_VoltageToPressure(pressureVoltage);
@@ -479,9 +479,9 @@ void App_NegPrsHeat_ProcessVacuum(void)
 				
                 // 在维持时间内，通过控制电机维持负压
                 targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
-                voltageDiff = (pressureVoltage > targetVoltage) ? 
-                                       (pressureVoltage - targetVoltage) : 
-                                       (targetVoltage - pressureVoltage);
+//                voltageDiff = (pressureVoltage > targetVoltage) ? 
+//                                       (pressureVoltage - targetVoltage) : 
+//                                       (targetVoltage - pressureVoltage);
                 uint16_t thresholdVoltage = App_NegPrsHeat_PressureToVoltage(5);  // 5KPa对应的电压差
                 
                 if(pressureVoltage < targetVoltage - thresholdVoltage)  // 负压不足（电压低于目标）

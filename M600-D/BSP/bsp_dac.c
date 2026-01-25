@@ -5,8 +5,7 @@
  ***********************************************************************************/
 #include "bsp_dac.h"
 
-#define BSP_DAC_REF_MV    3300u
-#define BSP_DAC_RES       4096u
+
 
 void BSP_DAC_Init(void)
 {

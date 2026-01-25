@@ -330,7 +330,7 @@ bool App_NegPrsHeat_IsHeadTempNormal(void)
             if(temp >= NPH_TEMP_ERROR_THRESHOLD)
             {
                 s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_TEMP_RISE_TOO_FAST;
-                LOG_W("NPH: Temperature rise to 65℃ in %d ms (from %d to %d)", 
+                LOG_W("NPH: Temperature rise to 65 degree in %d ms (from %d to %d)", 
                       timeElapsed, s_NPHCtrlInfo.lastTemp, temp);
                 isNormal = false;
             }
@@ -411,6 +411,12 @@ void App_NegPrsHeat_ControlTemperature(void)
 
 void App_NegPrsHeat_ProcessVacuum(void)
 {
+	uint16_t targetVoltage;
+	uint32_t maintainElapsed;
+	uint32_t maintainTimeMs;
+	uint32_t releaseElapsed;  
+	uint32_t releaseTimeMs;	
+	uint16_t voltageDiff;
     uint32_t currentTime = Drv_Delay_GetTickMs();
     uint16_t pressureVoltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HP_PRE);
     s_NPHCtrlInfo.currentPressure = App_NegPrsHeat_VoltageToPressure(pressureVoltage);
@@ -432,7 +438,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
             // 注意：这里需要根据实际硬件特性调整判断逻辑
             // 如果ADC采样值越大表示负压越大，则应该判断currentPressure >= targetPressure
             // 如果ADC采样值越大表示压力越大（负压越小），则需要反向判断
-            uint16_t targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
+            targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
             if(pressureVoltage >= targetVoltage)
             {
                 // 达到目标负压，进入维持状态
@@ -454,8 +460,8 @@ void App_NegPrsHeat_ProcessVacuum(void)
         case E_NPH_VACUUM_STATE_MAINTAIN:
             // 维持负压大小
             // 检查维持时间是否到达
-            uint32_t maintainElapsed = currentTime - s_NPHCtrlInfo.maintainStartTime;
-            uint32_t maintainTimeMs = s_NPHCtrlInfo.SuckTime * 100;  // 转换为毫秒
+            maintainElapsed = currentTime - s_NPHCtrlInfo.maintainStartTime;
+            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 100;  // 转换为毫秒
             
             if(maintainElapsed >= maintainTimeMs)
             {
@@ -470,9 +476,10 @@ void App_NegPrsHeat_ProcessVacuum(void)
             }
             else
             {
+				
                 // 在维持时间内，通过控制电机维持负压
-                uint16_t targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
-                uint16_t voltageDiff = (pressureVoltage > targetVoltage) ? 
+                targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
+                voltageDiff = (pressureVoltage > targetVoltage) ? 
                                        (pressureVoltage - targetVoltage) : 
                                        (targetVoltage - pressureVoltage);
                 uint16_t thresholdVoltage = App_NegPrsHeat_PressureToVoltage(5);  // 5KPa对应的电压差
@@ -497,11 +504,11 @@ void App_NegPrsHeat_ProcessVacuum(void)
                 }
             }
             break;
-            
+        	
         case E_NPH_VACUUM_STATE_RELEASING:
             // 放气状态
-            uint32_t releaseElapsed = currentTime - s_NPHCtrlInfo.releaseStartTime;
-            uint32_t releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 100;  // 转换为毫秒
+            releaseElapsed = currentTime - s_NPHCtrlInfo.releaseStartTime;
+            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 100;  // 转换为毫秒
             
             if(releaseElapsed >= releaseTimeMs)
             {

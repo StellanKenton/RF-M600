@@ -15,6 +15,7 @@
 #include "stm32f10x_pwr.h"
 #include "bsp_SI5351.h"
 #include "drv_soft_i2c.h"
+#include "delay.h"
 #include "math.h"
 #include <string.h>
 

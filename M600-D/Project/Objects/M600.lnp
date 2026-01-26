@@ -43,6 +43,7 @@
 ".\objects\drv_tim.o"
 ".\objects\drv_usart.o"
 ".\objects\drv_wdg.o"
+".\objects\drv_soft_i2c.o"
 ".\objects\delay.o"
 ".\objects\main.o"
 ".\objects\stm32f103_it.o"

@@ -225,11 +225,11 @@ void App_Shockwave_SetWorkParams(void)
     // 切换继电器pwr_control1至冲击波通道（需求说切换至超声通道，可能是笔误，应该是冲击波通道）
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
-            // 初始化PWM状态
-            s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
-            s_SWCtrlInfo.cycleStartTime = 0;  // 重置周期开始时间
-            Drv_TIM4_SetESW_P(false);
-            Drv_TIM4_SetESW_N(false);
+	// 初始化PWM状态
+	s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
+	s_SWCtrlInfo.cycleStartTime = 0;  // 重置周期开始时间
+	Drv_TIM4_SetESW_P(false);
+	Drv_TIM4_SetESW_N(false);
     
     LOG_I("SW: Work params set - level=%d, freq=%d, points=%d, period=%d ms, ESW_N_high=%d ms", 
           s_SWCtrlInfo.WorkLevel, s_SWCtrlInfo.FreqLevel, s_SWCtrlInfo.RemainPoints,

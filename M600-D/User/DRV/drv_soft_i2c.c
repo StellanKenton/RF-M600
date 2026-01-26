@@ -13,7 +13,7 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 #include <stdbool.h>
-
+#include <string.h>
 /* ==================== Private Definitions ==================== */
 
 #define I2C_DELAY_US    100     /* I2C timing delay in microseconds */

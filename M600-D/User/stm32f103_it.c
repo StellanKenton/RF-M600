@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : stm32f103_it.c
  * @brief    : M600-D interrupt handlers - ported from M600
- * @details  : Cortex fault + DMA1 Ch4/Ch5 (USART1 TX/RX) + USART1 (IDLE). Std lib.
+ * @details  : Cortex fault + DMA1 Ch4/Ch5 (USART1 TX/RX) + DMA1 Ch6/Ch7 (USART2 RX/TX) + USART1/USART2 (IDLE). Std lib.
  ***********************************************************************************/
 #include "stm32f103_it.h"
 #include "stm32f10x_conf.h"
@@ -88,6 +88,39 @@ void DMA1_Channel5_IRQHandler(void)
 }
 
 /* -----------------------------------------------------------------------------
+ * DMA1 Channel6 (USART2 RX) - clear flags on TC / HT (circular)
+ * ----------------------------------------------------------------------------- */
+void DMA1_Channel6_IRQHandler(void)
+{
+    if (DMA_GetITStatus(DMA1_IT_TC6) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TC6);
+        /* Optional: process full buffer */
+    }
+    if (DMA_GetITStatus(DMA1_IT_HT6) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_HT6);
+        /* Optional: process half buffer */
+    }
+    if (DMA_GetITStatus(DMA1_IT_TE6) != RESET)
+        DMA_ClearITPendingBit(DMA1_IT_TE6);
+}
+
+/* -----------------------------------------------------------------------------
+ * DMA1 Channel7 (USART2 TX) - clear flags on TC
+ * ----------------------------------------------------------------------------- */
+void DMA1_Channel7_IRQHandler(void)
+{
+    if (DMA_GetITStatus(DMA1_IT_TC7) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TC7);
+        /* Optional: user callback for TX complete */
+    }
+    if (DMA_GetITStatus(DMA1_IT_TE7) != RESET)
+        DMA_ClearITPendingBit(DMA1_IT_TE7);
+}
+
+/* -----------------------------------------------------------------------------
  * USART1 - IDLE line (frame end). Clear IDLE; optional DMA restart.
  * ----------------------------------------------------------------------------- */
 void USART1_IRQHandler(void)
@@ -96,5 +129,17 @@ void USART1_IRQHandler(void)
     {
         USART_ClearITPendingBit(USART1, USART_IT_IDLE);
         /* Optional: frame end - process BSP_USART1_RxBuf, restart DMA, etc. */
+    }
+}
+
+/* -----------------------------------------------------------------------------
+ * USART2 - IDLE line (frame end). Clear IDLE; optional DMA restart.
+ * ----------------------------------------------------------------------------- */
+void USART2_IRQHandler(void)
+{
+    if (USART_GetITStatus(USART2, USART_IT_IDLE) != RESET)
+    {
+        USART_ClearITPendingBit(USART2, USART_IT_IDLE);
+        /* Optional: frame end - process BSP_USART2_RxBuf, restart DMA, etc. */
     }
 }

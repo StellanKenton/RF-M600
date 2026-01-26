@@ -79,9 +79,6 @@ void Drv_SI5351_SetComplementaryPWM(uint16_t frequency_khz, uint16_t dead_time_n
     /* TODO: DAL -> BSP_I2C1_Transmit(addr, buf, len) for SI5351 I2C config */
 }
 
-
-
-
 /**************************End of file********************************/
 
 

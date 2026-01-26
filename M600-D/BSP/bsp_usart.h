@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : bsp_usart.h
  * @brief    : M600 USART1/USART2 init - ported from M600 HAL
- * @details  : USART1: PA9 TX, PA10 RX, 115200, DMA RX(Ch5)/TX(Ch4). USART2: PA2 TX, PA3 RX, 115200.
+ * @details  : USART1: PA9 TX, PA10 RX, 115200, DMA RX(Ch5)/TX(Ch4). USART2: PA2 TX, PA3 RX, 115200, DMA RX(Ch6)/TX(Ch7).
  * @hardware : STM32F103xE (M600)
  ***********************************************************************************/
 #ifndef __BSP_USART_H
@@ -17,12 +17,16 @@ extern "C" {
 #define BSP_USART_REC_LEN   512u
 
 extern uint8_t BSP_USART1_RxBuf[BSP_USART_REC_LEN];
+extern uint8_t BSP_USART2_RxBuf[BSP_USART_REC_LEN];
 
 void BSP_USART1_Init(uint32_t Baud);
 void BSP_USART2_Init(uint32_t Baud);
 
 void BSP_USART1_DMA_Send(const uint8_t *pData, uint32_t Len);
-void BSP_USART2_Send(const uint8_t *pData, uint32_t Len);
+void BSP_USART2_DMA_Send(const uint8_t *pData, uint32_t Len);
+
+uint8_t BSP_USART1_DMA_TxStatus(void);
+uint8_t BSP_USART2_DMA_TxStatus(void);
 
 #ifdef __cplusplus
 }

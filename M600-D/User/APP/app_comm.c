@@ -8,6 +8,7 @@
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
 #include "app_comm.h"
+#include "lib_ringbuffer.h"
 
 App_Comm_Info_t s_AppCommInfo;
 

@@ -224,6 +224,8 @@ void App_TreatMgr_Process(void)
         case E_TREATMGR_STATE_ERROR:
             // Handle error state
             break;
+		case E_TREATMGR_STATE_MAX:
+			break;
     }
 }
 

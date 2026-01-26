@@ -61,6 +61,7 @@
 ".\objects\segger_rtt_printf.o"
 ".\objects\cm_backtrace.o"
 ".\objects\cmb_fault.o"
+".\objects\lib_ringbuffer.o"
 --strict --scatter ".\Objects\M600.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

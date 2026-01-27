@@ -6,7 +6,7 @@
 #include "stm32f103_it.h"
 #include "stm32f10x_conf.h"
 #include "bsp_delay.h"
-
+#include "drv_usart.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
  * ----------------------------------------------------------------------------- */
@@ -129,6 +129,7 @@ void USART1_IRQHandler(void)
     {
         USART_ClearITPendingBit(USART1, USART_IT_IDLE);
         /* Optional: frame end - process BSP_USART1_RxBuf, restart DMA, etc. */
+        Drv_USART1_Rx();
     }
 }
 
@@ -141,5 +142,6 @@ void USART2_IRQHandler(void)
     {
         USART_ClearITPendingBit(USART2, USART_IT_IDLE);
         /* Optional: frame end - process BSP_USART2_RxBuf, restart DMA, etc. */
+        Drv_USART2_Rx();
     }
 }

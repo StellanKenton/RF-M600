@@ -77,11 +77,11 @@ ARM Macro Assembler    Page 2
    46 0000000C         
    47 0000000C                 END
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=.\objects\cmb_fault.d -o.\objects\cmb_fault.o -I.\RTE\_Development
- -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.3\Device\Include -IC:\Keil_v
-5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA 526" --predefine="GD32F
-10X_HD SETA 1" --predefine="USE_STDPERIPH_DRIVER SETA 1" --list=.\listings\cmb_
-fault.lst ..\User\BackTrace\fault_handler\keil\cmb_fault.S
+ork --depend=.\objects\cmb_fault.d -o.\objects\cmb_fault.o -IC:\Users\senki\App
+Data\Local\Arm\Packs\GigaDevice\GD32F10x_DFP\2.0.3\Device\Include --predefine="
+__UVISION_VERSION SETA 541" --predefine="GD32F10X_HD SETA 1" --predefine="USE_S
+TDPERIPH_DRIVER SETA 1" --list=.\listings\cmb_fault.lst ..\User\BackTrace\fault
+_handler\keil\cmb_fault.S
 
 
 

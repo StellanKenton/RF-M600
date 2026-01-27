@@ -71,7 +71,7 @@ void BSP_USART1_Init(uint32_t Baud)
 
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
     USART_ITConfig(USART1, USART_IT_TC,  DISABLE);
-    USART_ITConfig(USART1, USART_IT_IDLE, DISABLE);  /* enable for frame end; handler in stm32f103_it.c */
+    USART_ITConfig(USART1, USART_IT_IDLE, ENABLE);  /* enable for frame end; handler in stm32f103_it.c */
 
     USART_DMACmd(USART1, USART_DMAReq_Rx, ENABLE);
     USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
@@ -156,7 +156,7 @@ void BSP_USART2_Init(uint32_t Baud)
 
     USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
     USART_ITConfig(USART2, USART_IT_TC,  DISABLE);
-    USART_ITConfig(USART2, USART_IT_IDLE, DISABLE);  /* enable for frame end; handler in stm32f103_it.c */
+    USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);  /* enable for frame end; handler in stm32f103_it.c */
 
     USART_DMACmd(USART2, USART_DMAReq_Rx, ENABLE);
     USART_DMACmd(USART2, USART_DMAReq_Tx, ENABLE);

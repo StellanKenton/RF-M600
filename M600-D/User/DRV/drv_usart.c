@@ -42,7 +42,6 @@ void Drv_USART2_Send(const uint8_t *pData, uint32_t Len)
     Dal_USART2_Send(pData, Len);
 }
 
-
 bool Dal_GetUSART1_DMA_SendStatus(void)
 {
     return (bool)BSP_USART1_DMA_TxStatus();
@@ -115,3 +114,13 @@ void Drv_USART2_Rx(void)
     DMA_Cmd(DMA1_Channel6, ENABLE);
 }
 
+
+CBuff* Drv_GetUsart1RingPtr(void)
+{
+    return &s_USART1_RxBuffer;
+}
+
+CBuff* Drv_GetUsart2RingPtr(void)
+{
+    return &s_USART2_RxBuffer;
+}

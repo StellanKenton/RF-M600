@@ -22,7 +22,8 @@ void Drv_USART1_Rx(void);
 bool Drv_GetUSART1_DMA_SendStatus(void);
 bool Drv_GetUSART2_DMA_SendStatus(void);
 void Drv_Uart_init(void);
-
+CBuff* Drv_GetUsart1RingPtr(void);
+CBuff* Drv_GetUsart2RingPtr(void);
 #ifdef __cplusplus
 }
 #endif

@@ -20,13 +20,14 @@
 extern "C" {
 #endif
 
+#define APP_COMM_RUN_INTERVAL       5
+#define APP_COMM_RX_BUFFER_SIZE     128
+
 /* =============================================================================
  * Protocol Constants
  * ============================================================================= */
 #define PROTOCOL_HEADER_0          0x5A
 #define PROTOCOL_HEADER_1          0xA5
-#define PROTOCOL_TAIL_0            0xC3
-#define PROTOCOL_TAIL_1            0x3C
 
 /* Transmission Direction */
 #define PROTOCOL_DIR_HOST_TO_DEV   0x00    ///< Host to Device
@@ -75,7 +76,7 @@ typedef struct
     uint8_t cmd;                 ///< Command code
     uint8_t data_len;            ///< Data field length
     uint8_t *data;               ///< Data field pointer
-    uint8_t tail[2];             ///< Fixed tail: 0xC3 0x3C
+    uint16_t crc16;              ///< CRC16 checksum
 } Protocol_Frame_t;
 
 /* =============================================================================

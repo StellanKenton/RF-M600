@@ -205,10 +205,15 @@ void BSP_USART2_DMA_Send(const uint8_t *pData, uint32_t Len)
 
 uint8_t BSP_USART1_DMA_TxStatus(void)
 {
-    if (DMA1_Channel4->CCR & DMA_CCR4_EN)
+    /* 优先看EN位；但有些情况下TC到来前/后EN位可能未及时被清（取决于IRQ处理）
+       因此补充CNDTR判断：计数为0视为完成 */
+    if ((DMA1_Channel4->CCR & DMA_CCR4_EN) != 0u)
+    {
+        if (DMA_GetCurrDataCounter(DMA1_Channel4) == 0u)
+            return 0;
         return 1;  /* DMA发送正在进行 */
-    else
-        return 0;  /* DMA发送已完成 */
+    }
+    return 0;      /* DMA发送已完成 */
 }
 
 uint8_t BSP_USART2_DMA_TxStatus(void)

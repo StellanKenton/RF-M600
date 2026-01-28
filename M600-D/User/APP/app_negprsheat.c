@@ -680,4 +680,9 @@ void App_NegPrsHeat_Init(void)
     LOG_I("Negative Pressure Heat module initialized");
 }
 
+Heat_GetStatus_Reply_t *App_NegPrsHeat_GetStatus(void)
+{
+    return &s_NPHCtrlInfo.Trans.TxStatus;
+}
+
 /**************************End of file********************************/

@@ -111,6 +111,7 @@ void App_NegPrsHeat_Init(void);
 void App_NegPrsHeat_Process(void);
 bool App_NegPrsHeat_StartCheck(void);
 void App_NegPrsHeat_SetWorkParams(void);
+Heat_GetStatus_Reply_t *App_NegPrsHeat_GetStatus(void);
 
 #ifdef __cplusplus
 }

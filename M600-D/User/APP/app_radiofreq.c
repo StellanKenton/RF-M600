@@ -412,4 +412,9 @@ void App_RadioFreq_Init(void)
     LOG_I("Radio Frequency module initialized");
 }
 
+RF_GetStatus_Reply_t *App_RadioFreq_GetStatus(void)
+{
+    return &s_RFCtrlInfo.Trans.TxStatus;
+}
+
 /**************************End of file********************************/

@@ -87,8 +87,8 @@ void App_Ultrasound_Init(void);
 void App_Ultrasound_Process(void);
 bool App_UltraSound_StartCheck(void);
 void App_UltraSound_SetWorkParams(void);
-
-
+US_GetStatus_Reply_t *App_UltraSound_GetStatus(void);
+US_SetConfig_Reply_t *App_UltraSound_GetConfig(void);
 #ifdef __cplusplus
 }
 #endif

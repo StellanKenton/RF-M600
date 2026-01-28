@@ -86,6 +86,7 @@ void App_RadioFreq_Init(void);
 void App_RadioFreq_Process(void);
 bool App_RadioFreq_StartCheck(void);
 void App_RadioFreq_SetWorkParams(void);
+RF_GetStatus_Reply_t *App_RadioFreq_GetStatus(void);
 
 #ifdef __cplusplus
 }

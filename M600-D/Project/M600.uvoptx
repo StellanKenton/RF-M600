@@ -120,7 +120,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>i</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -199,6 +198,16 @@
           <count>9</count>
           <WinNumber>1</WinNumber>
           <ItemText>s_AppCommInfo,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_AppCommInfo</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CaculateCrc</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

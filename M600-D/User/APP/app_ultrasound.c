@@ -454,4 +454,13 @@ void App_Ultrasound_Init(void)
     LOG_I("Ultrasound module initialized");
 }
 
+US_GetStatus_Reply_t *App_UltraSound_GetStatus(void)
+{
+    return &s_USCtrlInfo.Trans.TxStatus;
+}
+US_SetConfig_Reply_t *App_UltraSound_GetConfig(void)
+{
+    return &s_USCtrlInfo.Trans.TxConfig;
+}
+
 /**************************End of file********************************/

@@ -62,10 +62,18 @@ void DMA1_Channel4_IRQHandler(void)
     if (DMA_GetITStatus(DMA1_IT_TC4) != RESET)
     {
         DMA_ClearITPendingBit(DMA1_IT_TC4);
+        /* 发送完成后关闭TX DMA通道，否则EN位会保持为1，导致TxStatus一直显示busy */
+        DMA_Cmd(DMA1_Channel4, DISABLE);
+        while (DMA1_Channel4->CCR & DMA_CCR4_EN) { }
         /* Optional: user callback for TX complete */
     }
     if (DMA_GetITStatus(DMA1_IT_TE4) != RESET)
+    {
         DMA_ClearITPendingBit(DMA1_IT_TE4);
+        /* 出错时也关闭通道，避免一直busy */
+        DMA_Cmd(DMA1_Channel4, DISABLE);
+        while (DMA1_Channel4->CCR & DMA_CCR4_EN) { }
+    }
 }
 
 /* -----------------------------------------------------------------------------

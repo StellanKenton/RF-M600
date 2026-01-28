@@ -105,6 +105,7 @@ void App_Shockwave_Init(void);
 void App_Shockwave_Process(void);
 bool App_Shockwave_StartCheck(void);
 void App_Shockwave_SetWorkParams(void);
+SW_GetStatus_Reply_t *App_Shockwave_GetStatus(void);
 
 #ifdef __cplusplus
 }

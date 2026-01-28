@@ -42,9 +42,11 @@ CONN_STATE_DISCONNECTED_FOOT_CLOSED = 0x10
 CONN_STATE_CONNECTED_FOOT_OPEN = 0x01
 CONN_STATE_DISCONNECTED_FOOT_OPEN = 0x11
 
-# 温度错误码
+# 温度 / 限值错误码
 TEMP_ERROR_NTC_OPEN = 0xFFFF
 TEMP_ERROR_NTC_SHORT = 0xEEFF
+# 与固件一致：温度/频率等“超限”也用 0xFFFF 表示
+TEMP_ERROR_OVER_LIMIT = 0xFFFF
 
 # 配置结果
 CONFIG_RESULT_SUCCESS = 0x00
@@ -68,13 +70,14 @@ class ProtocolHelper:
                 b >>= 1
             
             crc ^= (r << 8)
+            crc &= 0xFFFF
             
             # 处理8位
             for i in range(8):
                 if crc & 0x8000:
-                    crc = (crc << 1) ^ 0x8005
+                    crc = ((crc << 1) ^ 0x8005) & 0xFFFF
                 else:
-                    crc <<= 1
+                    crc = (crc << 1) & 0xFFFF
         
         # 输出反转
         result = 0
@@ -82,7 +85,7 @@ class ProtocolHelper:
             result = (result << 1) | (crc & 0x01)
             crc >>= 1
         
-        return result
+        return result & 0xFFFF
     
     @staticmethod
     def build_packet(direction, module, cmd, data_bytes):

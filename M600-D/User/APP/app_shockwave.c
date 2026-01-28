@@ -518,4 +518,9 @@ void App_Shockwave_Init(void)
     LOG_I("Shockwave module initialized");
 }
 
+SW_GetStatus_Reply_t *App_Shockwave_GetStatus(void)
+{
+    return &s_SWCtrlInfo.Trans.TxStatus;
+}
+
 /**************************End of file********************************/

@@ -6,20 +6,20 @@
 #include "bsp_usart.h"
 #include "lib_ringbuffer.h"
 
-static CBuff s_USART1_RxBuffer;
-static CBuff s_USART2_RxBuffer;
+CBuff s_USART1_RxBuffer;
+CBuff s_USART2_RxBuffer;
 
-static uint8_t s_USART1_RxBufferData[BSP_USART_REC_LEN];
-static uint8_t s_USART2_RxBufferData[BSP_USART_REC_LEN];
+uint8_t s_USART1_RxBufferData[BSP_USART_REC_LEN];
+uint8_t s_USART2_RxBufferData[BSP_USART_REC_LEN];
 
 void Drv_USART1_Init(void)
 {
-    CBuff_Init(&s_USART1_RxBuffer, s_USART1_RxBufferData, sizeof(s_USART1_RxBufferData));
+    CBuff_Init(&s_USART1_RxBuffer, s_USART1_RxBufferData, BSP_USART_REC_LEN);
 }
 
 void Drv_USART2_Init(void)
 {
-    CBuff_Init(&s_USART2_RxBuffer, s_USART2_RxBufferData, sizeof(s_USART2_RxBufferData));
+    CBuff_Init(&s_USART2_RxBuffer, s_USART2_RxBufferData, BSP_USART_REC_LEN);
 }
 
 void Dal_USART1_Send(const uint8_t *pData, uint32_t Len)

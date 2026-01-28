@@ -1,0 +1,37 @@
+{
+    "configurations": [
+        {
+            "name": "STM32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/M600-D/User",
+                "${workspaceFolder}/M600-D/User/DRV",
+                "${workspaceFolder}/M600-D/User/APP",
+                "${workspaceFolder}/M600-D/User/LIB",
+                "${workspaceFolder}/M600-D/User/SEGGER",
+                "${workspaceFolder}/M600-D/User/BackTrace",
+                "${workspaceFolder}/M600-D/BSP",
+                "${workspaceFolder}/M600-D/Libraries/CMSIS",
+                "${workspaceFolder}/M600-D/Libraries/FWlib/inc",
+                "${workspaceFolder}/M600-D/Libraries/FWlib/src"
+            ],
+            "defines": [
+                "USE_STDPERIPH_DRIVER",
+                "STM32F10X_HD",
+                "__weak=__attribute__((weak))",
+                "__packed=__attribute__((__packed__))"
+            ],
+            "compilerPath": "",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+        }
+    ],
+    "version": 4
+}

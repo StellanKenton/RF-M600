@@ -16,7 +16,7 @@ static Protocol_Frame_t RxFrame;
 
 
 
-void App_Comm_RecvDataHandle(uint8_t *Data);
+static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame);
 uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
     uint16_t crc = 0x0000;
     
@@ -90,7 +90,7 @@ void App_Comm_RecvData(void)
     }
     OverTime = 0;
     CBuff_Read(pRxBuffer, UartRxData, RxFrame.data_len+8);
-    uint16_t Crc16 = Crc16Compute(UartRxData, RxFrame.data_len+6);
+    uint16_t Crc16 = Crc16Compute(UartRxData+6, RxFrame.data_len);
     uint16_t Crc16_recv = UartRxData[RxFrame.data_len+6] | UartRxData[RxFrame.data_len+7] << 8;
     RxFrame.crc16 = Crc16_recv;
     if(Crc16_recv != Crc16){
@@ -98,90 +98,112 @@ void App_Comm_RecvData(void)
         return;
     }
     RxFrame.data = UartRxData + 6;
-    App_Comm_RecvDataHandle(RxFrame.data);
+    App_Comm_RecvDataHandle(&RxFrame);
     CBuff_Pop(pRxBuffer, UartRxData, RxFrame.data_len+8);
 }
 
 
 
-void App_Comm_RecvDataHandle(uint8_t *Data)
+static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
 {
-    if(Data == NULL){
+    if(pRxFrame == NULL || pRxFrame->data == NULL){
         return;
     }
+    const uint8_t *pData = pRxFrame->data;
 
-    switch(Data[3])
+    switch(pRxFrame->module)
     {
         case PROTOCOL_MODULE_ULTRASOUND:
-            switch(Data[4]) 
+            switch(pRxFrame->cmd) 
             {
                 case PROTOCOL_CMD_GET_STATUS:
                     s_AppCommInfo.US.flag.bits.Rely_Status = 1;
                     break;
                 case PROTOCOL_CMD_SET_WORK_STATE:
-                    s_AppCommInfo.US.RxWorkState.work_state = Data[6];
-                    s_AppCommInfo.US.RxWorkState.work_time = Data[7]  | Data[8] << 8;
-                    s_AppCommInfo.US.RxWorkState.work_level = Data[9];
+                    if(pRxFrame->data_len < 4){
+                        break;
+                    }
+                    s_AppCommInfo.US.RxWorkState.work_state = pData[0];
+                    s_AppCommInfo.US.RxWorkState.work_time = pData[1]  | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.US.RxWorkState.work_level = pData[3];
                     s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_WORK_STATE] = true;
                     break; 
                 case PROTOCOL_CMD_SET_CONFIG:
-                    s_AppCommInfo.US.RxConfig.frequency = Data[6] | Data[7] << 8;
-                    s_AppCommInfo.US.RxConfig.voltage = Data[8] | Data[9] << 8;
-                    s_AppCommInfo.US.RxConfig.temp_limit = Data[10] | Data[11] << 8;
+                    if(pRxFrame->data_len < 6){
+                        break;
+                    }
+                    s_AppCommInfo.US.RxConfig.frequency = pData[0] | (uint16_t)pData[1] << 8;
+                    s_AppCommInfo.US.RxConfig.voltage = pData[2] | (uint16_t)pData[3] << 8;
+                    s_AppCommInfo.US.RxConfig.temp_limit = pData[4] | (uint16_t)pData[5] << 8;
                     s_AppCommInfo.US.flag.bits.Rely_Config = 1;
                     s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_CONFIG] = true;
                     break;
             }
             break;
         case PROTOCOL_MODULE_RADIO_FREQ:
-            switch(Data[4]) 
+            switch(pRxFrame->cmd) 
             {
                 case PROTOCOL_CMD_GET_STATUS:
                     s_AppCommInfo.RF.flag.bits.Rely_Status = 1;
                     break;
                 case PROTOCOL_CMD_SET_WORK_STATE:
-                    s_AppCommInfo.RF.RxWorkState.work_state = Data[6];
-                    s_AppCommInfo.RF.RxWorkState.work_time = Data[7] | Data[8] << 8;
-                    s_AppCommInfo.RF.RxWorkState.work_level = Data[9];
+                    if(pRxFrame->data_len < 4){
+                        break;
+                    }
+                    s_AppCommInfo.RF.RxWorkState.work_state = pData[0];
+                    s_AppCommInfo.RF.RxWorkState.work_time = pData[1] | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.RF.RxWorkState.work_level = pData[3];
                     break; 
                 case PROTOCOL_CMD_SET_CONFIG:
-                    s_AppCommInfo.RF.RxConfig.temp_limit = Data[6] | Data[7] << 8;
+                    if(pRxFrame->data_len < 2){
+                        break;
+                    }
+                    s_AppCommInfo.RF.RxConfig.temp_limit = pData[0] | (uint16_t)pData[1] << 8;
                     s_AppCommInfo.RF.flag.bits.Rely_Config = 1;
                     break;
             }
             break;
         case PROTOCOL_MODULE_SHOCKWAVE:
-            switch(Data[4]) 
+            switch(pRxFrame->cmd) 
             {
                 case PROTOCOL_CMD_GET_STATUS:
                     s_AppCommInfo.SW.flag.bits.Rely_Status = 1;
                     break;
                 case PROTOCOL_CMD_SET_WORK_STATE:
-                    s_AppCommInfo.SW.RxWorkState.work_state = Data[6];
-                    s_AppCommInfo.SW.RxWorkState.work_time = Data[7] | Data[8] << 8;
-                    s_AppCommInfo.SW.RxWorkState.work_level = Data[9];
-                    s_AppCommInfo.SW.RxWorkState.frequency = Data[10];
+                    if(pRxFrame->data_len < 5){
+                        break;
+                    }
+                    s_AppCommInfo.SW.RxWorkState.work_state = pData[0];
+                    s_AppCommInfo.SW.RxWorkState.work_time = pData[1] | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.SW.RxWorkState.work_level = pData[3];
+                    s_AppCommInfo.SW.RxWorkState.frequency = pData[4];
                     break; 
             }
             break;
         case PROTOCOL_MODULE_HEAT:
-            switch(Data[4]) 
+            switch(pRxFrame->cmd) 
             {
                 case PROTOCOL_CMD_GET_STATUS:
                     s_AppCommInfo.Heat.flag.bits.Rely_Status = 1;
                     break;
                 case PROTOCOL_CMD_SET_WORK_STATE:
-                    s_AppCommInfo.Heat.RxWorkState.work_state = Data[6];
-                    s_AppCommInfo.Heat.RxWorkState.work_time = Data[7] | Data[8] << 8;
-                    s_AppCommInfo.Heat.RxWorkState.pressure = Data[9];
-                    s_AppCommInfo.Heat.RxWorkState.suck_time = Data[10] | Data[11] << 8;
-                    s_AppCommInfo.Heat.RxWorkState.release_time = Data[12] | Data[13] << 8;
-                    s_AppCommInfo.Heat.RxWorkState.temp_limit = Data[14] | Data[15] << 8;
+                    if(pRxFrame->data_len < 10){
+                        break;
+                    }
+                    s_AppCommInfo.Heat.RxWorkState.work_state = pData[0];
+                    s_AppCommInfo.Heat.RxWorkState.work_time = pData[1] | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.pressure = pData[3];
+                    s_AppCommInfo.Heat.RxWorkState.suck_time = pData[4] | (uint16_t)pData[5] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.release_time = pData[6] | (uint16_t)pData[7] << 8;
+                    s_AppCommInfo.Heat.RxWorkState.temp_limit = pData[8] | (uint16_t)pData[9] << 8;
                     break; 
                 case PROTOCOL_CMD_SET_CONFIG:
-                    s_AppCommInfo.Heat.RxPreheat.preheat_state = Data[6];
-                    s_AppCommInfo.Heat.RxPreheat.work_time = Data[7] | Data[8] << 8;
-                    s_AppCommInfo.Heat.RxPreheat.temp_limit = Data[9] | Data[10] << 8;
+                    if(pRxFrame->data_len < 5){
+                        break;
+                    }
+                    s_AppCommInfo.Heat.RxPreheat.preheat_state = pData[0];
+                    s_AppCommInfo.Heat.RxPreheat.work_time = pData[1] | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.Heat.RxPreheat.temp_limit = pData[3] | (uint16_t)pData[4] << 8;
                     s_AppCommInfo.Heat.flag.bits.Rely_Config = 1;
                     break;
             }

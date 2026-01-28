@@ -10,6 +10,7 @@
 #include "cm_backtrace.h"
 #include "drv_wdg.h"
 #include "app_treatmgr.h"
+#include "app_comm.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
@@ -43,13 +44,15 @@ void System_Init(void)
     Log_Init();
     Drv_WatchDogResartCheck();
     cm_backtrace_init(FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);
-    LOG_I("&&&&&&&&&&&&&&&&& BOOT LOADER &&&&&&&&&&&&&&&&&");
+    LOG_I("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
     LOG_I("System initialized.");
     LOG_I("Firmware: %s, Version: %s, Hardware: %s", FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);        
 
     // Initialize the treatment manager
     App_TreatMgr_Init();
     LOG_I("Treatment manager initialized.");
+    App_Comm_Init();
+    LOG_I("Communication initialized.");
 }
 
 void SystemManager(void)
@@ -72,6 +75,8 @@ void SystemManager(void)
             // Handle unexpected mode
             break;
     }
+
+    App_Comm_Process();
     
 }
 

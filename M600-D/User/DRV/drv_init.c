@@ -16,5 +16,5 @@ void Drv_System_Init(void)
 {
     Drv_Uart_init();
     Dal_System_Init();
-    Drv_WatchDog_Init();
+    //Drv_WatchDog_Init();
 }

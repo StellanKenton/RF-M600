@@ -127,9 +127,17 @@ void USART1_IRQHandler(void)
 {
     if (USART_GetITStatus(USART1, USART_IT_IDLE) != RESET)
     {
-        USART_ClearITPendingBit(USART1, USART_IT_IDLE);
-        /* Optional: frame end - process BSP_USART1_RxBuf, restart DMA, etc. */
+        /* 必须先读取 USART_DR 寄存器来清除 IDLE 中断标志 */
+        /* 即使数据已经被 DMA 读取，也需要读取一次来清除 IDLE 标志 */
+        volatile uint16_t temp = USART1->DR;
+        (void)temp;  /* 避免编译器警告 */
+        
+        /* 然后处理接收到的数据 */
         Drv_USART1_Rx();
+        
+        /* 清除 IDLE 中断标志（虽然读取 DR 后标志应该已经清除，但为了保险还是清除一下） */
+        USART_ClearITPendingBit(USART1, USART_IT_IDLE);
+        /* Optional: frame end - process BSP_USART1_RxBuf, restart DMA, etc. */    
     }
 }
 
@@ -140,8 +148,16 @@ void USART2_IRQHandler(void)
 {
     if (USART_GetITStatus(USART2, USART_IT_IDLE) != RESET)
     {
+        /* 必须先读取 USART_DR 寄存器来清除 IDLE 中断标志 */
+        /* 即使数据已经被 DMA 读取，也需要读取一次来清除 IDLE 标志 */
+        volatile uint16_t temp = USART2->DR;
+        (void)temp;  /* 避免编译器警告 */
+        
+        /* 清除 IDLE 中断标志（虽然读取 DR 后标志应该已经清除，但为了保险还是清除一下） */
         USART_ClearITPendingBit(USART2, USART_IT_IDLE);
-        /* Optional: frame end - process BSP_USART2_RxBuf, restart DMA, etc. */
+        
+        /* 然后处理接收到的数据 */
         Drv_USART2_Rx();
+        /* Optional: frame end - process BSP_USART2_RxBuf, restart DMA, etc. */
     }
 }

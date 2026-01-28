@@ -124,3 +124,4 @@ CBuff* Drv_GetUsart2RingPtr(void)
 {
     return &s_USART2_RxBuffer;
 }
+

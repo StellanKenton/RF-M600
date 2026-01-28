@@ -14,6 +14,9 @@
 App_Comm_Info_t s_AppCommInfo;
 static Protocol_Frame_t RxFrame;
 
+
+
+void App_Comm_RecvDataHandle(uint8_t *Data);
 uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
     uint16_t crc = 0x0000;
     
@@ -54,7 +57,6 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
 
 void App_Comm_RecvData(void)
 {
-    uint16_t RxLen = 0;
     static uint8_t UartRxData[APP_COMM_RX_BUFFER_SIZE];
     static uint16_t OverTime = 0;
     CBuff* pRxBuffer = Drv_GetUsart1RingPtr();
@@ -96,7 +98,7 @@ void App_Comm_RecvData(void)
         return;
     }
     RxFrame.data = UartRxData + 6;
-    App_Comm_RecvDataHandle(&RxFrame.data);
+    App_Comm_RecvDataHandle(RxFrame.data);
     CBuff_Pop(pRxBuffer, UartRxData, RxFrame.data_len+8);
 }
 
@@ -218,10 +220,7 @@ void App_Comm_SendData(void)
 
     if(s_AppCommInfo.US.flag.bits.Rely_Status){
         s_AppCommInfo.US.flag.bits.Rely_Status = 0;
-        s_AppCommInfo.US.TxStatus.status = PROTOCOL_STATUS_OK;
-        s_AppCommInfo.US.TxStatus.data_len = 0;
-        s_AppCommInfo.US.TxStatus.data = NULL;
-        Drv_USART1_Send(s_AppCommInfo.US.TxStatus.data, s_AppCommInfo.US.TxStatus.data_len);
+        
     }
 }
 

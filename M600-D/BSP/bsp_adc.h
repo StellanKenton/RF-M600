@@ -32,8 +32,9 @@ typedef enum {
 
 void BSP_ADC_Init(void);
 uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch);
-uint32_t BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch);
+uint16_t BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch);
 const uint16_t* BSP_ADC_GetDmaBuffer(void);
+void BSP_ADC_DMA_TC_Handler(void);  /* DMA transfer complete handler - called from interrupt */
 
 #ifdef __cplusplus
 }

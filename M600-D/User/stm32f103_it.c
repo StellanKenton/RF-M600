@@ -7,6 +7,7 @@
 #include "stm32f10x_conf.h"
 #include "bsp_delay.h"
 #include "drv_usart.h"
+#include "bsp_adc.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
  * ----------------------------------------------------------------------------- */
@@ -52,6 +53,24 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
     BSP_SysTick_Inc();
+}
+
+/* -----------------------------------------------------------------------------
+ * DMA1 Channel1 (ADC1) - double buffering on TC
+ * ----------------------------------------------------------------------------- */
+void DMA1_Channel1_IRQHandler(void)
+{
+    if (DMA_GetITStatus(DMA1_IT_TC1) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TC1);
+        /* Copy DMA working buffer to read buffer (double buffering) */
+        BSP_ADC_DMA_TC_Handler();
+    }
+    if (DMA_GetITStatus(DMA1_IT_TE1) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TE1);
+        /* Error handling - optional */
+    }
 }
 
 /* -----------------------------------------------------------------------------

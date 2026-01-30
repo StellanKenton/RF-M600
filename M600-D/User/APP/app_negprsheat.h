@@ -42,6 +42,7 @@ typedef enum
     E_NPH_RUN_PREHEAT,
     E_NPH_RUN_WORKING,
     E_NPH_RUN_STOP,
+    E_NPH_RUN_WAIT_RETURN,
     E_NPH_RUN_MAX,
 } NPH_RunState_EnumDef;
 
@@ -69,7 +70,8 @@ typedef struct
 {
     NPH_RunState_EnumDef runState;
     NPH_Vacuum_State_EnumDef vacuumState;
-    
+    bool isWaitReturn;
+
     uint16_t TempLimit;            ///< 工作温度上限 (0.1°C)
     uint16_t TreatTimes;           ///< 剩余可治疗次数
     bool PreheatEnable;            ///< 预热功能是否开启
@@ -87,6 +89,7 @@ typedef struct
     uint8_t ErrorCode;
     bool FootSwitchStatus;
     IODevice_WorkingMode_EnumDef probeStatus;
+    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     NPH_TreatParams_t TreatParams;
     Heat_TransData_t Trans;
@@ -111,6 +114,8 @@ void App_NegPrsHeat_Init(void);
 void App_NegPrsHeat_Process(void);
 bool App_NegPrsHeat_StartCheck(void);
 void App_NegPrsHeat_SetWorkParams(void);
+NPH_RunState_EnumDef App_NegPrsHeat_GetRunState(void);
+void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState);
 
 #ifdef __cplusplus
 }

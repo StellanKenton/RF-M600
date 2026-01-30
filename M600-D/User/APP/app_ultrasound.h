@@ -41,6 +41,7 @@ typedef enum
     E_US_RUN_IDLE,
     E_US_RUN_WORKING,
     E_US_RUN_STOP,
+    E_US_RUN_WAIT_RETURN,
     E_US_RUN_MAX,
 } US_RunState_EnumDef;
 
@@ -61,6 +62,7 @@ typedef enum {
 typedef struct
 {
     US_RunState_EnumDef runState;
+    bool isWaitReturn;
     uint16_t Voltage;              ///< 工作电压 (mV)
     uint16_t VoltageBase;          ///< 基础工作电压 (mV)，用于超限检测
     uint16_t CurrentHigh;
@@ -77,6 +79,7 @@ typedef struct
     uint8_t ErrorCode;
     bool FootSwitchStatus;
     IODevice_WorkingMode_EnumDef probeStatus;
+    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     US_TreatParams_t TreatParams;
     UltraSound_TransData_t Trans;
@@ -87,6 +90,8 @@ void App_Ultrasound_Init(void);
 void App_Ultrasound_Process(void);
 bool App_UltraSound_StartCheck(void);
 void App_UltraSound_SetWorkParams(void);
+US_RunState_EnumDef App_Ultrasound_GetRunState(void);
+void App_Ultrasound_ChangeState(US_RunState_EnumDef newState);
 
 
 #ifdef __cplusplus

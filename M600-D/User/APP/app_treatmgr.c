@@ -90,6 +90,8 @@ void App_TreatMgr_Init(void)
 {
     // Initialize the treatment manager module
     s_TreatMgr.eState = E_TREATMGR_STATE_IDLE;
+    Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
+	s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
 }
 
 void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState)
@@ -118,32 +120,49 @@ void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState)
             case E_TREATMGR_STATE_ERROR:
                 LOG_I("TreatMgr state changed to ERROR");
                 break;
+			case E_TREATMGR_STATE_MAX:
+				break;
         }
     }
 }
 
 
+
 void ProbeStatusCheck()
 {
-    s_TreatMgr.eProbeStatus = Drv_IODevice_GetProbeStatus();
-    if(s_TreatMgr.eProbeStatus != s_TreatMgr.preProbeStaus){
-        s_TreatMgr.preProbeStaus = s_TreatMgr.eProbeStatus;
-        switch(s_TreatMgr.eProbeStatus)
-        {
+    static IODevice_WorkingMode_EnumDef pendingStatus = E_IODEVICE_MODE_NOT_CONNECTED;
+    static uint16_t debounceCount = 0;
+
+    IODevice_WorkingMode_EnumDef curStatus = Drv_IODevice_GetProbeStatus();
+
+    if(curStatus == s_TreatMgr.eProbeStatus) {
+        debounceCount = 0;
+        return;
+    }
+
+    if(curStatus == pendingStatus) {
+        debounceCount++;
+        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
+            s_TreatMgr.preProbeStaus = s_TreatMgr.eProbeStatus;
+            s_TreatMgr.eProbeStatus = curStatus;
+            debounceCount = 0;
+            pendingStatus = curStatus;
+            switch(s_TreatMgr.eProbeStatus)
+            {
             case E_IODEVICE_MODE_ULTRASOUND:
-                LOG_I("Probe status changed to ULTRASOUND");
+                LOG_I("Probe***** status changed to ULTRASOUND");
                 break;
             case E_IODEVICE_MODE_SHOCKWAVE:
-                LOG_I("Probe status changed to SHOCKWAVE");
+                LOG_I("Probe***** status changed to SHOCKWAVE");
                 break;
             case E_IODEVICE_MODE_RADIO_FREQUENCY:
-                LOG_I("Probe status changed to RADIO_FREQUENCY");
+                LOG_I("Probe***** status changed to RADIO_FREQUENCY");
                 break;
             case E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT:
-                LOG_I("Probe status changed to NEGATIVE_PRESSURE_HEAT");
+                LOG_I("Probe***** status changed to NEGATIVE_PRESSURE_HEAT");
                 break;
             case E_IODEVICE_MODE_NOT_CONNECTED:
-                LOG_I("Probe status changed to NOT_CONNECTED");
+                LOG_I("Probe***** status changed to NOT_CONNECTED");
                 break;  
             case E_IODEVICE_MODE_ERROR:
                 LOG_I("Probe status changed to ERROR");
@@ -151,28 +170,49 @@ void ProbeStatusCheck()
             default:
                 LOG_I("Probe status changed to UNKNOWN");
                 break;
+            }
         }
+    } else {
+        pendingStatus = curStatus;
+        debounceCount = 1;
     }
 }
 
-// void App_TreatMgr_ChangeCheck(IODevice_WorkingMode_EnumDef curProbe) 
-// {
-//     if(curProbe != s_TreatMgr.preProbeStaus){
-        
-//     }
-// }
+void App_TreatMgr_CheckWaitReturn(void)
+{
+    if(App_Shockwave_GetRunState() == E_SW_RUN_WAIT_RETURN) {
+        App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+        App_Shockwave_ChangeState(E_SW_RUN_INIT);
+    }
+
+    if(App_RadioFreq_GetRunState() == E_RF_RUN_WAIT_RETURN) {
+        App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+        App_RadioFreq_ChangeState(E_RF_RUN_INIT);
+    }
+
+    if(App_Ultrasound_GetRunState() == E_US_RUN_WAIT_RETURN) {
+        App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+        App_Ultrasound_ChangeState(E_US_RUN_INIT);
+    }
+
+    if(App_NegPrsHeat_GetRunState() == E_NPH_RUN_WAIT_RETURN) {
+        App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+        App_NegPrsHeat_ChangeState(E_NPH_RUN_INIT);
+    }
+}
 
 void App_TreatMgr_Process(void)
 {
     static Drv_Timer_t TreatMgrTimer;
     static Drv_Timer_t BoardTempMonitorTimer;
 
-    // 处理蜂鸣器控制（每次循环都处理，确保及时响应）
-    Drv_IODevice_ProcessBuzzer();
     
     if(Drv_Timer_Tick(&TreatMgrTimer, TREAT_TASK_TIME) == false){
         return;
     }
+
+    // 处理蜂鸣器控制（每次循环都处理，确保及时响应）
+    Drv_IODevice_ProcessBuzzer();
     // Process the treatment manager module
     ProbeStatusCheck();
     
@@ -180,9 +220,13 @@ void App_TreatMgr_Process(void)
     if(Drv_Timer_Tick(&BoardTempMonitorTimer, BOARD_TEMP_MONITOR_PERIOD_MS)){
         App_TreatMgr_ControlFan();
     }
+    // 检查是否需要等待回连
+    App_TreatMgr_CheckWaitReturn();
+
     switch(s_TreatMgr.eState)
     {
         case E_TREATMGR_STATE_IDLE:
+            
             // Handle idle state
             switch(s_TreatMgr.eProbeStatus)
             {

@@ -181,9 +181,30 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
                 // 结束工作时蜂鸣器提示（2s）
                 Drv_IODevice_StartBuzzer(2000);
                 break;
+            case E_NPH_RUN_WAIT_RETURN:
+                LOG_I("NPH state changed to WAIT_RETURN");
+                break;
             default:
                 break;
         }
+    }
+}
+
+void App_NegPrsHeat_CheckProbe(void)
+{
+    static uint16_t debounceCount = 0;
+    if(s_NPHCtrlInfo.probeStatus != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
+        debounceCount++;
+        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
+            debounceCount = 0;
+            s_NPHCtrlInfo.isWaitReturn = true;
+        }
+    } else {
+        debounceCount = 0;
+    }
+
+    if(s_NPHCtrlInfo.isWaitReturn) {
+        App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
     }
 }
 
@@ -202,14 +223,12 @@ bool App_NegPrsHeat_StartCheck()
     
     // 1. 检查下位机是否下发了发射负压加热指令
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
-        LOG_E("NPH: Work state is not start");
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 2. 检查剩余工作时间是否大于0（0-3600s）
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > NPH_WORK_TIME_MAX) {
-        LOG_E("NPH: Invalid work time: %d", pTransData->RxWorkState.work_time);
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -217,8 +236,6 @@ bool App_NegPrsHeat_StartCheck()
     // 3. 检查负压大小是否有效（10-100KPa）
     if(pTransData->RxWorkState.pressure < NPH_PRESSURE_MIN_KPA || 
        pTransData->RxWorkState.pressure > NPH_PRESSURE_MAX_KPA) {
-        LOG_E("NPH: Invalid pressure: %d (range: %d-%d)", 
-              pTransData->RxWorkState.pressure, NPH_PRESSURE_MIN_KPA, NPH_PRESSURE_MAX_KPA);
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -226,8 +243,6 @@ bool App_NegPrsHeat_StartCheck()
     // 4. 检查负压吸时间是否有效（0.1-60s，单位100ms）
     if(pTransData->RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/100) || 
        pTransData->RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/100)) {
-        LOG_E("NPH: Invalid suck time: %d (range: %d-%d)", 
-              pTransData->RxWorkState.suck_time, NPH_SUCK_TIME_MIN_MS/100, NPH_SUCK_TIME_MAX_MS/100);
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -235,34 +250,30 @@ bool App_NegPrsHeat_StartCheck()
     // 5. 检查负压放时间是否有效（0.1-60s，单位100ms）
     if(pTransData->RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/100) || 
        pTransData->RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/100)) {
-        LOG_E("NPH: Invalid release time: %d (range: %d-%d)", 
-              pTransData->RxWorkState.release_time, NPH_RELEASE_TIME_MIN_MS/100, NPH_RELEASE_TIME_MAX_MS/100);
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 6. 检查脚踏开关是否闭合
     if(s_NPHCtrlInfo.FootSwitchStatus == false) {
-        LOG_E("NPH: Foot switch is not closed");
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 7. 检查是否正确识别到负压加热治疗头
     if(s_NPHCtrlInfo.probeStatus != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
-        LOG_E("NPH: Negative pressure heat probe not connected");
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
     // 8. 检查是否有剩余可治疗次数
     if(s_NPHCtrlInfo.TreatTimes == 0) {
-        LOG_E("NPH: No remaining treat times");
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 所有检查通过
+    LOG_I("NPH: Start check passed");
     return true;
 }
 
@@ -532,7 +543,7 @@ void App_NegPrsHeat_Process(void)
     App_NegPrsHeat_UpdateStatus();
     App_NegPrsHeat_RxDataHandle();
     App_NegPrsHeat_Monitor();
-
+    App_NegPrsHeat_CheckProbe();
     // Handle the negative pressure heat state
     switch(s_NPHCtrlInfo.runState)
     {
@@ -606,6 +617,7 @@ void App_NegPrsHeat_Process(void)
             break;
             
         case E_NPH_RUN_WORKING:
+            
             // 检查所有条件
             if(App_NegPrsHeat_StartCheck() == false || 
                s_NPHCtrlInfo.RemainTime == 0){
@@ -648,6 +660,14 @@ void App_NegPrsHeat_Process(void)
             // 关闭输出通道
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+            if(s_NPHCtrlInfo.isWaitReturn) {
+                App_NegPrsHeat_ChangeState(E_NPH_RUN_WAIT_RETURN);
+                LOG_I("NPH: Wait return");
+                s_NPHCtrlInfo.isWaitReturn = false;
+            }
+            break;
+
+        case E_NPH_RUN_WAIT_RETURN:
             break;
             
         default:
@@ -678,6 +698,11 @@ void App_NegPrsHeat_Init(void)
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
     
     LOG_I("Negative Pressure Heat module initialized");
+}
+
+NPH_RunState_EnumDef App_NegPrsHeat_GetRunState(void)
+{
+    return s_NPHCtrlInfo.runState;
 }
 
 /**************************End of file********************************/

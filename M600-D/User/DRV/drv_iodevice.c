@@ -6,6 +6,7 @@
 #include "drv_delay.h"
 #include "bsp_gpio.h"
 #include <stddef.h>
+#include <string.h>
 
 #define IODEVICE_DEBOUNCE_TIME_MS  50u
 #define BUZZER_DEFAULT_DURATION_MS 2000u
@@ -17,6 +18,8 @@ static uint8_t s_debounceActive = 0;
 static bool s_buzzerActive = false;
 static uint32_t s_buzzerStartTime = 0;
 static uint32_t s_buzzerDuration = 0;
+static bool s_probeStatusOverridden = false;
+static IODevice_WorkingMode_EnumDef s_overrideProbeMode = E_IODEVICE_MODE_NOT_CONNECTED;
 
 /* DAL: only called from DRV; calls BSP */
 static bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
@@ -87,6 +90,8 @@ IODevice_WorkingMode_EnumDef Drv_IODevice_GetWorkingMode(const IODevice_SyncSign
 
 IODevice_WorkingMode_EnumDef Drv_IODevice_GetProbeStatus(void)
 {
+    if (s_probeStatusOverridden)
+        return s_overrideProbeMode;
     IODevice_SyncSignals_t s;
     Drv_IODevice_ReadSyncSignals(&s);
     return Drv_IODevice_GetWorkingMode(&s);
@@ -154,3 +159,31 @@ void Drv_IODevice_ProcessBuzzer(void)
         s_buzzerActive = false;
     }
 }
+
+void Drv_IODevice_SetProbeStatus(char *data)
+{
+    if (data == NULL)
+        return;
+    if (strcmp(data, "us") == 0) {
+        s_probeStatusOverridden = true;
+        s_overrideProbeMode = E_IODEVICE_MODE_ULTRASOUND;
+    }
+    else if (strcmp(data, "esw") == 0) {
+        s_probeStatusOverridden = true;
+        s_overrideProbeMode = E_IODEVICE_MODE_SHOCKWAVE;
+    }
+    else if (strcmp(data, "rf") == 0) {
+        s_probeStatusOverridden = true;
+        s_overrideProbeMode = E_IODEVICE_MODE_RADIO_FREQUENCY;
+    }
+    else if (strcmp(data, "nh") == 0) {
+        s_probeStatusOverridden = true;
+        s_overrideProbeMode = E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT;
+    }
+    else if (strcmp(data, "clear") == 0) {
+        s_probeStatusOverridden = false;
+        s_overrideProbeMode = E_IODEVICE_MODE_NOT_CONNECTED;
+    }
+}
+
+

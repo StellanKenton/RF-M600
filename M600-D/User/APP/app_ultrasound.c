@@ -174,66 +174,54 @@ bool App_UltraSound_StartCheck()
 {
     // 1. 检查下位机是否下发了发射超声指令
     if(s_USCtrlInfo.Trans.RxWorkState.work_state != 0x01) {
-        LOG_E("Work state is not start");
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 2. 检查剩余工作时间是否大于0（0-3600s）
     if(s_USCtrlInfo.Trans.RxWorkState.work_time == 0 || s_USCtrlInfo.Trans.RxWorkState.work_time > 3600) {
-        LOG_E("Invalid work time: %d", s_USCtrlInfo.Trans.RxWorkState.work_time);
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 3. 检查工作档位是否不等于0（0-40）
     if(s_USCtrlInfo.Trans.RxWorkState.work_level == 0 || s_USCtrlInfo.Trans.RxWorkState.work_level > WORK_LEVEL_MAX) {
-        LOG_E("Invalid work level: %d (range: 1-%d)", s_USCtrlInfo.Trans.RxWorkState.work_level, WORK_LEVEL_MAX);
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 4. 检查脚踏开关是否闭合
     if(s_USCtrlInfo.FootSwitchStatus == false) {
-        LOG_E("Foot switch is not closed");
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 5. 检查是否正确识别到超声治疗头
     if(s_USCtrlInfo.probeStatus != E_IODEVICE_MODE_ULTRASOUND) {
-        LOG_E("Ultrasound probe not connected");
         s_USCtrlInfo.ErrorCode = E_US_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
     // 6. 检查是否有剩余可治疗次数
     if(s_USCtrlInfo.TreatTimes == 0) {
-        LOG_E("No remaining treat times");
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 7. 检查配置参数是否有效
     if(s_USCtrlInfo.Trans.RxConfig.frequency == 0 || s_USCtrlInfo.Trans.RxConfig.temp_limit == 0 || s_USCtrlInfo.Trans.RxConfig.voltage == 0) {
-        LOG_E("Invalid ultrasound config parameters: freq=%d, temp_limit=%d, voltage=%d", 
-              s_USCtrlInfo.Trans.RxConfig.frequency, 
-              s_USCtrlInfo.Trans.RxConfig.temp_limit, 
-              s_USCtrlInfo.Trans.RxConfig.voltage);
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 8. 检查治疗参数是否有效
     if(s_USCtrlInfo.TreatParams.CurrentHigh == 0 || s_USCtrlInfo.TreatParams.CurrentLow == 0) {
-        LOG_E("Invalid treatment parameters: CurrentHigh=%d, CurrentLow=%d", 
-              s_USCtrlInfo.TreatParams.CurrentHigh, 
-              s_USCtrlInfo.TreatParams.CurrentLow);
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 所有检查通过
+    LOG_I("US: Start check passed");
     return true;
 }
 
@@ -369,6 +357,23 @@ bool App_UltraSound_IsHeadTempNormal(void)
     return isNormal;
 }
 
+void App_Ultrasound_CheckProbe(void)
+{
+    static uint16_t debounceCount = 0;
+    if(s_USCtrlInfo.probeStatus != E_IODEVICE_MODE_ULTRASOUND) {
+        debounceCount++;
+        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
+            debounceCount = 0;
+            s_USCtrlInfo.isWaitReturn = true;
+        }
+    } else {
+        debounceCount = 0;
+    }
+
+    if(s_USCtrlInfo.isWaitReturn) {
+        App_Ultrasound_ChangeState(E_US_RUN_STOP);
+    }
+}
 
 void App_Ultrasound_Process(void)
 {
@@ -376,7 +381,7 @@ void App_Ultrasound_Process(void)
     App_UltraSound_UpdateStatus();
     App_UltraSound_RxDataHandle();
     App_Ultrasound_Monitor();
-
+    App_Ultrasound_CheckProbe();
     // Handle the ultrasound state
     switch(s_USCtrlInfo.runState)
     {
@@ -391,6 +396,7 @@ void App_Ultrasound_Process(void)
                 LOG_E("Failed to load ultrasound parameters");
                 s_USCtrlInfo.ErrorCode = E_US_ERROR_READ_PARAMS_FAILED;
             }
+			
             App_Ultrasound_ChangeState(E_US_RUN_IDLE);
             break;
         case E_US_RUN_IDLE:
@@ -404,7 +410,7 @@ void App_Ultrasound_Process(void)
                 App_Ultrasound_ChangeState(E_US_RUN_WORKING);
             }
             break;
-        case E_US_RUN_WORKING:
+        case E_US_RUN_WORKING:           
             // 检查所有条件
             if(App_UltraSound_StartCheck() == false || 
             App_UltraSound_IsCurrentNormal() == false || 
@@ -425,6 +431,13 @@ void App_Ultrasound_Process(void)
             // 停止DAC输出
             Drv_DAC_SetVoltage(0);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+            if(s_USCtrlInfo.isWaitReturn) {
+                App_Ultrasound_ChangeState(E_US_RUN_WAIT_RETURN);
+                LOG_I("US: Wait return");
+                s_USCtrlInfo.isWaitReturn = false;
+            }
+            break;
+        case E_US_RUN_WAIT_RETURN:
             break;
         default:
             break;
@@ -452,6 +465,11 @@ void App_Ultrasound_Init(void)
     Drv_SI5351_Init();
     
     LOG_I("Ultrasound module initialized");
+}
+
+US_RunState_EnumDef App_Ultrasound_GetRunState(void)
+{
+    return s_USCtrlInfo.runState;
 }
 
 /**************************End of file********************************/

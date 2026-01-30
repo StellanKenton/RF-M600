@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-#define APP_COMM_RUN_INTERVAL       5
+#define COMM_TASK_TIME       5
 #define APP_COMM_RX_BUFFER_SIZE     128
 
 /* =============================================================================
@@ -328,7 +328,7 @@ typedef struct
     uint8_t RxData[128];
     uint8_t TxData[128];
     UltraSound_TransData_t US;
-    RF_TransData_t RF;
+    RF_TransData_t RF; 
     SW_TransData_t SW;
     Heat_TransData_t Heat;
 } App_Comm_Info_t;

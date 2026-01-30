@@ -148,47 +148,42 @@ bool App_RadioFreq_StartCheck()
     
     // 1. 检查下位机是否下发了发射射频指令
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
-        LOG_E("RF: Work state is not start");
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 2. 检查剩余工作时间是否大于0（0-3600s）
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > 3600) {
-        LOG_E("RF: Invalid work time: %d", pTransData->RxWorkState.work_time);
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 3. 检查工作档位是否不等于0（0-20）
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > RF_WORK_LEVEL_MAX) {
-        LOG_E("RF: Invalid work level: %d (range: 1-%d)", pTransData->RxWorkState.work_level, RF_WORK_LEVEL_MAX);
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 4. 检查脚踏开关是否闭合
     if(s_RFCtrlInfo.FootSwitchStatus == false) {
-        LOG_E("RF: Foot switch is not closed");
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 5. 检查是否正确识别到射频治疗头
     if(s_RFCtrlInfo.probeStatus != E_IODEVICE_MODE_RADIO_FREQUENCY) {
-        LOG_E("RF: Radio frequency probe not connected");
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
     // 6. 检查是否有剩余可治疗次数
     if(s_RFCtrlInfo.TreatTimes == 0) {
-        LOG_E("RF: No remaining treat times");
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 所有检查通过
+    LOG_I("RF: Start check passed");
     return true;
 }
 
@@ -295,6 +290,24 @@ bool App_RadioFreq_IsHeadTempNormal(void)
     return isNormal;
 }
 
+void App_RadioFreq_CheckProbe(void)
+{
+    static uint16_t debounceCount = 0;
+    if(s_RFCtrlInfo.probeStatus != E_IODEVICE_MODE_RADIO_FREQUENCY) {
+        debounceCount++;
+        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
+            debounceCount = 0;
+            s_RFCtrlInfo.isWaitReturn = true;
+        }
+    } else {
+        debounceCount = 0;
+    }
+
+    if(s_RFCtrlInfo.isWaitReturn) {
+        App_RadioFreq_ChangeState(E_RF_RUN_STOP);
+    }
+}
+
 void App_RadioFreq_Process(void)
 {
     static Drv_Timer_t CurrentMonitorTimer;
@@ -304,7 +317,7 @@ void App_RadioFreq_Process(void)
     App_RadioFreq_UpdateStatus();
     App_RadioFreq_RxDataHandle();
     App_RadioFreq_Monitor();
-
+    App_RadioFreq_CheckProbe();
     // Handle the radio frequency state
     switch(s_RFCtrlInfo.runState)
     {
@@ -343,6 +356,7 @@ void App_RadioFreq_Process(void)
             break;
             
         case E_RF_RUN_WORKING:
+            
             // 检查所有条件
             if(App_RadioFreq_StartCheck() == false || 
                s_RFCtrlInfo.RemainTime == 0){
@@ -380,6 +394,14 @@ void App_RadioFreq_Process(void)
             // CTR_HEAT_HP恢复为低电平
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+            if(s_RFCtrlInfo.isWaitReturn) {
+                App_RadioFreq_ChangeState(E_RF_RUN_WAIT_RETURN);
+                LOG_I("RF: Wait return");
+                s_RFCtrlInfo.isWaitReturn = false;
+            }
+            break;
+
+        case E_RF_RUN_WAIT_RETURN:
             break;
             
         default:
@@ -410,6 +432,11 @@ void App_RadioFreq_Init(void)
     Drv_SI5351_Init();
     
     LOG_I("Radio Frequency module initialized");
+}
+
+RF_RunState_EnumDef App_RadioFreq_GetRunState(void)
+{
+    return s_RFCtrlInfo.runState;
 }
 
 /**************************End of file********************************/

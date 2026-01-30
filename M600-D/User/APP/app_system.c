@@ -75,9 +75,8 @@ void SystemManager(void)
             // Handle unexpected mode
             break;
     }
-
     App_Comm_Process();
-    
+    Log_Process(10);
 }
 
 /**

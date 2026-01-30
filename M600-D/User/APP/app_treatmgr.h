@@ -21,8 +21,9 @@ extern "C" {
 
 #include "drv_iodevice.h"
 
-#define   TREAT_TASK_TIME     10       // 10ms
-
+#define TREAT_TASK_TIME     10       // 10ms
+#define PROBE_STATUS_DEBOUNCE_MS    1000    ///< 探头状态防抖时间 (1s)
+#define PROBE_STATUS_DEBOUNCE_CNT   (PROBE_STATUS_DEBOUNCE_MS / TREAT_TASK_TIME)  ///< 1s对应的计数
 
 typedef enum
 {

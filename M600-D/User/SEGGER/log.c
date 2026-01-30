@@ -13,6 +13,8 @@
 #include "cm_backtrace.h"
 #endif
 
+#include "drv_delay.h"
+
 // 日志缓冲区大小，根据最大单条日志长度调整
 #define LOG_BUF_SIZE 256
 
@@ -169,6 +171,12 @@ void Log_Process(uint8_t taskTick) {
     static char KeyBuf[16];
     int GetKey;
     Log_TimeStamp += taskTick;
+    static Drv_Timer_t LogTimer;
+
+    if(Drv_Timer_Tick(&LogTimer, taskTick) == false){
+        return;
+    }
+    
     if (SEGGER_RTT_HasKey()) 
     {
         memset(LogCmd, 0, sizeof(LogCmd));

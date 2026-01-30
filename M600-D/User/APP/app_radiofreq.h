@@ -42,6 +42,7 @@ typedef enum
     E_RF_RUN_IDLE,
     E_RF_RUN_WORKING,
     E_RF_RUN_STOP,
+    E_RF_RUN_WAIT_RETURN,
     E_RF_RUN_MAX,
 } RF_RunState_EnumDef;
 
@@ -58,6 +59,7 @@ typedef enum {
 typedef struct
 {
     RF_RunState_EnumDef runState;
+    bool isWaitReturn;
     uint16_t Voltage;              ///< 当前工作电压 (mV)
     uint16_t VoltageTarget;        ///< 目标工作电压 (mV)，根据档位计算
     uint16_t CurrentHigh;         ///< 工作电流上限 (mV)
@@ -73,6 +75,7 @@ typedef struct
     uint8_t ErrorCode;
     bool FootSwitchStatus;
     IODevice_WorkingMode_EnumDef probeStatus;
+    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     RF_TreatParams_t TreatParams;
     RF_TransData_t Trans;
@@ -86,6 +89,8 @@ void App_RadioFreq_Init(void);
 void App_RadioFreq_Process(void);
 bool App_RadioFreq_StartCheck(void);
 void App_RadioFreq_SetWorkParams(void);
+RF_RunState_EnumDef App_RadioFreq_GetRunState(void);
+void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState);
 
 #ifdef __cplusplus
 }

@@ -10,6 +10,7 @@
 #include "app_comm.h"
 #include "lib_ringbuffer.h"
 #include "drv_usart.h"
+#include "drv_delay.h"
 
 App_Comm_Info_t s_AppCommInfo;
 static Protocol_Frame_t RxFrame;
@@ -80,7 +81,7 @@ void App_Comm_RecvData(void)
     RxFrame.data_len = UartRxData[5];
 
     if(CBuff_GetLength(pRxBuffer) < RxFrame.data_len+8){
-        OverTime += APP_COMM_RUN_INTERVAL;
+        OverTime += COMM_TASK_TIME;
         if(OverTime >= 200){
             OverTime = 0;
             CBuff_Pop(pRxBuffer, UartRxData, 1);
@@ -257,6 +258,10 @@ void App_Comm_Init(void)
 
 void App_Comm_Process(void)
 {
+    static Drv_Timer_t CommTimer;
+    if(Drv_Timer_Tick(&CommTimer, COMM_TASK_TIME) == false){
+        return;
+    }
     App_Comm_RecvData();
     App_Comm_SendData();
 }

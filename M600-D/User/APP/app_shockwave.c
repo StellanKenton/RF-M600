@@ -156,54 +156,48 @@ bool App_Shockwave_StartCheck()
     
     // 1. 检查下位机是否下发了发射冲击波指令
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
-        LOG_E("SW: Work state is not start");
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 2. 检查剩余工作点数是否大于0（0-10000）
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > SW_WORK_POINT_MAX) {
-        LOG_E("SW: Invalid work points: %d", pTransData->RxWorkState.work_time);
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 3. 检查工作档位是否不等于0（0-26）
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > SW_WORK_LEVEL_MAX) {
-        LOG_E("SW: Invalid work level: %d (range: 1-%d)", pTransData->RxWorkState.work_level, SW_WORK_LEVEL_MAX);
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 4. 检查工作频率档位是否有效（1-16）
     if(pTransData->RxWorkState.frequency == 0 || pTransData->RxWorkState.frequency > SW_FREQ_LEVEL_MAX) {
-        LOG_E("SW: Invalid frequency level: %d (range: 1-%d)", pTransData->RxWorkState.frequency, SW_FREQ_LEVEL_MAX);
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 5. 检查脚踏开关是否闭合
     if(s_SWCtrlInfo.FootSwitchStatus == false) {
-        LOG_E("SW: Foot switch is not closed");
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 6. 检查是否正确识别到冲击波治疗头
     if(s_SWCtrlInfo.probeStatus != E_IODEVICE_MODE_SHOCKWAVE) {
-        LOG_E("SW: Shockwave probe not connected");
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
     // 7. 检查是否有剩余可治疗次数
     if(s_SWCtrlInfo.TreatTimes == 0) {
-        LOG_E("SW: No remaining treat times");
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
     // 所有检查通过
+    LOG_I("SW: Start check passed");
     return true;
 }
 
@@ -399,6 +393,23 @@ void App_Shockwave_ProcessPWM(void)
     }
 }
 
+void App_ShockWave_CheckProbe()
+{
+    static uint16_t debounceCount = 0;
+    if(s_SWCtrlInfo.probeStatus != E_IODEVICE_MODE_SHOCKWAVE) {
+        debounceCount++;
+        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
+            debounceCount = 0;
+            s_SWCtrlInfo.isWaitReturn = true;
+        }
+    } else {
+        debounceCount = 0;
+    }
+
+    if(s_SWCtrlInfo.isWaitReturn) {
+        App_Shockwave_ChangeState(E_SW_RUN_STOP);
+    }
+}
 void App_Shockwave_Process(void)
 {
     static Drv_Timer_t TempMonitorTimer;
@@ -407,7 +418,7 @@ void App_Shockwave_Process(void)
     App_Shockwave_UpdateStatus();
     App_Shockwave_RxDataHandle();
     App_Shockwave_Monitor();
-
+    App_ShockWave_CheckProbe();
     // Handle the shockwave state
     switch(s_SWCtrlInfo.runState)
     {
@@ -445,6 +456,7 @@ void App_Shockwave_Process(void)
             break;
             
         case E_SW_RUN_WORKING:
+            
             // 检查所有条件
             if(App_Shockwave_StartCheck() == false || 
                s_SWCtrlInfo.RemainPoints == 0){
@@ -486,8 +498,15 @@ void App_Shockwave_Process(void)
             // 关闭输出通道
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
+            if(s_SWCtrlInfo.isWaitReturn)
+            {
+                App_Shockwave_ChangeState(E_SW_RUN_WAIT_RETURN);
+                LOG_I("SW: Wait return");
+                s_SWCtrlInfo.isWaitReturn = false;
+            }
             break;
-            
+        case E_SW_RUN_WAIT_RETURN:
+            break;
         default:
             break;
     }
@@ -516,6 +535,12 @@ void App_Shockwave_Init(void)
     Drv_TIM4_SetESW_N(false);
     
     LOG_I("Shockwave module initialized");
+}
+
+
+SW_RunState_EnumDef App_Shockwave_GetRunState(void)
+{
+    return s_SWCtrlInfo.runState;
 }
 
 /**************************End of file********************************/

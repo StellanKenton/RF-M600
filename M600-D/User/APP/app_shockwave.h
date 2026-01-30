@@ -42,6 +42,7 @@ typedef enum
     E_SW_RUN_IDLE,
     E_SW_RUN_WORKING,
     E_SW_RUN_STOP,
+    E_SW_RUN_WAIT_RETURN,
     E_SW_RUN_MAX,
 } SW_RunState_EnumDef;
 
@@ -70,7 +71,8 @@ typedef struct
 {
     SW_RunState_EnumDef runState;
     SW_PWM_State_EnumDef pwmState;
-    
+    bool isWaitReturn;
+
     uint16_t TempLimit;            ///< 治疗头温度上限 (0.1°C)
     uint16_t TreatTimes;           ///< 剩余可治疗次数
     uint16_t CurrentHigh_ESW_P;    ///< PWM_ESW+工作电流上限 (mV)
@@ -87,6 +89,7 @@ typedef struct
     uint8_t ErrorCode;
     bool FootSwitchStatus;
     IODevice_WorkingMode_EnumDef probeStatus;
+    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     SW_TreatParams_t TreatParams;
     SW_TransData_t Trans;
@@ -105,7 +108,8 @@ void App_Shockwave_Init(void);
 void App_Shockwave_Process(void);
 bool App_Shockwave_StartCheck(void);
 void App_Shockwave_SetWorkParams(void);
-
+SW_RunState_EnumDef App_Shockwave_GetRunState(void);
+void App_Shockwave_ChangeState(SW_RunState_EnumDef newState);
 #ifdef __cplusplus
 }
 #endif

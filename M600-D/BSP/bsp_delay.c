@@ -1,35 +1,35 @@
 /************************************************************************************
  * @file     : bsp_delay.c
- * @brief    : M600 SysTick delay and tick - Std lib
- * @details  : 1ms period SysTick, BSP_Delay_ms, BSP_GetTick_ms.
+ * @brief    : M600 delay and tick - Unified timer using TIM2
+ * @details  : Uses TIM2 (100us interrupt) and shared global time variable.
  ***********************************************************************************/
 #include "bsp_delay.h"
 
-static volatile uint32_t s_tick_ms = 0;
+/* Global system time in microseconds (updated by TIM2 interrupt every 100us) */
+volatile uint64_t g_SystemTimeUs = 0;
 
 void BSP_SysTick_Init(void)
 {
-    /* SysTick 1ms: SystemCoreClock typically 72MHz */
-    if (SysTick_Config(SystemCoreClock / 1000) != 0) {
-        while (1) { }
-    }
-    s_tick_ms = 0;
+    /* TIM2 initialization is done in BSP_TIM2_Init, called from BSP_Init */
+    /* This function is kept for compatibility but does nothing */
+    g_SystemTimeUs = 0;
 }
 
 void BSP_SysTick_Inc(void)
 {
-    s_tick_ms++;
+    /* This function is no longer used - TIM2 interrupt updates g_SystemTimeUs directly */
 }
 
 void BSP_Delay_ms(uint32_t ms)
 {
-    uint32_t start = s_tick_ms;
-    while ((s_tick_ms - start) < ms) {
+    uint64_t start = g_SystemTimeUs;
+    uint64_t delay_us = (uint64_t)ms * 1000;
+    while ((g_SystemTimeUs - start) < delay_us) {
         __NOP();
     }
 }
 
 uint32_t BSP_GetTick_ms(void)
 {
-    return s_tick_ms;
+    return (uint32_t)(g_SystemTimeUs / 1000);
 }

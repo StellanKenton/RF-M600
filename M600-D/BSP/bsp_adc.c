@@ -6,14 +6,14 @@
 #include "bsp_adc.h"
 
 static const uint8_t s_adc_ch[] = {
-    ADC_Channel_0,   /* US_I     PA0 */
-    ADC_Channel_1,   /* RF_I     PA1 */
-    ADC_Channel_5,   /* Heat_REF02 PA5 */
-    ADC_Channel_6,   /* Heat_REF01 PA6 */
-    ADC_Channel_8,   /* ESW_U    PB0 */
-    ADC_Channel_9,   /* ESW_I    PB1 */
-    ADC_Channel_12,  /* HP_PRE   PC2 */
-    ADC_Channel_13,  /* HAND_NTC PC3 */
+    ADC_Channel_0,   /*0 US_I     PA0 */
+    ADC_Channel_1,   /*1 RF_I     PA1 */
+    ADC_Channel_5,   /*2 Heat_REF02 PA5 */
+    ADC_Channel_6,   /*3 Heat_REF01 PA6 */
+    ADC_Channel_8,   /*4 ESW_U    PB0 */
+    ADC_Channel_9,   /*5 ESW_I    PB1 */
+    ADC_Channel_12,  /*6 HP_PRE   PC2 */
+    ADC_Channel_13,  /*7 HAND_NTC PC3 */
 };
 
 /* Double buffer for ADC values
@@ -25,7 +25,6 @@ static const uint8_t s_adc_ch[] = {
  */
 static uint16_t s_adc_dma_buffer[BSP_ADC_CH_MAX];  /* DMA working buffer */
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
-static uint16_t s_Voltage_Buffer[BSP_ADC_CH_MAX];   /* Voltage buffer (in mV) */
 static volatile uint8_t s_adc_buffer_ready = 0;     /* Buffer ready flag */
 
 void BSP_ADC_Init(void)

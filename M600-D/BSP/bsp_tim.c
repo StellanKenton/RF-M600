@@ -66,6 +66,40 @@ void BSP_TIM1_Init(void)
     TIM_Cmd(TIM1, ENABLE);
 }
 
+void BSP_TIM2_Init(void)
+{
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* Enable TIM2 clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+    /* Time base configuration: 100us period
+     * Assuming APB1 timer clock = 72MHz (if APB1 prescaler = 1)
+     * To get 100us period: 72MHz * 100us = 7200 cycles
+     * Prescaler = 720 - 1 = 719 -> timer clock = 72MHz / 720 = 100kHz
+     * Period = 10 - 1 = 9 -> interrupt every 10 cycles = 100us
+     */
+    TIM_TimeBaseStructure.TIM_Period        = 10 - 1;  /* 10 cycles = 100us at 100kHz */
+    TIM_TimeBaseStructure.TIM_Prescaler     = 720 - 1; /* 72MHz / 720 = 100kHz */
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+
+    /* Enable TIM2 update interrupt */
+    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
+    /* Configure NVIC for TIM2 interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel                   = TIM2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd               = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    /* Enable TIM2 */
+    TIM_Cmd(TIM2, ENABLE);
+}
+
 void BSP_TIM4_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;

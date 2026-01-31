@@ -8,6 +8,7 @@
 #include "bsp_delay.h"
 #include "drv_usart.h"
 #include "bsp_adc.h"
+#include "drv_delay.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
  * ----------------------------------------------------------------------------- */
@@ -49,10 +50,14 @@ void PendSV_Handler(void)
 {
 }
 
-/* SysTick: 1ms tick for BSP_Delay / BSP_GetTick_ms */
-void SysTick_Handler(void)
+/* TIM2: 100us interrupt for unified system time */
+void TIM2_IRQHandler(void)
 {
-    BSP_SysTick_Inc();
+    if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+    {
+        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+        Drv_SysTick_Increment();  /* Updates g_SystemTimeUs by 100us */
+    }
 }
 
 /* -----------------------------------------------------------------------------

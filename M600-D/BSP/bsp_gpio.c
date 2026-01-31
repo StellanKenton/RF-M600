@@ -105,6 +105,7 @@ void BSP_Init(void)
     BSP_ADC_Init();
     BSP_DAC_Init();
     BSP_TIM1_Init();
+    BSP_TIM2_Init();
     BSP_TIM4_Init();
     BSP_USART1_Init(115200);
     BSP_USART2_Init(115200);

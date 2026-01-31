@@ -22,8 +22,8 @@ extern "C" {
 #include "drv_iodevice.h"
 
 #define TREAT_TASK_TIME     10       // 10ms
-#define PROBE_STATUS_DEBOUNCE_MS    1000    ///< 探头状态防抖时间 (1s)
-#define PROBE_STATUS_DEBOUNCE_CNT   (PROBE_STATUS_DEBOUNCE_MS / TREAT_TASK_TIME)  ///< 1s对应的计数
+#define PROBE_STATUS_DEBOUNCE_MS    1000    ///< Probe status debounce time (1s)
+#define PROBE_STATUS_DEBOUNCE_CNT   (PROBE_STATUS_DEBOUNCE_MS / TREAT_TASK_TIME)  ///< Count for 1s
 
 typedef enum
 {
@@ -42,7 +42,7 @@ typedef struct
     TreatMgr_State_EnumDef preState;
     IODevice_WorkingMode_EnumDef eProbeStatus;
     IODevice_WorkingMode_EnumDef preProbeStaus;
-    bool eFootSwitchClosed;       ///< true=脚踏闭合(按下), false=脚踏打开
+    bool eFootSwitchClosed;       ///< true=foot switch closed(pressed), false=foot switch open
 } TreatMgr_t;
 
 typedef enum 

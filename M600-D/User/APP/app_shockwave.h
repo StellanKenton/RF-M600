@@ -21,6 +21,7 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
+#include "app_treatmgr.h"
 
 /* ???????? */
 #define SW_WORK_LEVEL_MAX          26          ///< ????? (0-26)
@@ -69,10 +70,11 @@ typedef enum
 typedef struct
 {
     SW_RunState_EnumDef runState;
+    Treat_Times_EnumDef TreatCountsState;
     SW_PWM_State_EnumDef pwmState;
     bool isWaitReturn;
 
-    uint16_t TempLimit;            ///< ???????? (0.1°C)
+    uint16_t TempLimit;            ///< ???????? (0.1?C)
     uint16_t TreatCounts;           ///< ????????
     uint16_t CurrentHigh_ESW_P;    ///< PWM_ESW+?????? (mV)
     uint16_t CurrentLow_ESW_P;     ///< PWM_ESW+?????? (mV)
@@ -82,7 +84,7 @@ typedef struct
     uint8_t WorkLevel;             ///< ???? (0-26)
     uint8_t FreqLevel;             ///< ?????? (1-16)
     uint16_t RemainPoints;         ///< ??????
-    uint16_t HeadTemp;             ///< ?????? (0.1°C)
+    uint16_t HeadTemp;             ///< ?????? (0.1?C)
     
     uint8_t ErrorCode;
     

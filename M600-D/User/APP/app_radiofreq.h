@@ -21,6 +21,7 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
+#include "app_treatmgr.h"
 
 /* ??????????????1MHz */
 #define RF_FREQUENCY_KHZ           1000        ///< ?????????? (kHz)
@@ -58,17 +59,18 @@ typedef enum {
 typedef struct
 {
     RF_RunState_EnumDef runState;
+    Treat_Times_EnumDef TreatCountsState;
     bool isWaitReturn;
-    uint16_t Voltage;              ///< ?????? (mV)
-    uint16_t VoltageTarget;        ///< ???????? (mV)????????
-    uint16_t CurrentHigh;         ///< ?????? (mV)
-    uint16_t CurrentLow;          ///< ?????? (mV)
-    uint16_t TempLimit;            ///< ???????? (0.1°C)
-    uint16_t TreatCounts;           ///< ????????
+    uint16_t Voltage;              
+    uint16_t VoltageTarget;        
+    uint16_t CurrentHigh;        
+    uint16_t CurrentLow;          
+    uint16_t TempLimit;            
+    uint16_t TreatCounts;           
     
-    uint8_t WorkLevel;             ///< ???? (0-20)
-    uint16_t HeadTemp;             ///< ?????? (0.1°C)
-    uint16_t TreatRemainTimes;           ///< ?????? (??)
+    uint8_t WorkLevel;             
+    uint16_t HeadTemp;             
+    uint16_t TreatRemainTimes;           
     
     uint8_t ErrorCode;
     

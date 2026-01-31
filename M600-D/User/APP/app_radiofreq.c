@@ -48,7 +48,7 @@ void App_RadioFreq_UpdateStatus(void)
         s_RFCtrlInfo.Trans.TxStatus.work_state = 0x00;
     }
     s_RFCtrlInfo.Trans.TxStatus.temp_limit = s_RFCtrlInfo.TempLimit;
-    s_RFCtrlInfo.Trans.TxStatus.remain_time = s_RFCtrlInfo.TreatRemainTimes;
+    s_RFCtrlInfo.Trans.TxStatus.remain_time = s_RFCtrlInfo.TreatRemainTimes / 100;  /* 10ms -> s */
     s_RFCtrlInfo.Trans.TxStatus.work_level = s_RFCtrlInfo.WorkLevel;
     s_RFCtrlInfo.Trans.TxStatus.head_temp = s_RFCtrlInfo.HeadTemp;
     
@@ -71,25 +71,7 @@ void App_RadioFreq_RxDataHandle(void)
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     
-    if(pTransData->RxWorkState.work_state == WORK_STATE_RESET)
-    {
-        // ??????
-        // ????????????
-        s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time;
-        s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-        
-        // ??????????
-        if(s_RFCtrlInfo.TreatCounts > 0)
-        {
-            s_RFCtrlInfo.TreatCounts--;
-            // ??????
-            s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatCounts;
-            App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
-            LOG_I("RF Reset: Remaining treat times decreased to: %d", s_RFCtrlInfo.TreatCounts);
-        }
-        
-        LOG_I("RF Reset: Work time=%d, Work level=%d", s_RFCtrlInfo.TreatRemainTimes, s_RFCtrlInfo.WorkLevel);
-    }
+    /* RxWorkState ? WorkTimeHandle ???? */
     
     // ??????
     if(pTransData->flag.bits.Rely_Config)
@@ -100,6 +82,75 @@ void App_RadioFreq_RxDataHandle(void)
         App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
         pTransData->flag.bits.Rely_Config = 0;
         LOG_I("RF Config updated: temp_limit=%d", s_RFCtrlInfo.TempLimit);
+    }
+}
+
+void App_RadioFreq_WorkTimeHandle(void)
+{
+    RF_TransData_t *pTransData = App_Comm_GetRFTransData();
+    static uint8_t s_lastRxWorkState = 0x00;
+
+    if(pTransData->RxWorkState.work_state != s_lastRxWorkState) {
+        if (pTransData->RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
+            s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_RESET;
+        }
+        s_lastRxWorkState = pTransData->RxWorkState.work_state;
+    }
+
+    switch(s_RFCtrlInfo.TreatCountsState)
+    {
+        case E_TREAT_TIMES_POWER_ON:
+            if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
+            {
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_RFCtrlInfo.TreatCounts--;
+                s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatCounts;
+                App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
+                LOG_I("RF: Remaining treat times decreased to: %d", s_RFCtrlInfo.TreatCounts);
+            }
+            break;
+        case E_TREAT_TIMES_RESET:
+            if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
+            {
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_RFCtrlInfo.TreatCounts--;
+                s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatCounts;
+                App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
+                LOG_I("RF: Remaining treat times decreased to: %d", s_RFCtrlInfo.TreatCounts);
+            }
+            break;
+        case E_TREAT_TIMES_WORKING:
+            if(s_RFCtrlInfo.TreatRemainTimes > 0 && s_RFCtrlInfo.runState == E_RF_RUN_WORKING)
+            {
+                if(s_RFCtrlInfo.TreatRemainTimes >= TREAT_TASK_TIME) {
+                    s_RFCtrlInfo.TreatRemainTimes -= TREAT_TASK_TIME;
+                } else {
+                    s_RFCtrlInfo.TreatRemainTimes = 0;
+                }
+            }
+            if(s_RFCtrlInfo.TreatRemainTimes == 0)
+            {
+                s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WAIT;
+            }
+            break;
+        case E_TREAT_TIMES_WAIT:
+            if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
+            {
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_RFCtrlInfo.TreatCounts--;
+                s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatCounts;
+                App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
+                LOG_I("RF: Remaining treat times decreased to: %d", s_RFCtrlInfo.TreatCounts);
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -118,12 +169,10 @@ void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState)
                 break;
             case E_RF_RUN_WORKING:
                 LOG_I("RF state changed to WORKING");
-                // ????????????2s??
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_RF_RUN_STOP:
                 LOG_I("RF state changed to STOP");
-                // ????????????2s??
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
@@ -134,50 +183,47 @@ void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState)
 
 void App_RadioFreq_Monitor(void)
 {
-    // ???????? mgr ?????
 }
 
 bool App_RadioFreq_StartCheck()
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     
-    // 1. ????????????????????
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 2. ?????????????0??0-3600s??
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > 3600) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 3. ???????????0??0-20??
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > RF_WORK_LEVEL_MAX) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 4. ???????????
     if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 5. ????????????????
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_RADIO_FREQUENCY) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
-    // 6. ?????????????
     if(s_RFCtrlInfo.TreatCounts == 0) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
+
+    if(s_RFCtrlInfo.TreatRemainTimes == 0) {
+        s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
+        return false;
+    }
     
-    // ????????
     LOG_I("RF: Start check passed");
     return true;
 }
@@ -186,25 +232,17 @@ void App_RadioFreq_SetWorkParams(void)
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     
-    // ??????
     s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-    s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time;
     
-    // ????????????????
     s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
     
-    // ???????????7V
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
     Drv_DAC_SetVoltage(s_RFCtrlInfo.Voltage);
     
-    // ??SI5351??1MHz??PWM????????
-    // ??????????????????100ns
     Drv_SI5351_SetComplementaryPWM(RF_FREQUENCY_KHZ, 100);
     
-    // ?????pwr_control1?????
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
-    // CTR_HEAT_HP?????????????
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
     
     LOG_I("RF: Work params set - level=%d, time=%d, voltage_target=%d", 
@@ -220,7 +258,6 @@ bool App_RadioFreq_IsCurrentNormal(void)
     
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
-        // ?????????0.5V????????7V
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
             newVoltage = RF_VOLTAGE_INIT_MV;
@@ -233,7 +270,6 @@ bool App_RadioFreq_IsCurrentNormal(void)
     }
     else if(current >= s_RFCtrlInfo.CurrentLow)
     {
-        // ????????????????????????????????
         if(currentVoltage != s_RFCtrlInfo.VoltageTarget)
         {
             newVoltage = s_RFCtrlInfo.VoltageTarget;
@@ -246,7 +282,6 @@ bool App_RadioFreq_IsCurrentNormal(void)
     }
     else
     {
-        // ??????????????????7V
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
             newVoltage = RF_VOLTAGE_INIT_MV;
@@ -263,9 +298,6 @@ bool App_RadioFreq_IsCurrentNormal(void)
 
 bool App_RadioFreq_IsHeadTempNormal(void)
 {
-    // TODO: ??????????????RF_TX/RF_RX??
-    // ?????????????????????????
-    // ????????????????s_RFCtrlInfo.HeadTemp??
     
     bool isNormal = true;
     
@@ -274,7 +306,6 @@ bool App_RadioFreq_IsHeadTempNormal(void)
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
         LOG_W("RF: Head temperature too high: %d (limit: %d)", 
               s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
-        // ????????????
         isNormal = false;
     }
     else
@@ -311,20 +342,20 @@ void App_RadioFreq_Process(void)
     // Process the radio frequency module
     App_RadioFreq_UpdateStatus();
     App_RadioFreq_RxDataHandle();
+    App_RadioFreq_WorkTimeHandle();
     App_RadioFreq_Monitor();
     App_RadioFreq_CheckProbe();
     // Handle the radio frequency state
     switch(s_RFCtrlInfo.runState)
     {
         case E_RF_RUN_INIT:
-            // ?????????
+            s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             if(App_Memory_LoadRFParams(&s_RFCtrlInfo.TreatParams)) {
                 s_RFCtrlInfo.TempLimit = s_RFCtrlInfo.TreatParams.TempLimit;
                 s_RFCtrlInfo.TreatCounts = s_RFCtrlInfo.TreatParams.TreatRemainTimes;
                 s_RFCtrlInfo.CurrentHigh = s_RFCtrlInfo.TreatParams.CurrentHigh;
                 s_RFCtrlInfo.CurrentLow = s_RFCtrlInfo.TreatParams.CurrentLow;
                 
-                // ??????
                 RF_TransData_t *pTransData = App_Comm_GetRFTransData();
                 pTransData->RxConfig.temp_limit = s_RFCtrlInfo.TempLimit;
                 
@@ -339,12 +370,9 @@ void App_RadioFreq_Process(void)
             break;
             
         case E_RF_RUN_IDLE:
-            // ??App_RadioFreq_StartCheck??????????
             if(App_RadioFreq_StartCheck()) {
-                // ??????????????
                 App_RadioFreq_SetWorkParams();
 
-                // pwr_control2????????????????
                 Drv_IODevice_ChangeChannel(CHANNEL_RF);
                 App_RadioFreq_ChangeState(E_RF_RUN_WORKING);
             }
@@ -352,41 +380,26 @@ void App_RadioFreq_Process(void)
             
         case E_RF_RUN_WORKING:
             
-            // ???????
             if(App_RadioFreq_StartCheck() == false || 
                s_RFCtrlInfo.TreatRemainTimes == 0){
                 App_RadioFreq_ChangeState(E_RF_RUN_STOP);
             } else {
-                // ??????10ms????
                 if(Drv_Timer_Tick(&CurrentMonitorTimer, RF_CURRENT_MONITOR_PERIOD_MS)) {
                     if(App_RadioFreq_IsCurrentNormal() == false) {
-                        // ??????????????????
                     }
                 }
                 
-                // ??????1s????
                 if(Drv_Timer_Tick(&TempMonitorTimer, RF_TEMP_MONITOR_PERIOD_MS)) {
                     if(App_RadioFreq_IsHeadTempNormal() == false) {
-                        // ??????????
                         App_RadioFreq_ChangeState(E_RF_RUN_STOP);
                     }
-                }
-                
-                // ????
-                if(s_RFCtrlInfo.TreatRemainTimes >= TREAT_TASK_TIME) {
-                    s_RFCtrlInfo.TreatRemainTimes -= TREAT_TASK_TIME;
-                } else {
-                    s_RFCtrlInfo.TreatRemainTimes = 0;
                 }
             }
             break;
             
         case E_RF_RUN_STOP:
-            // ??????
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
-            // ????DAC??
             Drv_DAC_SetVoltage(0);
-            // CTR_HEAT_HP?????????
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             if(s_RFCtrlInfo.isWaitReturn) {
                 App_RadioFreq_ChangeState(E_RF_RUN_WAIT_RETURN);
@@ -408,10 +421,8 @@ void App_RadioFreq_Process(void)
  */
 void App_RadioFreq_Init(void)
 {
-    // ???????????
     memset(&s_RFCtrlInfo, 0, sizeof(RF_CtrlInfo_t));
     
-    // ?????????
     s_RFCtrlInfo.runState = E_RF_RUN_INIT;
     s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
     s_RFCtrlInfo.WorkLevel = 0;
@@ -419,10 +430,8 @@ void App_RadioFreq_Init(void)
     s_RFCtrlInfo.TreatCounts = 0;
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
     
-    // ?????DAC
     Drv_DAC_Init();
-    
-    // ?????SI5351
+   
     Drv_SI5351_Init();
     
     LOG_I("Radio Frequency module initialized");

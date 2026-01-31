@@ -32,7 +32,7 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
     while (length--) {
         uint8_t b = *data++;
         
-        // 杈撳叆鍙嶈浆锛堜娇鐢ㄥ惊鐜�锛岃�?�?佷唬�?佺┖闂达�?
+        // Input bit reversal (use loop for bit-by-bit reversal)
         uint8_t r = 0;
         for (uint8_t i = 0; i < 8; i++) {
             r = (r << 1) | (b & 0x01);
@@ -41,7 +41,7 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
         
         crc ^= (uint16_t)r << 8;
         
-        // 澶勭�?8浣�
+        // Process 8 bits
         for (uint8_t i = 0; i < 8; i++) {
             if (crc & 0x8000) {
                 crc = (crc << 1) ^ 0x8005;
@@ -51,7 +51,7 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
         }
     }
     
-    // 杈撳�?鍙嶈浆锛堜娇�?ㄥ惊鐜�锛�
+    // Output bit reversal (use loop)
     uint16_t result = 0;
     for (uint8_t i = 0; i < 16; i++) {
         result = (result << 1) | (crc & 0x01);

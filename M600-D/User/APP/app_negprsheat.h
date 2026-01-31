@@ -21,18 +21,19 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
+#include "app_treatmgr.h"
 
 /* ???????? */
-#define NPH_WORK_TIME_MAX           3600        ///< ??????? (??)
-#define NPH_PRESSURE_MIN_KPA        10          ///< ??????? (10KPa)
-#define NPH_PRESSURE_MAX_KPA        100         ///< ??????? (100KPa)
-#define NPH_SUCK_TIME_MIN_MS        100         ///< ??????? (0.1s = 100ms)
-#define NPH_SUCK_TIME_MAX_MS        60000       ///< ??????? (60s = 60000ms)
-#define NPH_RELEASE_TIME_MIN_MS     100         ///< ??????? (0.1s = 100ms)
-#define NPH_RELEASE_TIME_MAX_MS     60000       ///< ??????? (60s = 60000ms)
-#define NPH_TEMP_MONITOR_PERIOD_MS  10          ///< ?????? (10ms)
-#define NPH_TEMP_ERROR_THRESHOLD    650         ///< ????????? (65?? = 650 * 0.1°C)
-#define NPH_TEMP_ERROR_TIME_MS      2000        ///< ??????????? (2s = 2000ms)
+#define NPH_WORK_TIME_MAX           3600        
+#define NPH_PRESSURE_MIN_KPA        10          
+#define NPH_PRESSURE_MAX_KPA        100         
+#define NPH_SUCK_TIME_MIN_MS        100         
+#define NPH_SUCK_TIME_MAX_MS        60000       
+#define NPH_RELEASE_TIME_MIN_MS     100        
+#define NPH_RELEASE_TIME_MAX_MS     60000       
+#define NPH_TEMP_MONITOR_PERIOD_MS  10          
+#define NPH_TEMP_ERROR_THRESHOLD    650         
+#define NPH_TEMP_ERROR_TIME_MS      2000        
 
 typedef enum
 {
@@ -68,41 +69,40 @@ typedef enum
 typedef struct
 {
     NPH_RunState_EnumDef runState;
+    Treat_Times_EnumDef TreatCountsState;
     NPH_Vacuum_State_EnumDef vacuumState;
     bool isWaitReturn;
 
-    uint16_t TempLimit;            ///< ?????? (0.1°C)
-    uint16_t TreatCounts;           ///< ????????
-    bool PreheatEnable;            ///< ??????????
-    uint16_t PreheatTempLimit;    ///< ?????? (0.1°C)
-    uint16_t PreheatTime;         ///< ???? (??)
+    uint16_t TempLimit;           
+    uint16_t TreatCounts;           
+    bool PreheatEnable;            
+    uint16_t PreheatTempLimit;    
+    uint16_t PreheatTime;        
     
-    uint16_t WorkTempLimit;        ///< ???????? (0.1°C)
-    uint16_t TreatRemainTimes;           ///< ?????? (??)
-    uint8_t Pressure;             ///< ???? (10-100 KPa????????)
-    uint16_t SuckTime;             ///< ?????? (0.1s??????100ms??)
-    uint16_t ReleaseTime;          ///< ?????? (0.1s??????100ms??)
-    uint16_t HeadTemp;             ///< ?????? (0.1°C)
+    uint16_t WorkTempLimit;        
+    uint16_t TreatRemainTimes;           
+    uint8_t Pressure;             
+    uint16_t SuckTime;             
+    uint16_t ReleaseTime;          
+    uint16_t HeadTemp;             
     
     uint8_t ErrorCode;
     
     NPH_TreatParams_t TreatParams;
     Heat_TransData_t Trans;
     
-    /* ???? */
-    bool heatControlActive;        ///< ??????????
-    uint32_t lastTempMonitorTime;  ///< ???????????
-    uint32_t tempErrorStartTime;   ///< ???????????
-    uint16_t lastTemp;             ///< ????????
+    bool heatControlActive;        
+    uint32_t lastTempMonitorTime;  
+    uint32_t tempErrorStartTime;   
+    uint16_t lastTemp;             
     
-    /* ???? */
-    uint32_t vacuumStateStartTime; ///< ?????????
-    uint16_t targetPressure;       ///< ??????? (KPa????????)
-    uint16_t currentPressure;      ///< ?????? (KPa????????)
-    uint32_t suckStartTime;        ///< ???????
-    uint32_t maintainStartTime;    ///< ???????
-    uint32_t releaseStartTime;     ///< ???????
-    bool motorState;               ///< ????? (true=????, false=????)
+    uint32_t vacuumStateStartTime; 
+    uint16_t targetPressure;       
+    uint16_t currentPressure;      
+    uint32_t suckStartTime;        
+    uint32_t maintainStartTime;   
+    uint32_t releaseStartTime;     
+    bool motorState;               
 } NPH_CtrlInfo_t;
 
 void App_NegPrsHeat_Init(void);

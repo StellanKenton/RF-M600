@@ -23,16 +23,13 @@ extern "C" {
 #include "app_memory.h"
 #include "app_treatmgr.h"
 
-/* ??????????????20ms????0.5ms?? */
-/* ??0??20ms????39??0.5ms (20ms - 39*0.5ms = 0.5ms) */
-#define PULSE_REPEAT_TIME_BASE_MS    20      ///< ??????????? (ms)
-#define PULSE_REPEAT_TIME_STEP_MS    0.5f    ///< ???? (ms)
-#define PULSE_REPEAT_TIME_MIN_MS     0.5f    ///< ????????? (ms)
-#define PULSE_REPEAT_TIME_MAX_MS     20      ///< ????????? (ms)
-#define WORK_LEVEL_MAX               40      ///< ????? (0-39??40????)
+#define PULSE_REPEAT_TIME_BASE_MS    20     
+#define PULSE_REPEAT_TIME_STEP_MS    0.5f   
+#define PULSE_REPEAT_TIME_MIN_MS     0.5f    
+#define PULSE_REPEAT_TIME_MAX_MS     20     
+#define WORK_LEVEL_MAX               40      
 
-/* ?????? */
-#define VOLTAGE_ADJUST_LIMIT_MV       2000    ///< ?????? �2V = 2000mV
+#define VOLTAGE_ADJUST_LIMIT_MV       2000    
 
 typedef enum
 {

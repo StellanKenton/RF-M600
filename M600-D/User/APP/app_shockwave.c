@@ -38,7 +38,7 @@ static uint32_t App_Shockwave_CalculateCyclePeriod(uint8_t freqLevel)
 /**
  * @brief Calculate PWM_ESW- high time from work level
  * @param level Work level (1-26)
- * @retval High time in milliseconds (??????????0.28ms??)
+ * @retval High time in milliseconds
  */
 static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
 {
@@ -49,11 +49,8 @@ static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
         level = SW_WORK_LEVEL_MAX;
     }
     // ?????? = 3 + (level - 1) * 0.28 ms
-    // ????????3000 + (level - 1) * 280 (????0.001ms??????)
-    // ????1000????????????????
-    // 3ms = 3000????0.28ms = 280????
-    uint32_t time_us = 3000 + (level - 1) * 280;  // ????
-    return (time_us + 500) / 1000;  // ??????????
+    uint32_t time_us = 3000 + (level - 1) * 280; 
+    return (time_us + 500) / 1000;  
 }
 
 void App_Shockwave_UpdateStatus(void)
@@ -86,28 +83,70 @@ void App_Shockwave_UpdateStatus(void)
 
 void App_Shockwave_RxDataHandle(void)
 {
+    /* RxWorkState ? WorkTimeHandle ???? */
+}
+
+void App_Shockwave_WorkTimeHandle(void)
+{
     SW_TransData_t *pTransData = App_Comm_GetSWTransData();
-    
-    if(pTransData->RxWorkState.work_state == WORK_STATE_RESET)
-    {
-        // ??????
-        // ????????????????????
-        s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;  // work_time??????
-        s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-        s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
-        
-        // ??????????
-        if(s_SWCtrlInfo.TreatCounts > 0)
-        {
-            s_SWCtrlInfo.TreatCounts--;
-            // ??????
-            s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
-            App_Memory_SaveSWParams(&s_SWCtrlInfo.TreatParams);
-            LOG_I("SW Reset: Remaining treat times decreased to: %d", s_SWCtrlInfo.TreatCounts);
+    static uint8_t s_lastRxWorkState = 0x00;
+
+    if(pTransData->RxWorkState.work_state != s_lastRxWorkState) {
+        if (pTransData->RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
+            s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_RESET;
         }
-        
-        LOG_I("SW Reset: Work points=%d, Work level=%d, Freq level=%d", 
-              s_SWCtrlInfo.RemainPoints, s_SWCtrlInfo.WorkLevel, s_SWCtrlInfo.FreqLevel);
+        s_lastRxWorkState = pTransData->RxWorkState.work_state;
+    }
+
+    switch(s_SWCtrlInfo.TreatCountsState)
+    {
+        case E_TREAT_TIMES_POWER_ON:
+            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
+            {
+                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
+                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
+                s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_SWCtrlInfo.TreatCounts--;
+                s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
+                App_Memory_SaveSWParams(&s_SWCtrlInfo.TreatParams);
+                LOG_I("SW: Remaining treat times decreased to: %d", s_SWCtrlInfo.TreatCounts);
+            }
+            break;
+        case E_TREAT_TIMES_RESET:
+            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
+            {
+                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
+                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
+                s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_SWCtrlInfo.TreatCounts--;
+                s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
+                App_Memory_SaveSWParams(&s_SWCtrlInfo.TreatParams);
+                LOG_I("SW: Remaining treat times decreased to: %d", s_SWCtrlInfo.TreatCounts);
+            }
+            break;
+        case E_TREAT_TIMES_WORKING:
+            if(s_SWCtrlInfo.RemainPoints == 0)
+            {
+                s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WAIT;
+            }
+            break;
+        case E_TREAT_TIMES_WAIT:
+            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
+            {
+                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
+                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
+                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
+                s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
+                s_SWCtrlInfo.TreatCounts--;
+                s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
+                App_Memory_SaveSWParams(&s_SWCtrlInfo.TreatParams);
+                LOG_I("SW: Remaining treat times decreased to: %d", s_SWCtrlInfo.TreatCounts);
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -149,49 +188,46 @@ bool App_Shockwave_StartCheck()
 {
     SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     
-    // 1. ???????????????????
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 2. ?????????????0??0-10000??
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > SW_WORK_POINT_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 3. ???????????0??0-26??
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > SW_WORK_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 4. ????????????????1-16??
     if(pTransData->RxWorkState.frequency == 0 || pTransData->RxWorkState.frequency > SW_FREQ_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 5. ???????????
     if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 6. ??????????????????
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_SHOCKWAVE) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
-    // 7. ?????????????
     if(s_SWCtrlInfo.TreatCounts == 0) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
+
+    if(s_SWCtrlInfo.RemainPoints == 0) {
+        s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        return false;
+    }
     
-    // ????????
     LOG_I("SW: Start check passed");
     return true;
 }
@@ -412,6 +448,7 @@ void App_Shockwave_Process(void)
     // Process the shockwave module
     App_Shockwave_UpdateStatus();
     App_Shockwave_RxDataHandle();
+    App_Shockwave_WorkTimeHandle();
     App_Shockwave_Monitor();
     App_ShockWave_CheckProbe();
     // Handle the shockwave state
@@ -419,6 +456,7 @@ void App_Shockwave_Process(void)
     {
         case E_SW_RUN_INIT:
             // ????????
+            s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             if(App_Memory_LoadSWParams(&s_SWCtrlInfo.TreatParams)) {
                 s_SWCtrlInfo.TempLimit = s_SWCtrlInfo.TreatParams.TempLimit;
                 s_SWCtrlInfo.TreatCounts = s_SWCtrlInfo.TreatParams.TreatRemainTimes;

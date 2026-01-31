@@ -34,7 +34,7 @@ static uint16_t App_RadioFreq_CalculateVoltage(uint8_t level)
     if(level > RF_WORK_LEVEL_MAX) {
         level = RF_WORK_LEVEL_MAX;
     }
-    // 1档对应11V，20档对应30V
+    // 1档�?�应11V�?20档�?�应30V
     // voltage = 11000 + (level - 1) * (30000 - 11000) / (20 - 1)
     return RF_VOLTAGE_MIN_MV + ((level - 1) * (RF_VOLTAGE_MAX_MV - RF_VOLTAGE_MIN_MV)) / (RF_WORK_LEVEL_MAX - 1);
 }
@@ -75,11 +75,11 @@ void App_RadioFreq_RxDataHandle(void)
     if(pTransData->RxWorkState.work_state == WORK_STATE_RESET)
     {
         // 处理复位功能
-        // 重置治疗时间和治疗档位
+        // 重置治疗时间和治疗档�?
         s_RFCtrlInfo.RemainTime = pTransData->RxWorkState.work_time;
         s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
         
-        // 剩余可治疗次数减一
+        // 剩余�?治疗次数减一
         if(s_RFCtrlInfo.TreatTimes > 0)
         {
             s_RFCtrlInfo.TreatTimes--;
@@ -119,12 +119,12 @@ void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState)
                 break;
             case E_RF_RUN_WORKING:
                 LOG_I("RF state changed to WORKING");
-                // 启动工作时蜂鸣器提示（2s）
+                // �?动工作时蜂鸣器提示（2s�?
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_RF_RUN_STOP:
                 LOG_I("RF state changed to STOP");
-                // 结束工作时蜂鸣器提示（2s）
+                // 结束工作时蜂鸣器提示�?2s�?
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
@@ -146,43 +146,43 @@ bool App_RadioFreq_StartCheck()
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     
-    // 1. 检查下位机是否下发了发射射频指令
+    // 1. 检查下位机�?否下发了发射射�?�指�?
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 2. 检查剩余工作时间是否大于0（0-3600s）
+    // 2. 检查剩余工作时间是否大�?0�?0-3600s�?
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > 3600) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 3. 检查工作档位是否不等于0（0-20）
+    // 3. 检查工作档位是否不等于0�?0-20�?
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > RF_WORK_LEVEL_MAX) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 4. 检查脚踏开关是否闭合
+    // 4. 检查脚踏开关是否闭�?
     if(s_RFCtrlInfo.FootSwitchStatus == false) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 5. 检查是否正确识别到射频治疗头
+    // 5. 检查是否�?�确识别到射频治疗头
     if(s_RFCtrlInfo.probeStatus != E_IODEVICE_MODE_RADIO_FREQUENCY) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
-    // 6. 检查是否有剩余可治疗次数
+    // 6. 检查是否有剩余�?治疗次数
     if(s_RFCtrlInfo.TreatTimes == 0) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 所有检查通过
+    // 所有�?�查通过
     LOG_I("RF: Start check passed");
     return true;
 }
@@ -195,15 +195,15 @@ void App_RadioFreq_SetWorkParams(void)
     s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
     s_RFCtrlInfo.RemainTime = pTransData->RxWorkState.work_time;
     
-    // 计算目标工作电压（根据档位）
+    // 计算�?标工作电压（根据档位�?
     s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
     
-    // 设置初始工作电压为7V
+    // 设置初�?�工作电压为7V
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
     Drv_DAC_SetVoltage(s_RFCtrlInfo.Voltage);
     
-    // 配置SI5351输出1MHz互补PWM（带死区时间）
-    // 死区时间根据实际需求设置，例如100ns
+    // 配置SI5351输出1MHz互补PWM（带死区时间�?
+    // 死区时间根据实际需求�?�置，例�?100ns
     Drv_SI5351_SetComplementaryPWM(RF_FREQUENCY_KHZ, 100);
     
     // 切换继电器pwr_control1至射频通道
@@ -225,7 +225,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
     
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
-        // 射频电流低于0.5V，工作电压维持在7V
+        // 射�?�电流低�?0.5V，工作电压维持在7V
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
             newVoltage = RF_VOLTAGE_INIT_MV;
@@ -238,7 +238,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
     }
     else if(current >= s_RFCtrlInfo.CurrentLow)
     {
-        // 射频电流大于工作电流下限，电压切换至档位对应的工作电压
+        // 射�?�电流大于工作电流下限，电压切换至档位�?�应的工作电�?
         if(currentVoltage != s_RFCtrlInfo.VoltageTarget)
         {
             newVoltage = s_RFCtrlInfo.VoltageTarget;
@@ -251,7 +251,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
     }
     else
     {
-        // 电流在工作电流区间以下，自动切换至7V
+        // 电流在工作电流区间以下，�?动切换至7V
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
             newVoltage = RF_VOLTAGE_INIT_MV;
@@ -268,9 +268,9 @@ bool App_RadioFreq_IsCurrentNormal(void)
 
 bool App_RadioFreq_IsHeadTempNormal(void)
 {
-    // TODO: 通过治疗头串口读取温度（RF_TX/RF_RX）
-    // 这里暂时使用占位符，需要根据实际串口协议实现
-    // 假设从串口读取的温度值存储在s_RFCtrlInfo.HeadTemp中
+    // TODO: 通过治疗头串口�?�取温度（RF_TX/RF_RX�?
+    // 这里暂时使用占位符，需要根�?实际串口协�??实现
+    // 假�?�从串口读取的温度值存储在s_RFCtrlInfo.HeadTemp�?
     
     bool isNormal = true;
     
@@ -279,7 +279,7 @@ bool App_RadioFreq_IsHeadTempNormal(void)
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
         LOG_W("RF: Head temperature too high: %d (limit: %d)", 
               s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
-        // 温度超限，自动停止输出
+        // 温度超限，自动停止输�?
         isNormal = false;
     }
     else
@@ -322,7 +322,7 @@ void App_RadioFreq_Process(void)
     switch(s_RFCtrlInfo.runState)
     {
         case E_RF_RUN_INIT:
-            // 加载射频参数
+            // 加载射�?�参�?
             if(App_Memory_LoadRFParams(&s_RFCtrlInfo.TreatParams)) {
                 s_RFCtrlInfo.TempLimit = s_RFCtrlInfo.TreatParams.TempLimit;
                 s_RFCtrlInfo.TreatTimes = s_RFCtrlInfo.TreatParams.RemainTimes;
@@ -344,12 +344,12 @@ void App_RadioFreq_Process(void)
             break;
             
         case E_RF_RUN_IDLE:
-            // 使用App_RadioFreq_StartCheck进行启动前检查
+            // 使用App_RadioFreq_StartCheck进�?�启动前检�?
             if(App_RadioFreq_StartCheck()) {
-                // 设置工作参数并启动射频发射
+                // 设置工作参数并启动射频发�?
                 App_RadioFreq_SetWorkParams();
 
-                // pwr_control2切换至可输出（平常为不可输出）
+                // pwr_control2切换至可输出（平常为不可输出�?
                 Drv_IODevice_ChangeChannel(CHANNEL_RF);
                 App_RadioFreq_ChangeState(E_RF_RUN_WORKING);
             }
@@ -357,22 +357,22 @@ void App_RadioFreq_Process(void)
             
         case E_RF_RUN_WORKING:
             
-            // 检查所有条件
+            // 检查所有条�?
             if(App_RadioFreq_StartCheck() == false || 
                s_RFCtrlInfo.RemainTime == 0){
                 App_RadioFreq_ChangeState(E_RF_RUN_STOP);
             } else {
-                // 电流监控（10ms周期）
+                // 电流监控�?10ms周期�?
                 if(Drv_Timer_Tick(&CurrentMonitorTimer, RF_CURRENT_MONITOR_PERIOD_MS)) {
                     if(App_RadioFreq_IsCurrentNormal() == false) {
-                        // 电流异常，但不立即停止，继续监控
+                        // 电流异常，但不立即停�?，继�?监控
                     }
                 }
                 
-                // 温度监控（1s周期）
+                // 温度监控�?1s周期�?
                 if(Drv_Timer_Tick(&TempMonitorTimer, RF_TEMP_MONITOR_PERIOD_MS)) {
                     if(App_RadioFreq_IsHeadTempNormal() == false) {
-                        // 温度超限，停止输出
+                        // 温度超限，停止输�?
                         App_RadioFreq_ChangeState(E_RF_RUN_STOP);
                     }
                 }
@@ -389,9 +389,9 @@ void App_RadioFreq_Process(void)
         case E_RF_RUN_STOP:
             // 关闭输出通道
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
-            // 停止DAC输出
+            // 停�??DAC输出
             Drv_DAC_SetVoltage(0);
-            // CTR_HEAT_HP恢复为低电平
+            // CTR_HEAT_HP恢�?�为低电�?
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
             if(s_RFCtrlInfo.isWaitReturn) {
@@ -414,10 +414,10 @@ void App_RadioFreq_Process(void)
  */
 void App_RadioFreq_Init(void)
 {
-    // 初始化控制信息结构
+    // 初�?�化控制信息结构
     memset(&s_RFCtrlInfo, 0, sizeof(RF_CtrlInfo_t));
     
-    // 设置初始状态
+    // 设置初�?�状�?
     s_RFCtrlInfo.runState = E_RF_RUN_INIT;
     s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
     s_RFCtrlInfo.WorkLevel = 0;
@@ -425,13 +425,18 @@ void App_RadioFreq_Init(void)
     s_RFCtrlInfo.TreatTimes = 0;
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
     
-    // 初始化DAC
+    // 初�?�化DAC
     Drv_DAC_Init();
     
-    // 初始化SI5351
+    // 初�?�化SI5351
     Drv_SI5351_Init();
     
     LOG_I("Radio Frequency module initialized");
+}
+
+RF_GetStatus_Reply_t *App_RadioFreq_GetStatus(void)
+{
+    return &s_RFCtrlInfo.Trans.TxStatus;
 }
 
 RF_RunState_EnumDef App_RadioFreq_GetRunState(void)

@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 void BSP_TIM1_Init(void);   /* TIM1: ETR(PA12), CH1(PA8), CH1N(PB13), PWM, period 65535 */
+void BSP_TIM2_Init(void);   /* TIM2: System tick timer, 100us interrupt, no PWM */
 void BSP_TIM4_Init(void);   /* TIM4: CH3(PB8), CH4(PB9), PWM, period 65535 */
 
 void BSP_TIM1_SetCompare1(uint16_t pulse);

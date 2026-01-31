@@ -11,6 +11,7 @@
 #include "drv_wdg.h"
 #include "app_treatmgr.h"
 #include "app_comm.h"
+#include "drv_adc.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 

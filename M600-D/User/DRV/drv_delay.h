@@ -1,6 +1,6 @@
 /************************************************************************************
  * @file     : drv_delay.h
- * @brief    : Delay/tick driver - DRV API, DAL calls BSP (Std lib)
+ * @brief    : Delay/tick driver - Unified timer using TIM2, single global time variable
  ***********************************************************************************/
 #ifndef DRV_DELAY_H
 #define DRV_DELAY_H
@@ -14,13 +14,14 @@ extern "C" {
 
 #define SYSTEM_TICK_PER_SECOND  100u  /* us per Drv_SysTick_Increment (if used) */
 
-void Dal_Delay(uint32_t ms);   /* DAL: calls BSP_Delay_ms; only used inside DRV */
-uint32_t Dal_GetTick(void);    /* DAL: calls BSP_GetTick_ms; only used inside DRV */
+void Dal_Delay(uint32_t ms);   /* DAL: uses unified global time; only used inside DRV */
+uint32_t Dal_GetTick(void);    /* DAL: uses unified global time; only used inside DRV */
 
 void Drv_SysTick_Increment(void);
 uint64_t Drv_GetSystemTickUs(void);
 uint64_t Drv_GetSystemTickMs(void);
 uint32_t Drv_Delay_GetTickMs(void);   /* for APP: ms since boot (BSP tick) */
+void Drv_Delay_ms(uint32_t ms);       /* for APP: blocking delay in milliseconds */
 
 typedef struct {
     uint32_t start_ms;

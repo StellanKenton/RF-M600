@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : bsp_delay.h
- * @brief    : M600 SysTick-based delay and tick (STM32 Standard Library)
- * @details  : 1ms SysTick IRQ, BSP_Delay_ms, BSP_GetTick_ms. BSP only.
+ * @brief    : M600 delay and tick - Unified timer using TIM2
+ * @details  : Uses TIM2 (100us interrupt) and shared global time variable.
  * @hardware : STM32F103xE (M600-D)
  ***********************************************************************************/
 #ifndef __BSP_DELAY_H
@@ -14,10 +14,13 @@
 extern "C" {
 #endif
 
-/** SysTick 1ms init. Call from BSP_Init. */
+/* Global system time in microseconds (defined in bsp_delay.c) */
+extern volatile uint64_t g_SystemTimeUs;
+
+/** Timer init (for compatibility, does nothing - TIM2 is initialized separately). */
 void BSP_SysTick_Init(void);
 
-/** Increment tick. Call from SysTick_Handler only. */
+/** Increment tick (deprecated - TIM2 interrupt handles this). */
 void BSP_SysTick_Inc(void);
 
 /** Blocking delay, milliseconds. */

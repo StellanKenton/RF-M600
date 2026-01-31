@@ -1,42 +1,58 @@
 /************************************************************************************
  * @file     : drv_delay.c
- * @brief    : Delay/tick driver - DRV calls DAL, DAL calls BSP (Std lib)
+ * @brief    : Delay/tick driver - Unified timer using TIM2, single global time variable
  ***********************************************************************************/
 #include "drv_delay.h"
 #include "bsp_delay.h"
+#include "stm32f10x.h"
 #include <stdint.h>
+#include <stddef.h>
 #include <string.h>
 
-static uint64_t s_SystemTick = 0;
+/* Use external global time variable from bsp_delay.c */
+extern volatile uint64_t g_SystemTimeUs;
 
 void Dal_Delay(uint32_t ms)
 {
-    BSP_Delay_ms(ms);
+    uint64_t start = g_SystemTimeUs;
+    uint64_t delay_us = (uint64_t)ms * 1000;
+    while ((g_SystemTimeUs - start) < delay_us) {
+        __NOP();
+    }
 }
 
 uint32_t Dal_GetTick(void)
 {
-    return BSP_GetTick_ms();
+    return (uint32_t)(g_SystemTimeUs / 1000);
 }
 
 void Drv_SysTick_Increment(void)
 {
-    s_SystemTick += SYSTEM_TICK_PER_SECOND;
+    g_SystemTimeUs += SYSTEM_TICK_PER_SECOND;
 }
 
 uint64_t Drv_GetSystemTickUs(void)
 {
-    return s_SystemTick;
+    return g_SystemTimeUs;
 }
 
 uint64_t Drv_GetSystemTickMs(void)
 {
-    return s_SystemTick / 1000;
+    return g_SystemTimeUs / 1000;
 }
 
 uint32_t Drv_Delay_GetTickMs(void)
 {
-    return Dal_GetTick();
+    return (uint32_t)(g_SystemTimeUs / 1000);
+}
+
+void Drv_Delay_ms(uint32_t ms)
+{
+    uint64_t start = g_SystemTimeUs;
+    uint64_t delay_us = (uint64_t)ms * 1000;
+    while ((g_SystemTimeUs - start) < delay_us) {
+        __NOP();
+    }
 }
 
 bool Drv_Timer_Tick(Drv_Timer_t *pTimer, uint32_t timeout_ms)

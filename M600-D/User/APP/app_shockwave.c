@@ -21,7 +21,7 @@
 static SW_CtrlInfo_t s_SWCtrlInfo;
 
 /**
- * @brief Calculate cycle period from frequency level (1-16档位对应1S到62.5ms)
+ * @brief Calculate cycle period from frequency level (1-16档位对应1S�?62.5ms)
  * @param freqLevel Frequency level (1-16)
  * @retval Cycle period in milliseconds
  */
@@ -38,7 +38,7 @@ static uint32_t App_Shockwave_CalculateCyclePeriod(uint8_t freqLevel)
 /**
  * @brief Calculate PWM_ESW- high time from work level
  * @param level Work level (1-26)
- * @retval High time in milliseconds (使用整数计算，保留0.28ms精度)
+ * @retval High time in milliseconds (使用整数计算，保�?0.28ms精度)
  */
 static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
 {
@@ -48,12 +48,12 @@ static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
     if(level > SW_WORK_LEVEL_MAX) {
         level = SW_WORK_LEVEL_MAX;
     }
-    // 高电平时间 = 3 + (level - 1) * 0.28 ms
-    // 使用整数计算：3000 + (level - 1) * 280 (单位：0.001ms，即微秒)
-    // 然后除以1000转换为毫秒，但保留精度
-    // 3ms = 3000微秒，0.28ms = 280微秒
-    uint32_t time_us = 3000 + (level - 1) * 280;  // 微秒
-    return (time_us + 500) / 1000;  // 四舍五入到毫秒
+    // 高电平时�? = 3 + (level - 1) * 0.28 ms
+    // 使用整数计算�?3000 + (level - 1) * 280 (单位�?0.001ms，即�?�?)
+    // 然后除以1000�?�?为�??秒，但保留精�?
+    // 3ms = 3000�?秒，0.28ms = 280�?�?
+    uint32_t time_us = 3000 + (level - 1) * 280;  // �?�?
+    return (time_us + 500) / 1000;  // 四舍五入到�??�?
 }
 
 void App_Shockwave_UpdateStatus(void)
@@ -92,12 +92,12 @@ void App_Shockwave_RxDataHandle(void)
     if(pTransData->RxWorkState.work_state == WORK_STATE_RESET)
     {
         // 处理复位功能
-        // 重置治疗点数、治疗档位、治疗频率档位
-        s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;  // work_time实际是点数
+        // 重置治疗点数、治疗档位、治疗�?�率档位
+        s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;  // work_time实际�?点数
         s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
         s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
         
-        // 剩余可治疗次数减一
+        // 剩余�?治疗次数减一
         if(s_SWCtrlInfo.TreatTimes > 0)
         {
             s_SWCtrlInfo.TreatTimes--;
@@ -127,12 +127,12 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
                 break;
             case E_SW_RUN_WORKING:
                 LOG_I("SW state changed to WORKING");
-                // 启动工作时蜂鸣器提示（2s）
+                // �?动工作时蜂鸣器提示（2s�?
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_SW_RUN_STOP:
                 LOG_I("SW state changed to STOP");
-                // 结束工作时蜂鸣器提示（2s）
+                // 结束工作时蜂鸣器提示�?2s�?
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
@@ -154,49 +154,49 @@ bool App_Shockwave_StartCheck()
 {
     SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     
-    // 1. 检查下位机是否下发了发射冲击波指令
+    // 1. 检查下位机�?否下发了发射冲击波指�?
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 2. 检查剩余工作点数是否大于0（0-10000）
+    // 2. 检查剩余工作点数是否大�?0�?0-10000�?
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > SW_WORK_POINT_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 3. 检查工作档位是否不等于0（0-26）
+    // 3. 检查工作档位是否不等于0�?0-26�?
     if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > SW_WORK_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 4. 检查工作频率档位是否有效（1-16）
+    // 4. 检查工作�?�率档位�?否有效（1-16�?
     if(pTransData->RxWorkState.frequency == 0 || pTransData->RxWorkState.frequency > SW_FREQ_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 5. 检查脚踏开关是否闭合
+    // 5. 检查脚踏开关是否闭�?
     if(s_SWCtrlInfo.FootSwitchStatus == false) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 6. 检查是否正确识别到冲击波治疗头
+    // 6. 检查是否�?�确识别到冲击波治疗�?
     if(s_SWCtrlInfo.probeStatus != E_IODEVICE_MODE_SHOCKWAVE) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
-    // 7. 检查是否有剩余可治疗次数
+    // 7. 检查是否有剩余�?治疗次数
     if(s_SWCtrlInfo.TreatTimes == 0) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 所有检查通过
+    // 所有�?�查通过
     LOG_I("SW: Start check passed");
     return true;
 }
@@ -213,15 +213,15 @@ void App_Shockwave_SetWorkParams(void)
     // 计算周期时间
     s_SWCtrlInfo.cyclePeriodMs = App_Shockwave_CalculateCyclePeriod(s_SWCtrlInfo.FreqLevel);
     
-    // 计算PWM_ESW-高电平时间
+    // 计算PWM_ESW-高电平时�?
     s_SWCtrlInfo.pwmESW_NHighTimeMs = App_Shockwave_CalculateESW_NHighTime(s_SWCtrlInfo.WorkLevel);
     
-    // 切换继电器pwr_control1至冲击波通道（需求说切换至超声通道，可能是笔误，应该是冲击波通道）
+    // 切换继电器pwr_control1至冲击波通道（需求�?�切换至超声通道，可能是笔�??，应该是冲击波通道�?
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
-	// 初始化PWM状态
+	// 初�?�化PWM状�?
 	s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
-	s_SWCtrlInfo.cycleStartTime = 0;  // 重置周期开始时间
+	s_SWCtrlInfo.cycleStartTime = 0;  // 重置周期开始时�?
 	Drv_TIM4_SetESW_P(false);
 	Drv_TIM4_SetESW_N(false);
     
@@ -235,7 +235,7 @@ bool App_Shockwave_IsCurrentNormal(void)
     uint16_t current = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_I);
     bool isNormal = true;
     
-    // 根据当前PWM状态检查电流
+    // 根据当前PWM状态�?�查电�?
     if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_P_HIGH)
     {
         // PWM_ESW+高电平时，监控电压应该大于PWM_ESW+工作电流区间
@@ -275,7 +275,7 @@ bool App_Shockwave_IsVoltageNormal(void)
     uint16_t voltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_U);
     bool isNormal = true;
     
-    // 采样电压低于3V时报警
+    // 采样电压低于3V时报�?
     if(voltage < SW_VOLTAGE_THRESHOLD_MV)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_VOLTAGE_LOW;
@@ -303,7 +303,7 @@ bool App_Shockwave_IsHeadTempNormal(void)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_TEMP_TOO_HIGH;
         LOG_W("SW: Head temperature too high: %d (limit: %d)", temp, s_SWCtrlInfo.TempLimit);
-        // 温度超限，立马停止工作
+        // 温度超限，立�?停�?�工�?
         isNormal = false;
     }
     else
@@ -328,7 +328,7 @@ void App_Shockwave_ProcessPWM(void)
             // 检查是否应该开始新周期
             if(s_SWCtrlInfo.cycleStartTime == 0)
             {
-                // 第一次启动，立即开始
+                // �?一次启�?，立即开�?
                 s_SWCtrlInfo.cycleStartTime = currentTime;
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -337,7 +337,7 @@ void App_Shockwave_ProcessPWM(void)
             }
             else
             {
-                // 检查周期是否完成
+                // 检查周期是否完�?
                 uint32_t cycleElapsed = currentTime - s_SWCtrlInfo.cycleStartTime;
                 if(cycleElapsed >= s_SWCtrlInfo.cyclePeriodMs)
                 {
@@ -357,7 +357,7 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= SW_PWM_ESW_P_HIGH_TIME_MS)
             {
-                // PWM_ESW+高电平5ms后切换为低电平，进入等待状态
+                // PWM_ESW+高电�?5ms后切�?为低电平，进入等待状�?
                 Drv_TIM4_SetESW_P(false);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_WAIT;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -368,7 +368,7 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= SW_PWM_ESW_P_WAIT_TIME_MS)
             {
-                // 等待17ms后，PWM_ESW-高电平
+                // 等待17ms后，PWM_ESW-高电�?
                 Drv_TIM4_SetESW_N(true);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_N_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -379,10 +379,10 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= s_SWCtrlInfo.pwmESW_NHighTimeMs)
             {
-                // PWM_ESW-高电平时间到，切换为低电平
+                // PWM_ESW-高电平时间到，切�?为低电平
                 Drv_TIM4_SetESW_N(false);
                 
-                // PWM_ESW-高电平时间到，切换为低电平
+                // PWM_ESW-高电平时间到，切�?为低电平
                 // 等待周期结束，然后开始新周期
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             }
@@ -423,7 +423,7 @@ void App_Shockwave_Process(void)
     switch(s_SWCtrlInfo.runState)
     {
         case E_SW_RUN_INIT:
-            // 加载冲击波参数
+            // 加载冲击波参�?
             if(App_Memory_LoadSWParams(&s_SWCtrlInfo.TreatParams)) {
                 s_SWCtrlInfo.TempLimit = s_SWCtrlInfo.TreatParams.TempLimit;
                 s_SWCtrlInfo.TreatTimes = s_SWCtrlInfo.TreatParams.RemainTimes;
@@ -444,12 +444,12 @@ void App_Shockwave_Process(void)
             break;
             
         case E_SW_RUN_IDLE:
-            // 使用App_Shockwave_StartCheck进行启动前检查
+            // 使用App_Shockwave_StartCheck进�?�启动前检�?
             if(App_Shockwave_StartCheck()) {
                 // 设置工作参数并启动冲击波发射
                 App_Shockwave_SetWorkParams();
 
-                // pwr_control3、pwr_control4切换至可输出（平常为不可输出）
+                // pwr_control3、pwr_control4切换至可输出（平常为不可输出�?
                 Drv_IODevice_ChangeChannel(CHANNEL_SW);
                 App_Shockwave_ChangeState(E_SW_RUN_WORKING);
             }
@@ -457,7 +457,7 @@ void App_Shockwave_Process(void)
             
         case E_SW_RUN_WORKING:
             
-            // 检查所有条件
+            // 检查所有条�?
             if(App_Shockwave_StartCheck() == false || 
                s_SWCtrlInfo.RemainPoints == 0){
                 App_Shockwave_ChangeState(E_SW_RUN_STOP);
@@ -465,23 +465,23 @@ void App_Shockwave_Process(void)
                 // 处理PWM时序
                 App_Shockwave_ProcessPWM();
                 
-                // 监控电流（在PWM高电平时）
+                // 监控电流（在PWM高电平时�?
                 if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_P_HIGH || 
                    s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_N_HIGH) {
                     if(App_Shockwave_IsCurrentNormal() == false) {
-                        // 电流异常，报警但不立即停止
+                        // 电流异常，报警但不立即停�?
                     }
                 }
                 
                 // 监控电压
                 if(App_Shockwave_IsVoltageNormal() == false) {
-                    // 电压异常，报警但不立即停止
+                    // 电压异常，报警但不立即停�?
                 }
                 
-                // 温度监控（10ms周期）
+                // 温度监控�?10ms周期�?
                 if(Drv_Timer_Tick(&TempMonitorTimer, SW_TEMP_MONITOR_PERIOD_MS)) {
                     if(App_Shockwave_IsHeadTempNormal() == false) {
-                        // 温度超限，立马停止工作
+                        // 温度超限，立�?停�?�工�?
                         App_Shockwave_ChangeState(E_SW_RUN_STOP);
                     }
                 }
@@ -492,7 +492,7 @@ void App_Shockwave_Process(void)
             // 关闭PWM输出
             Drv_TIM4_SetESW_P(false);
             Drv_TIM4_SetESW_N(false);
-            // 重置PWM状态
+            // 重置PWM状�?
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;
             // 关闭输出通道
@@ -517,10 +517,10 @@ void App_Shockwave_Process(void)
  */
 void App_Shockwave_Init(void)
 {
-    // 初始化控制信息结构
+    // 初�?�化控制信息结构
     memset(&s_SWCtrlInfo, 0, sizeof(SW_CtrlInfo_t));
     
-    // 设置初始状态
+    // 设置初�?�状�?
     s_SWCtrlInfo.runState = E_SW_RUN_INIT;
     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
     s_SWCtrlInfo.ErrorCode = E_SW_ERROR_NONE;
@@ -529,12 +529,17 @@ void App_Shockwave_Init(void)
     s_SWCtrlInfo.RemainPoints = 0;
     s_SWCtrlInfo.TreatTimes = 0;
     
-    /* TIM4 已在 BSP_Init -> BSP_TIM4_Init 中初始化 */
-    /* 确保PWM输出为低电平 */
+    /* TIM4 已在 BSP_Init -> BSP_TIM4_Init �?初�?�化 */
+    /* �?保PWM输出为低电平 */
     Drv_TIM4_SetESW_P(false);
     Drv_TIM4_SetESW_N(false);
     
     LOG_I("Shockwave module initialized");
+}
+
+SW_GetStatus_Reply_t *App_Shockwave_GetStatus(void)
+{
+    return &s_SWCtrlInfo.Trans.TxStatus;
 }
 
 

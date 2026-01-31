@@ -7,6 +7,8 @@
 #include "stm32f10x_conf.h"
 #include "bsp_delay.h"
 #include "drv_usart.h"
+#include "bsp_adc.h"
+#include "drv_delay.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
  * ----------------------------------------------------------------------------- */
@@ -48,10 +50,32 @@ void PendSV_Handler(void)
 {
 }
 
-/* SysTick: 1ms tick for BSP_Delay / BSP_GetTick_ms */
-void SysTick_Handler(void)
+/* TIM2: 100us interrupt for unified system time */
+void TIM2_IRQHandler(void)
 {
-    BSP_SysTick_Inc();
+    if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+    {
+        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+        Drv_SysTick_Increment();  /* Updates g_SystemTimeUs by 100us */
+    }
+}
+
+/* -----------------------------------------------------------------------------
+ * DMA1 Channel1 (ADC1) - double buffering on TC
+ * ----------------------------------------------------------------------------- */
+void DMA1_Channel1_IRQHandler(void)
+{
+    if (DMA_GetITStatus(DMA1_IT_TC1) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TC1);
+        /* Copy DMA working buffer to read buffer (double buffering) */
+        BSP_ADC_DMA_TC_Handler();
+    }
+    if (DMA_GetITStatus(DMA1_IT_TE1) != RESET)
+    {
+        DMA_ClearITPendingBit(DMA1_IT_TE1);
+        /* Error handling - optional */
+    }
 }
 
 /* -----------------------------------------------------------------------------
@@ -62,10 +86,18 @@ void DMA1_Channel4_IRQHandler(void)
     if (DMA_GetITStatus(DMA1_IT_TC4) != RESET)
     {
         DMA_ClearITPendingBit(DMA1_IT_TC4);
+        /* 发送完成后关闭TX DMA通道，否则EN位会保持为1，导致TxStatus一直显示busy */
+        DMA_Cmd(DMA1_Channel4, DISABLE);
+        while (DMA1_Channel4->CCR & DMA_CCR4_EN) { }
         /* Optional: user callback for TX complete */
     }
     if (DMA_GetITStatus(DMA1_IT_TE4) != RESET)
+    {
         DMA_ClearITPendingBit(DMA1_IT_TE4);
+        /* 出错时也关闭通道，避免一直busy */
+        DMA_Cmd(DMA1_Channel4, DISABLE);
+        while (DMA1_Channel4->CCR & DMA_CCR4_EN) { }
+    }
 }
 
 /* -----------------------------------------------------------------------------

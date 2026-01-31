@@ -120,7 +120,10 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+<<<<<<< HEAD
           <Name>?8簞</Name>
+=======
+>>>>>>> d49ae6b077f84f69baf81c90b9113d74f76d6164
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -179,6 +182,36 @@
           <count>5</count>
           <WinNumber>1</WinNumber>
           <ItemText>s_overrideProbeMode</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_AppCommInfo</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CaculateCrc</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_adc_dma_buffer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_adc_read_buffer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_Voltage_Buffer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>voltage,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -544,7 +577,7 @@
 
   <Group>
     <GroupName>BSP</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

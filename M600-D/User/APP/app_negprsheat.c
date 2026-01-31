@@ -20,35 +20,35 @@
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
 
 /**
- * @brief Convert pressure KPa to ADC voltage (需要根�?实际�?件校�?)
+ * @brief Convert pressure KPa to ADC voltage (?????????????)
  * @param pressure_kpa Pressure in KPa (10-100)
- * @retval Target ADC voltage in mV (近似值，需要根�?实际�?件校�?)
+ * @retval Target ADC voltage in mV (?????????????????)
  */
 static uint16_t App_NegPrsHeat_PressureToVoltage(uint8_t pressure_kpa)
 {
-    // TODO: 根据实际�?件校准负压传感器
-    // 这里使用线性近似：假�??0KPa对应0V�?100KPa对应3300mV
-    // 实际需要根�?�?件�?�格书校�?
+    // TODO: ??????????????
+    // ?????????????0KPa??0V??100KPa??3300mV
+    // ??????????????????
     if(pressure_kpa < NPH_PRESSURE_MIN_KPA) {
         pressure_kpa = NPH_PRESSURE_MIN_KPA;
     }
     if(pressure_kpa > NPH_PRESSURE_MAX_KPA) {
         pressure_kpa = NPH_PRESSURE_MAX_KPA;
     }
-    // 负压值转�?为电压值（需要根�?实际传感器特性调整）
-    // 假�?�线性关系：电压 = (pressure_kpa / 100) * 3300
+    // ??????????????????????????
+    // ??????????? = (pressure_kpa / 100) * 3300
     return (pressure_kpa * 3300) / 100;
 }
 
 /**
- * @brief Convert ADC voltage to pressure KPa (需要根�?实际�?件校�?)
+ * @brief Convert ADC voltage to pressure KPa (?????????????)
  * @param voltage_mv ADC voltage in mV
  * @retval Pressure in KPa
  */
 static uint8_t App_NegPrsHeat_VoltageToPressure(uint16_t voltage_mv)
 {
-    // TODO: 根据实际�?件校准负压传感器
-    // 反向�?�?：pressure_kpa = (voltage_mv / 3300) * 100
+    // TODO: ??????????????
+    // ???????pressure_kpa = (voltage_mv / 3300) * 100
     uint8_t pressure = (voltage_mv * 100) / 3300;
     if(pressure < NPH_PRESSURE_MIN_KPA) {
         pressure = NPH_PRESSURE_MIN_KPA;
@@ -75,7 +75,7 @@ void App_NegPrsHeat_UpdateStatus(void)
     }
     
     pTransData->TxStatus.temp_limit = s_NPHCtrlInfo.WorkTempLimit;
-    pTransData->TxStatus.remain_heat_time = s_NPHCtrlInfo.RemainTime;
+    pTransData->TxStatus.remain_heat_time = s_NPHCtrlInfo.TreatRemainTimes;
     pTransData->TxStatus.suck_time = s_NPHCtrlInfo.SuckTime;
     pTransData->TxStatus.release_time = s_NPHCtrlInfo.ReleaseTime;
     pTransData->TxStatus.pressure = s_NPHCtrlInfo.Pressure;
@@ -83,15 +83,14 @@ void App_NegPrsHeat_UpdateStatus(void)
     pTransData->TxStatus.preheat_temp_limit = s_NPHCtrlInfo.PreheatTempLimit;
     pTransData->TxStatus.remain_preheat_time = s_NPHCtrlInfo.PreheatTime;
     
-    // Get probe connection status and foot switch state
-    bool headConnected = (s_NPHCtrlInfo.probeStatus == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
-    
-    // Combine connection state
-    if (headConnected && s_NPHCtrlInfo.FootSwitchStatus) {
+    // ???????? mgr ??
+    bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
+    bool footClosed = App_TreatMgr_GetFootSwitchClosed();
+    if (headConnected && footClosed) {
         pTransData->TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_CLOSED;
-    } else if (!headConnected && s_NPHCtrlInfo.FootSwitchStatus) {
+    } else if (!headConnected && footClosed) {
         pTransData->TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_CLOSED;
-    } else if (headConnected && !s_NPHCtrlInfo.FootSwitchStatus) {
+    } else if (headConnected && !footClosed) {
         pTransData->TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_OPEN;
     } else {
         pTransData->TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_OPEN;
@@ -105,33 +104,33 @@ void App_NegPrsHeat_RxDataHandle(void)
     
     if(pTransData->RxWorkState.work_state == WORK_STATE_RESET)
     {
-        // 处理复位功能
-        // 重置工作温度上限、工作时间、负压大小、负压吸时间、负压放时间
+        // ??????
+        // ??????????????????????????????
         s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-        s_NPHCtrlInfo.RemainTime = pTransData->RxWorkState.work_time;
+        s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time;
         s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
         s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;
         s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;
         
-        // 剩余�?治疗次数减一
-        if(s_NPHCtrlInfo.TreatTimes > 0)
+        // ??????????
+        if(s_NPHCtrlInfo.TreatCounts > 0)
         {
-            s_NPHCtrlInfo.TreatTimes--;
-            // 保存到存储器
-            s_NPHCtrlInfo.TreatParams.RemainTimes = s_NPHCtrlInfo.TreatTimes;
+            s_NPHCtrlInfo.TreatCounts--;
+            // ??????
+            s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatCounts;
             App_Memory_SaveNPHParams(&s_NPHCtrlInfo.TreatParams);
-            LOG_I("NPH Reset: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatTimes);
+            LOG_I("NPH Reset: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatCounts);
         }
         
         LOG_I("NPH Reset: temp_limit=%d, work_time=%d, pressure=%d, suck=%d, release=%d", 
-              s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.RemainTime, 
+              s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.TreatRemainTimes, 
               s_NPHCtrlInfo.Pressure, s_NPHCtrlInfo.SuckTime, s_NPHCtrlInfo.ReleaseTime);
     }
     
-    // 处理预热配置
+    // ??????
     if(pTransData->flag.bits.Rely_Config)
     {
-        // 预热配置通过RxPreheat结构体传�?
+        // ??????RxPreheat??????
         if(pTransData->RxPreheat.preheat_state == 0x01)
         {
             s_NPHCtrlInfo.PreheatEnable = true;
@@ -143,7 +142,7 @@ void App_NegPrsHeat_RxDataHandle(void)
             s_NPHCtrlInfo.PreheatEnable = false;
         }
         
-        // 保存到存储器
+        // ??????
         s_NPHCtrlInfo.TreatParams.PreheatEnable = s_NPHCtrlInfo.PreheatEnable ? 1 : 0;
         s_NPHCtrlInfo.TreatParams.PreheatTempLimit = s_NPHCtrlInfo.PreheatTempLimit;
         s_NPHCtrlInfo.TreatParams.PreheatTime = s_NPHCtrlInfo.PreheatTime;
@@ -173,12 +172,12 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
                 break;
             case E_NPH_RUN_WORKING:
                 LOG_I("NPH state changed to WORKING");
-                // �?动工作时蜂鸣器提示（2s�?
+                // ????????????2s??
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_NPH_RUN_STOP:
                 LOG_I("NPH state changed to STOP");
-                // 结束工作时蜂鸣器提示�?2s�?
+                // ????????????2s??
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_NPH_RUN_WAIT_RETURN:
@@ -193,7 +192,7 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
 void App_NegPrsHeat_CheckProbe(void)
 {
     static uint16_t debounceCount = 0;
-    if(s_NPHCtrlInfo.probeStatus != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
+    if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
         debounceCount++;
         if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
             debounceCount = 0;
@@ -210,69 +209,65 @@ void App_NegPrsHeat_CheckProbe(void)
 
 void App_NegPrsHeat_Monitor(void)
 {
-    // Get the foot switch status and probe status
-    s_NPHCtrlInfo.FootSwitchStatus = Drv_IODevice_GetFootSwitchState();
-    
-    // Get the probe status
-    s_NPHCtrlInfo.probeStatus = Drv_IODevice_GetProbeStatus();
+    // ???????? mgr ?????
 }
 
 bool App_NegPrsHeat_StartCheck()
 {
     Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
     
-    // 1. 检查下位机�?否下发了发射负压加热指令
+    // 1. ???????????????????
     if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 2. 检查剩余工作时间是否大�?0�?0-3600s�?
+    // 2. ?????????????0??0-3600s??
     if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > NPH_WORK_TIME_MAX) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 3. 检查负压大小是否有效（10-100KPa�?
+    // 3. ???????????10-100KPa??
     if(pTransData->RxWorkState.pressure < NPH_PRESSURE_MIN_KPA || 
        pTransData->RxWorkState.pressure > NPH_PRESSURE_MAX_KPA) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 4. 检查负压吸时间�?否有效（0.1-60s，单�?100ms�?
+    // 4. ?????????????0.1-60s????100ms??
     if(pTransData->RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/100) || 
        pTransData->RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/100)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 5. 检查负压放时间�?否有效（0.1-60s，单�?100ms�?
+    // 5. ?????????????0.1-60s????100ms??
     if(pTransData->RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/100) || 
        pTransData->RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/100)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 6. 检查脚踏开关是否闭�?
-    if(s_NPHCtrlInfo.FootSwitchStatus == false) {
+    // 6. ???????????
+    if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 7. 检查是否�?�确识别到负压加�?治疗�?
-    if(s_NPHCtrlInfo.probeStatus != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
+    // 7. ????????????????????
+    if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_PROBE_NOT_CONNECTED;
         return false;
     }
     
-    // 8. 检查是否有剩余�?治疗次数
-    if(s_NPHCtrlInfo.TreatTimes == 0) {
+    // 8. ?????????????
+    if(s_NPHCtrlInfo.TreatCounts == 0) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    // 所有�?�查通过
+    // ????????
     LOG_I("NPH: Start check passed");
     return true;
 }
@@ -281,30 +276,30 @@ void App_NegPrsHeat_SetWorkParams(void)
 {
     Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
     
-    // 设置工作参数
+    // ??????
     s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-    s_NPHCtrlInfo.RemainTime = pTransData->RxWorkState.work_time;
+    s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time;
     s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
-    s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;  // 单位�?100ms
-    s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;  // 单位�?100ms
+    s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;  // ????100ms
+    s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;  // ????100ms
     
-    // 计算�?标负压值（�?�?为电压）
+    // ?????????????????
     s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
     
-    // 切换继电器pwr_control1至负压加�?通道
+    // ?????pwr_control1????????
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
-    // 初�?�化负压状�?
+    // ??????????
     s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
     s_NPHCtrlInfo.motorState = false;
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
     
-    // 初�?�化加热控制
+    // ?????????
     s_NPHCtrlInfo.heatControlActive = false;
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
     
     LOG_I("NPH: Work params set - temp_limit=%d, work_time=%d, pressure=%d, suck=%d, release=%d", 
-          s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.RemainTime, 
+          s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.TreatRemainTimes, 
           s_NPHCtrlInfo.Pressure, s_NPHCtrlInfo.SuckTime, s_NPHCtrlInfo.ReleaseTime);
 }
 
@@ -314,30 +309,30 @@ bool App_NegPrsHeat_IsHeadTempNormal(void)
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
     
-    // 检查温度传感器�?否出错（NTC开�?或短�?�?
+    // ?????????????NTC?????????
     if(temp == 0xFFFF || temp == 0xEEFF)
     {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_TEMP_SENSOR_ERROR;
         LOG_W("NPH: Temperature sensor error: %d", temp);
         isNormal = false;
     }
-    // 检查温度是否超�?65℃（650 * 0.1°C�?
+    // ?????????65??650 * 0.1?C??
     else if(temp > NPH_TEMP_ERROR_THRESHOLD)
     {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_TEMP_TOO_HIGH;
         LOG_W("NPH: Head temperature too high: %d (threshold: %d)", temp, NPH_TEMP_ERROR_THRESHOLD);
         isNormal = false;
     }
-    // 检查温度是否在2s内上升至65�?
+    // ???????2s????65??
     if(s_NPHCtrlInfo.lastTemp > 0)
     {
         uint16_t tempRise = temp - s_NPHCtrlInfo.lastTemp;
         uint32_t timeElapsed = currentTime - s_NPHCtrlInfo.tempErrorStartTime;
         
-        // 如果温度上升且时间在2s�?
+        // ??????????2s??
         if(tempRise > 0 && timeElapsed <= NPH_TEMP_ERROR_TIME_MS)
         {
-            // 如果温度达到或超�?65℃，且是�?2s内上升的，则报�??
+            // ??????????65??????2s??????????
             if(temp >= NPH_TEMP_ERROR_THRESHOLD)
             {
                 s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_TEMP_RISE_TOO_FAST;
@@ -347,16 +342,16 @@ bool App_NegPrsHeat_IsHeadTempNormal(void)
             }
         }
         
-        // 如果温度下降或时间超�?2s，重�?错�??检测起始时�?
+        // ????????????2s???????????????
         if(tempRise <= 0 || timeElapsed > NPH_TEMP_ERROR_TIME_MS)
         {
             s_NPHCtrlInfo.tempErrorStartTime = currentTime;
-            s_NPHCtrlInfo.lastTemp = temp;  // 更新基准温度
+            s_NPHCtrlInfo.lastTemp = temp;  // ??????
         }
     }
     else
     {
-        // 首�?��?�取，初始化错�??检测起始时间和基准温度
+        // ???????????????????????????
         s_NPHCtrlInfo.tempErrorStartTime = currentTime;
         s_NPHCtrlInfo.lastTemp = temp;
     }
@@ -377,7 +372,7 @@ void App_NegPrsHeat_ControlTemperature(void)
     uint16_t targetTemp = s_NPHCtrlInfo.WorkTempLimit;
     bool needHeat = false;
     
-    // 根据当前状态确定目标温�?
+    // ?????????????
     if(s_NPHCtrlInfo.runState == E_NPH_RUN_PREHEAT)
     {
         targetTemp = s_NPHCtrlInfo.PreheatTempLimit;
@@ -388,29 +383,29 @@ void App_NegPrsHeat_ControlTemperature(void)
     }
     else
     {
-        // 不在工作状态，关闭加热
+        // ???????????
         Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
         s_NPHCtrlInfo.heatControlActive = false;
         return;
     }
     
-    // 简单的开关控制：温度低于�?标温度时加热，高于目标温度时停�?�加�?
-    // �?以添加�?�区（hysteresis）来避免频繁开�?
-    if(temp < targetTemp - 5)  // 低于�?标温�?5*0.1℃时开始加�?
+    // ???????????????????????????????????
+    // ??????????hysteresis?????????
+    if(temp < targetTemp - 5)  // ????????5*0.1???????
     {
         needHeat = true;
     }
-    else if(temp > targetTemp + 5)  // 高于�?标温�?5*0.1℃时停�?�加�?
+    else if(temp > targetTemp + 5)  // ????????5*0.1?????????
     {
         needHeat = false;
     }
     else
     {
-        // 在�?�区内，保持当前状�?
+        // ??????????????
         needHeat = s_NPHCtrlInfo.heatControlActive;
     }
     
-    // 控制CTR_HEAT_HP
+    // ??CTR_HEAT_HP
     if(needHeat != s_NPHCtrlInfo.heatControlActive)
     {
         Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, needHeat ? 1 : 0);
@@ -435,7 +430,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
     switch(s_NPHCtrlInfo.vacuumState)
     {
         case E_NPH_VACUUM_STATE_IDLE:
-            // 开始吸�?
+            // ?????
             s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_SUCKING;
             s_NPHCtrlInfo.vacuumStateStartTime = currentTime;
             s_NPHCtrlInfo.suckStartTime = currentTime;
@@ -445,21 +440,21 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
             
         case E_NPH_VACUUM_STATE_SUCKING:
-            // 检查是否达到目标负压（负压值越大，压力越小，所�?currentPressure应�?�大于等于targetPressure�?
-            // 注意：这里需要根�?实际�?件特性调整判�?逻辑
-            // 如果ADC采样值越大表示负压越大，则应该判断currentPressure >= targetPressure
-            // 如果ADC采样值越大表示压力越大（负压越小），则需要反向判�?
+            // ?????????????????????????currentPressure????????targetPressure??
+            // ????????????????????????
+            // ??ADC?????????????????currentPressure >= targetPressure
+            // ??ADC??????????????????????????
             targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
             if(pressureVoltage >= targetVoltage)
             {
-                // 达到�?标负压，进入维持状�?
+                // ???????????????
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_MAINTAIN;
                 s_NPHCtrlInfo.maintainStartTime = currentTime;
                 LOG_I("NPH: Target pressure reached (%d KPa), start maintaining", s_NPHCtrlInfo.Pressure);
             }
             else
             {
-                // 继续吸气，保持电机运�?
+                // ????????????
                 if(!s_NPHCtrlInfo.motorState)
                 {
                     s_NPHCtrlInfo.motorState = true;
@@ -469,44 +464,44 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
             
         case E_NPH_VACUUM_STATE_MAINTAIN:
-            // 维持负压大小
-            // 检查维持时间是否到�?
+            // ??????
+            // ???????????
             maintainElapsed = currentTime - s_NPHCtrlInfo.maintainStartTime;
-            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 100;  // �?�?为�??�?
+            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 100;  // ??????????
             
             if(maintainElapsed >= maintainTimeMs)
             {
-                // 维持时间到，开始放�?
+                // ???????????
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_RELEASING;
                 s_NPHCtrlInfo.releaseStartTime = currentTime;
                 s_NPHCtrlInfo.motorState = false;
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
-                // 打开释放阀（�?�果有的话，这里使用CTR_HP_lose�?
+                // ??????????????????CTR_HP_lose??
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 1);
                 LOG_I("NPH: Maintain time reached, start releasing");
             }
             else
             {
 				
-                // 在维持时间内，通过控制电机维持负压
+                // ?????????????????
                 targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
 //                voltageDiff = (pressureVoltage > targetVoltage) ? 
 //                                       (pressureVoltage - targetVoltage) : 
 //                                       (targetVoltage - pressureVoltage);
-                uint16_t thresholdVoltage = App_NegPrsHeat_PressureToVoltage(5);  // 5KPa对应的电压差
+                uint16_t thresholdVoltage = App_NegPrsHeat_PressureToVoltage(5);  // 5KPa??????
                 
-                if(pressureVoltage < targetVoltage - thresholdVoltage)  // 负压不足（电压低于目标）
+                if(pressureVoltage < targetVoltage - thresholdVoltage)  // ????????????
                 {
-                    // 负压不足，启动电机补�?
+                    // ????????????
                     if(!s_NPHCtrlInfo.motorState)
                     {
                         s_NPHCtrlInfo.motorState = true;
                         Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
                     }
                 }
-                else if(pressureVoltage > targetVoltage + thresholdVoltage)  // 负压过高（电压高于目标）
+                else if(pressureVoltage > targetVoltage + thresholdVoltage)  // ????????????
                 {
-                    // 负压过高，停止电�?
+                    // ??????????
                     if(s_NPHCtrlInfo.motorState)
                     {
                         s_NPHCtrlInfo.motorState = false;
@@ -517,13 +512,13 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
         	
         case E_NPH_VACUUM_STATE_RELEASING:
-            // 放气状�?
+            // ?????
             releaseElapsed = currentTime - s_NPHCtrlInfo.releaseStartTime;
-            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 100;  // �?�?为�??�?
+            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 100;  // ??????????
             
             if(releaseElapsed >= releaseTimeMs)
             {
-                // 放气时间到，关闭释放阀，准备下一�?�?�?
+                // ??????????????????????
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
                 LOG_I("NPH: Release time reached, ready for next cycle");
@@ -548,16 +543,16 @@ void App_NegPrsHeat_Process(void)
     switch(s_NPHCtrlInfo.runState)
     {
         case E_NPH_RUN_INIT:
-            // 加载负压加热参数
+            // ????????
             if(App_Memory_LoadNPHParams(&s_NPHCtrlInfo.TreatParams)) {
                 s_NPHCtrlInfo.TempLimit = s_NPHCtrlInfo.TreatParams.TempLimit;
-                s_NPHCtrlInfo.TreatTimes = s_NPHCtrlInfo.TreatParams.RemainTimes;
+                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.TreatParams.TreatRemainTimes;
                 s_NPHCtrlInfo.PreheatEnable = (s_NPHCtrlInfo.TreatParams.PreheatEnable == 1);
                 s_NPHCtrlInfo.PreheatTempLimit = s_NPHCtrlInfo.TreatParams.PreheatTempLimit;
                 s_NPHCtrlInfo.PreheatTime = s_NPHCtrlInfo.TreatParams.PreheatTime;
                 
                 LOG_I("NPH: Parameters loaded - temp_limit=%d, remain_times=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d",
-                      s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatTimes,
+                      s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatCounts,
                       s_NPHCtrlInfo.PreheatEnable, s_NPHCtrlInfo.PreheatTempLimit, s_NPHCtrlInfo.PreheatTime);
             } else {
                 LOG_E("NPH: Failed to load parameters");
@@ -567,19 +562,19 @@ void App_NegPrsHeat_Process(void)
             break;
             
         case E_NPH_RUN_IDLE:
-            // 使用App_NegPrsHeat_StartCheck进�?�启动前检�?
+            // ??App_NegPrsHeat_StartCheck??????????
             if(App_NegPrsHeat_StartCheck()) {
-                // 设置工作参数
+                // ??????
                 App_NegPrsHeat_SetWorkParams();
                 
-                // 如果开�?了�?�热功能，先进入预热状�?
+                // ?????????????????????
                 if(s_NPHCtrlInfo.PreheatEnable)
                 {
                     App_NegPrsHeat_ChangeState(E_NPH_RUN_PREHEAT);
                 }
                 else
                 {
-                    // 直接进入工作状�?
+                    // ?????????
                     Drv_IODevice_ChangeChannel(CHANNEL_NH);
                     App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                 }
@@ -587,29 +582,29 @@ void App_NegPrsHeat_Process(void)
             break;
             
         case E_NPH_RUN_PREHEAT:
-            // 预热状态：加热至�?�热温度上限
-            // 检查温度是否达到�?�热温度上限
+            // ????????????????
+            // ????????????????
             if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
             {
-                // 预热完成，进入工作状�?
+                // ????????????
                 Drv_IODevice_ChangeChannel(CHANNEL_NH);
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                 LOG_I("NPH: Preheat completed, entering working state");
             }
-            // 检查所有条�?
+            // ???????
             else if(App_NegPrsHeat_StartCheck() == false)
             {
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
             }
             else
             {
-                // 温度监控�?10ms周期�?
+                // ??????10ms????
                 if(Drv_Timer_Tick(&TempMonitorTimer, NPH_TEMP_MONITOR_PERIOD_MS)) {
                     if(App_NegPrsHeat_IsHeadTempNormal() == false) {
-                        // 温度异常，立�?停�??
+                        // ????????????
                         App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
                     } else {
-                        // 控制温度
+                        // ????
                         App_NegPrsHeat_ControlTemperature();
                     }
                 }
@@ -618,48 +613,47 @@ void App_NegPrsHeat_Process(void)
             
         case E_NPH_RUN_WORKING:
             
-            // 检查所有条�?
+            // ???????
             if(App_NegPrsHeat_StartCheck() == false || 
-               s_NPHCtrlInfo.RemainTime == 0){
+               s_NPHCtrlInfo.TreatRemainTimes == 0){
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
             } else {
-                // 温度监控�?10ms周期�?
+                // ??????10ms????
                 if(Drv_Timer_Tick(&TempMonitorTimer, NPH_TEMP_MONITOR_PERIOD_MS)) {
                     if(App_NegPrsHeat_IsHeadTempNormal() == false) {
-                        // 温度异常，立�?停�??
+                        // ????????????
                         App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
                     } else {
-                        // 控制温度
+                        // ????
                         App_NegPrsHeat_ControlTemperature();
                     }
                 }
                 
-                // 处理负压控制
+                // ??????
                 App_NegPrsHeat_ProcessVacuum();
                 
-                // 更新时间
-                if(s_NPHCtrlInfo.RemainTime >= TREAT_TASK_TIME) {
-                    s_NPHCtrlInfo.RemainTime -= TREAT_TASK_TIME;
+                // ????
+                if(s_NPHCtrlInfo.TreatRemainTimes >= TREAT_TASK_TIME) {
+                    s_NPHCtrlInfo.TreatRemainTimes -= TREAT_TASK_TIME;
                 } else {
-                    s_NPHCtrlInfo.RemainTime = 0;
+                    s_NPHCtrlInfo.TreatRemainTimes = 0;
                 }
             }
             break;
             
         case E_NPH_RUN_STOP:
-            // 关闭加热
+            // ????
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             s_NPHCtrlInfo.heatControlActive = false;
             
-            // 关闭负压控制
+            // ??????
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
             s_NPHCtrlInfo.motorState = false;
             s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
             
-            // 关闭输出通道
+            // ??????
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
-            App_TreatMgr_ChangeState(E_TREATMGR_STATE_IDLE);
             if(s_NPHCtrlInfo.isWaitReturn) {
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_WAIT_RETURN);
                 LOG_I("NPH: Wait return");
@@ -680,19 +674,19 @@ void App_NegPrsHeat_Process(void)
  */
 void App_NegPrsHeat_Init(void)
 {
-    // 初�?�化控制信息结构
+    // ???????????
     memset(&s_NPHCtrlInfo, 0, sizeof(NPH_CtrlInfo_t));
     
-    // 设置初�?�状�?
+    // ?????????
     s_NPHCtrlInfo.runState = E_NPH_RUN_INIT;
     s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
     s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_NONE;
-    s_NPHCtrlInfo.RemainTime = 0;
-    s_NPHCtrlInfo.TreatTimes = 0;
+    s_NPHCtrlInfo.TreatRemainTimes = 0;
+    s_NPHCtrlInfo.TreatCounts = 0;
     s_NPHCtrlInfo.heatControlActive = false;
     s_NPHCtrlInfo.motorState = false;
     
-    // �?保所有控制引脚为低电�?
+    // ??????????????
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);

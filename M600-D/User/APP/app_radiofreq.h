@@ -21,19 +21,18 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
-#include "drv_iodevice.h"
 
-/* 射�?�工作�?�率固定�?1MHz */
-#define RF_FREQUENCY_KHZ           1000        ///< 射�?�工作�?�率 (kHz)
-#define RF_WORK_LEVEL_MAX          20          ///< 最大档�? (0-20)
-#define RF_VOLTAGE_MIN_MV          11000       ///< 最小工作电�? (11V = 11000mV)
-#define RF_VOLTAGE_MAX_MV          30000       ///< 最大工作电�? (30V = 30000mV)
-#define RF_VOLTAGE_INIT_MV         7000        ///< 初�?�工作电�? (7V = 7000mV)
-#define RF_CURRENT_THRESHOLD_MV    500         ///< 电流阈�? (0.5V = 500mV)
-#define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< 电流监控周期 (10ms)
-#define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< 温度监控周期 (1s)
+/* ??????????????1MHz */
+#define RF_FREQUENCY_KHZ           1000        ///< ?????????? (kHz)
+#define RF_WORK_LEVEL_MAX          20          ///< ????? (0-20)
+#define RF_VOLTAGE_MIN_MV          11000       ///< ??????? (11V = 11000mV)
+#define RF_VOLTAGE_MAX_MV          30000       ///< ??????? (30V = 30000mV)
+#define RF_VOLTAGE_INIT_MV         7000        ///< ????????? (7V = 7000mV)
+#define RF_CURRENT_THRESHOLD_MV    500         ///< ????? (0.5V = 500mV)
+#define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< ?????? (10ms)
+#define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< ?????? (1s)
 
-/* 档位到电压的映射�?1-20档位对应11-30V */
+/* ??????????1-20????11-30V */
 #define RF_VOLTAGE_PER_LEVEL_MV    ((RF_VOLTAGE_MAX_MV - RF_VOLTAGE_MIN_MV) / RF_WORK_LEVEL_MAX)
 
 typedef enum
@@ -60,29 +59,25 @@ typedef struct
 {
     RF_RunState_EnumDef runState;
     bool isWaitReturn;
-    uint16_t Voltage;              ///< 当前工作电压 (mV)
-    uint16_t VoltageTarget;        ///< �?标工作电�? (mV)，根�?档位计算
-    uint16_t CurrentHigh;         ///< 工作电流上限 (mV)
-    uint16_t CurrentLow;          ///< 工作电流下限 (mV)
-    uint16_t TempLimit;            ///< 治疗头温度上�? (0.1°C)
-    uint16_t TreatTimes;           ///< 剩余�?治疗次数
+    uint16_t Voltage;              ///< ?????? (mV)
+    uint16_t VoltageTarget;        ///< ???????? (mV)????????
+    uint16_t CurrentHigh;         ///< ?????? (mV)
+    uint16_t CurrentLow;          ///< ?????? (mV)
+    uint16_t TempLimit;            ///< ???????? (0.1�C)
+    uint16_t TreatCounts;           ///< ????????
     
-    uint8_t WorkLevel;             ///< 工作档位 (0-20)
-    uint16_t HeadTemp;             ///< 治疗头温�? (0.1°C)
-    uint16_t RemainTime;           ///< 剩余工作时间 (�?)
+    uint8_t WorkLevel;             ///< ???? (0-20)
+    uint16_t HeadTemp;             ///< ?????? (0.1�C)
+    uint16_t TreatRemainTimes;           ///< ?????? (??)
     
-    uint8_t ConnState;
     uint8_t ErrorCode;
-    bool FootSwitchStatus;
-    IODevice_WorkingMode_EnumDef probeStatus;
-    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     RF_TreatParams_t TreatParams;
     RF_TransData_t Trans;
     
-    /* 监控定时�? */
-    uint32_t lastCurrentMonitorTime;   ///< 上�?�电流监控时�?
-    uint32_t lastTempMonitorTime;      ///< 上�?�温度监控时�?
+    /* ?????? */
+    uint32_t lastCurrentMonitorTime;   ///< ???????????
+    uint32_t lastTempMonitorTime;      ///< ???????????
 } RF_CtrlInfo_t;
 
 void App_RadioFreq_Init(void);

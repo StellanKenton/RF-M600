@@ -42,10 +42,21 @@ typedef struct
     TreatMgr_State_EnumDef preState;
     IODevice_WorkingMode_EnumDef eProbeStatus;
     IODevice_WorkingMode_EnumDef preProbeStaus;
+    bool eFootSwitchClosed;       ///< true=脚踏闭合(按下), false=脚踏打开
 } TreatMgr_t;
+
+typedef enum 
+{
+    E_TREAT_TIMES_POWER_ON = 0,
+    E_TREAT_TIMES_WORKING,
+    E_TREAT_TIMES_RESET,
+	E_TREAT_TIMES_WAIT,
+} Treat_Times_EnumDef;
 
 
 void App_TreatMgr_Init(void);
+IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void);
+bool App_TreatMgr_GetFootSwitchClosed(void);
 void App_TreatMgr_Process(void);
 void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState);
 

@@ -39,7 +39,7 @@ extern "C" {
 #define CTR_FAN_Port         GPIOD
 
 /* Inputs */
-#define MCU_FOOT_Pin         GPIO_Pin_14
+#define MCU_FOOT_Pin         GPIO_Pin_0
 #define MCU_FOOT_Port        GPIOC
 #define IO_SYN_US_Pin        GPIO_Pin_10
 #define IO_SYN_US_Port       GPIOC

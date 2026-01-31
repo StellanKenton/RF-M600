@@ -21,19 +21,18 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
-#include "drv_iodevice.h"
 
-/* 负压加热工作参数 */
-#define NPH_WORK_TIME_MAX           3600        ///< 最大工作时�? (�?)
-#define NPH_PRESSURE_MIN_KPA        10          ///< 最小负压大�? (10KPa)
-#define NPH_PRESSURE_MAX_KPA        100         ///< 最大负压大�? (100KPa)
-#define NPH_SUCK_TIME_MIN_MS        100         ///< 最小负压吸时间 (0.1s = 100ms)
-#define NPH_SUCK_TIME_MAX_MS        60000       ///< 最大负压吸时间 (60s = 60000ms)
-#define NPH_RELEASE_TIME_MIN_MS     100         ///< 最小负压放时间 (0.1s = 100ms)
-#define NPH_RELEASE_TIME_MAX_MS     60000       ///< 最大负压放时间 (60s = 60000ms)
-#define NPH_TEMP_MONITOR_PERIOD_MS  10          ///< 温度监控周期 (10ms)
-#define NPH_TEMP_ERROR_THRESHOLD    650         ///< 温度错�??阈�? (65�? = 650 * 0.1°C)
-#define NPH_TEMP_ERROR_TIME_MS      2000        ///< 温度错�??检测时�? (2s = 2000ms)
+/* ???????? */
+#define NPH_WORK_TIME_MAX           3600        ///< ??????? (??)
+#define NPH_PRESSURE_MIN_KPA        10          ///< ??????? (10KPa)
+#define NPH_PRESSURE_MAX_KPA        100         ///< ??????? (100KPa)
+#define NPH_SUCK_TIME_MIN_MS        100         ///< ??????? (0.1s = 100ms)
+#define NPH_SUCK_TIME_MAX_MS        60000       ///< ??????? (60s = 60000ms)
+#define NPH_RELEASE_TIME_MIN_MS     100         ///< ??????? (0.1s = 100ms)
+#define NPH_RELEASE_TIME_MAX_MS     60000       ///< ??????? (60s = 60000ms)
+#define NPH_TEMP_MONITOR_PERIOD_MS  10          ///< ?????? (10ms)
+#define NPH_TEMP_ERROR_THRESHOLD    650         ///< ????????? (65?? = 650 * 0.1�C)
+#define NPH_TEMP_ERROR_TIME_MS      2000        ///< ??????????? (2s = 2000ms)
 
 typedef enum
 {
@@ -72,42 +71,38 @@ typedef struct
     NPH_Vacuum_State_EnumDef vacuumState;
     bool isWaitReturn;
 
-    uint16_t TempLimit;            ///< 工作温度上限 (0.1°C)
-    uint16_t TreatTimes;           ///< 剩余�?治疗次数
-    bool PreheatEnable;            ///< 预热功能�?否开�?
-    uint16_t PreheatTempLimit;    ///< 预热温度上限 (0.1°C)
-    uint16_t PreheatTime;         ///< 预热时间 (�?)
+    uint16_t TempLimit;            ///< ?????? (0.1�C)
+    uint16_t TreatCounts;           ///< ????????
+    bool PreheatEnable;            ///< ??????????
+    uint16_t PreheatTempLimit;    ///< ?????? (0.1�C)
+    uint16_t PreheatTime;         ///< ???? (??)
     
-    uint16_t WorkTempLimit;        ///< 当前工作温度上限 (0.1°C)
-    uint16_t RemainTime;           ///< 剩余工作时间 (�?)
-    uint8_t Pressure;             ///< 负压大小 (10-100 KPa，发送�?��?)
-    uint16_t SuckTime;             ///< 负压吸时�? (0.1s单位，实际为100ms单位)
-    uint16_t ReleaseTime;          ///< 负压放时�? (0.1s单位，实际为100ms单位)
-    uint16_t HeadTemp;             ///< 治疗头温�? (0.1°C)
+    uint16_t WorkTempLimit;        ///< ???????? (0.1�C)
+    uint16_t TreatRemainTimes;           ///< ?????? (??)
+    uint8_t Pressure;             ///< ???? (10-100 KPa????????)
+    uint16_t SuckTime;             ///< ?????? (0.1s??????100ms??)
+    uint16_t ReleaseTime;          ///< ?????? (0.1s??????100ms??)
+    uint16_t HeadTemp;             ///< ?????? (0.1�C)
     
-    uint8_t ConnState;
     uint8_t ErrorCode;
-    bool FootSwitchStatus;
-    IODevice_WorkingMode_EnumDef probeStatus;
-    IODevice_WorkingMode_EnumDef preProbeStatus;
     
     NPH_TreatParams_t TreatParams;
     Heat_TransData_t Trans;
     
-    /* 温度控制 */
-    bool heatControlActive;        ///< 加热控制�?否激�?
-    uint32_t lastTempMonitorTime;  ///< 上�?�温度监控时�?
-    uint32_t tempErrorStartTime;   ///< 温度错�??开始时�?
-    uint16_t lastTemp;             ///< 上�?�温度�?
+    /* ???? */
+    bool heatControlActive;        ///< ??????????
+    uint32_t lastTempMonitorTime;  ///< ???????????
+    uint32_t tempErrorStartTime;   ///< ???????????
+    uint16_t lastTemp;             ///< ????????
     
-    /* 负压控制 */
-    uint32_t vacuumStateStartTime; ///< 负压状态开始时�?
-    uint16_t targetPressure;       ///< �?标负压�? (KPa，采样电压转�?)
-    uint16_t currentPressure;      ///< 当前负压�? (KPa，采样电压转�?)
-    uint32_t suckStartTime;        ///< 吸气开始时�?
-    uint32_t maintainStartTime;    ///< 维持开始时�?
-    uint32_t releaseStartTime;     ///< 放气开始时�?
-    bool motorState;               ///< 电机状�? (true=运�??, false=停�??)
+    /* ???? */
+    uint32_t vacuumStateStartTime; ///< ?????????
+    uint16_t targetPressure;       ///< ??????? (KPa????????)
+    uint16_t currentPressure;      ///< ?????? (KPa????????)
+    uint32_t suckStartTime;        ///< ???????
+    uint32_t maintainStartTime;    ///< ???????
+    uint32_t releaseStartTime;     ///< ???????
+    bool motorState;               ///< ????? (true=????, false=????)
 } NPH_CtrlInfo_t;
 
 void App_NegPrsHeat_Init(void);

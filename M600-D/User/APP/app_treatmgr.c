@@ -91,7 +91,18 @@ void App_TreatMgr_Init(void)
     // Initialize the treatment manager module
     s_TreatMgr.eState = E_TREATMGR_STATE_IDLE;
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
-	s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
+    s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
+    s_TreatMgr.eFootSwitchClosed = false;
+}
+
+IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)
+{
+    return s_TreatMgr.eProbeStatus;
+}
+
+bool App_TreatMgr_GetFootSwitchClosed(void)
+{
+    return s_TreatMgr.eFootSwitchClosed;
 }
 
 void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState)
@@ -213,9 +224,10 @@ void App_TreatMgr_Process(void)
 
     // 处理蜂鸣器控制（每次循环都处理，确保及时响应）
     Drv_IODevice_ProcessBuzzer();
-    // Process the treatment manager module
+    // Process the treatment manager module: 集中刷新探头与脚踏状态
     ProbeStatusCheck();
-    
+    s_TreatMgr.eFootSwitchClosed = Drv_IODevice_GetFootSwitchState();
+
     // 板上温度监控和风扇控制（1s周期）
     if(Drv_Timer_Tick(&BoardTempMonitorTimer, BOARD_TEMP_MONITOR_PERIOD_MS)){
         App_TreatMgr_ControlFan();

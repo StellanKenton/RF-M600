@@ -21,19 +21,18 @@ extern "C" {
 
 #include "app_comm.h"
 #include "app_memory.h"
-#include "drv_iodevice.h"
+#include "app_treatmgr.h"
 
+/* ??????????????20ms????0.5ms?? */
+/* ??0??20ms????39??0.5ms (20ms - 39*0.5ms = 0.5ms) */
+#define PULSE_REPEAT_TIME_BASE_MS    20      ///< ??????????? (ms)
+#define PULSE_REPEAT_TIME_STEP_MS    0.5f    ///< ???? (ms)
+#define PULSE_REPEAT_TIME_MIN_MS     0.5f    ///< ????????? (ms)
+#define PULSE_REPEAT_TIME_MAX_MS     20      ///< ????????? (ms)
+#define WORK_LEVEL_MAX               40      ///< ????? (0-39??40????)
 
-/* 档位到脉冲重复时间的映射�?20ms基准�?0.5ms步进 */
-/* 档位0对应20ms，档�?39对应0.5ms (20ms - 39*0.5ms = 0.5ms) */
-#define PULSE_REPEAT_TIME_BASE_MS    20      ///< 基准脉冲重�?�时�? (ms)
-#define PULSE_REPEAT_TIME_STEP_MS    0.5f    ///< 每档步进 (ms)
-#define PULSE_REPEAT_TIME_MIN_MS     0.5f    ///< 最小脉冲重复时�? (ms)
-#define PULSE_REPEAT_TIME_MAX_MS     20      ///< 最大脉冲重复时�? (ms)
-#define WORK_LEVEL_MAX               40      ///< 最大档�? (0-39�?40�?档位)
-
-/* 电压调节限制 */
-#define VOLTAGE_ADJUST_LIMIT_MV       2000    ///< 电压调节限制 ±2V = 2000mV
+/* ?????? */
+#define VOLTAGE_ADJUST_LIMIT_MV       2000    ///< ?????? �2V = 2000mV
 
 typedef enum
 {
@@ -62,24 +61,22 @@ typedef enum {
 typedef struct
 {
     US_RunState_EnumDef runState;
+    Treat_Times_EnumDef TreatCountsState;
     bool isWaitReturn;
-    uint16_t Voltage;              ///< 工作电压 (mV)
-    uint16_t VoltageBase;          ///< 基�?�工作电压 (mV)，用于超限�?��?
+    uint16_t Voltage;              ///< ???? (mV)
+    uint16_t VoltageBase;          ///< ???????? (mV)??????????
     uint16_t CurrentHigh;
     uint16_t CurrentLow;
     uint16_t Frequency;
     uint16_t TempLimit;
-    uint16_t TreatTimes;  
+    uint32_t TreatCounts;  
 
     uint8_t WorkLevel;
     uint16_t HeadTemp;
-    uint16_t RemainTime;
+    uint16_t TreatRemainTimes;
     
-    uint8_t ConnState;
     uint8_t ErrorCode;
-    bool FootSwitchStatus;
-    IODevice_WorkingMode_EnumDef probeStatus;
-    IODevice_WorkingMode_EnumDef preProbeStatus;
+    uint8_t StartCheckStep;
     
     US_TreatParams_t TreatParams;
     UltraSound_TransData_t Trans;

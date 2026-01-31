@@ -10,11 +10,13 @@
 #include "app_comm.h"
 #include "lib_ringbuffer.h"
 #include "drv_usart.h"
+#include "app_treatmgr.h"
 #include "app_ultrasound.h"
 #include "app_radiofreq.h"
 #include "app_shockwave.h"
 #include "app_negprsheat.h"
 #include "drv_delay.h"
+#include "drv_iodevice.h"
 
 App_Comm_Info_t s_AppCommInfo;
 static Protocol_Frame_t RxFrame;
@@ -22,13 +24,15 @@ static Protocol_Frame_t RxFrame;
 
 
 static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame);
+static uint8_t App_Comm_GetConnStateFromMgr(IODevice_WorkingMode_EnumDef moduleProbeMode);
+
 uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
     uint16_t crc = 0x0000;
     
     while (length--) {
         uint8_t b = *data++;
         
-        // 杈撳叆鍙嶈浆锛堜娇鐢ㄥ惊鐜�锛岃�?�?佷唬�?佺┖闂达�?
+        // 杈撳叆鍙嶈浆锛堜娇鐢ㄥ惊鐜�锛岃�?�?佷唬�?佺┖闂达�?
         uint8_t r = 0;
         for (uint8_t i = 0; i < 8; i++) {
             r = (r << 1) | (b & 0x01);
@@ -37,7 +41,7 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
         
         crc ^= (uint16_t)r << 8;
         
-        // 澶勭�?8浣�
+        // 澶勭�?8浣�
         for (uint8_t i = 0; i < 8; i++) {
             if (crc & 0x8000) {
                 crc = (crc << 1) ^ 0x8005;
@@ -47,7 +51,7 @@ uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
         }
     }
     
-    // 杈撳�?鍙嶈浆锛堜娇�?ㄥ惊鐜�锛�
+    // 杈撳�?鍙嶈浆锛堜娇�?ㄥ惊鐜�锛�
     uint16_t result = 0;
     for (uint8_t i = 0; i < 16; i++) {
         result = (result << 1) | (crc & 0x01);
@@ -108,6 +112,16 @@ void App_Comm_RecvData(void)
 }
 
 
+
+static uint8_t App_Comm_GetConnStateFromMgr(IODevice_WorkingMode_EnumDef moduleProbeMode)
+{
+    bool headConnected = (App_TreatMgr_GetProbeStatus() == moduleProbeMode);
+    bool footClosed = App_TreatMgr_GetFootSwitchClosed();
+    if (headConnected && footClosed) return CONN_STATE_CONNECTED_FOOT_CLOSED;
+    if (!headConnected && footClosed) return CONN_STATE_DISCONNECTED_FOOT_CLOSED;
+    if (headConnected && !footClosed) return CONN_STATE_CONNECTED_FOOT_OPEN;
+    return CONN_STATE_DISCONNECTED_FOOT_OPEN;
+}
 
 static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
 {
@@ -275,7 +289,7 @@ static void App_Comm_ReplyUSStatus(void)
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.work_level;
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.head_temp & 0xFF;
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.head_temp >> 8;
-    TxData[DataLen++] = s_AppCommInfo.US.TxStatus.conn_state;
+    TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_ULTRASOUND);
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.error_code;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_ULTRASOUND, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
@@ -297,7 +311,7 @@ static void App_Comm_ReplyRFStatus(void)
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.work_level;
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.head_temp & 0xFF;
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.head_temp >> 8;
-    TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.conn_state;
+    TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_RADIO_FREQUENCY);
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.error_code;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_RADIO_FREQ, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
@@ -318,7 +332,7 @@ static void App_Comm_ReplySWStatus(void)
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.work_level;
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.head_temp & 0xFF;
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.head_temp >> 8;
-    TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.conn_state;
+    TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_SHOCKWAVE);
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.error_code;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_SHOCKWAVE, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
@@ -349,7 +363,7 @@ static void App_Comm_ReplyHeatStatus(void)
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.preheat_temp_limit >> 8;
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_preheat_time & 0xFF;
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_preheat_time >> 8;
-    TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.conn_state;
+    TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.error_code;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }

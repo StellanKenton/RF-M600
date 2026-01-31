@@ -143,7 +143,7 @@ void App_NegPrsHeat_WorkTimeHandle(void)
         case E_TREAT_TIMES_POWER_ON:
             if(pTransData->RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatCounts > 0)
             {
-                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
                 s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
                 s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
                 s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;
@@ -158,7 +158,7 @@ void App_NegPrsHeat_WorkTimeHandle(void)
         case E_TREAT_TIMES_RESET:
             if(pTransData->RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatCounts > 0)
             {
-                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
                 s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
                 s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
                 s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;

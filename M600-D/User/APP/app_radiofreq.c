@@ -102,7 +102,7 @@ void App_RadioFreq_WorkTimeHandle(void)
         case E_TREAT_TIMES_POWER_ON:
             if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
             {
-                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
                 s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
                 s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_RFCtrlInfo.TreatCounts--;
@@ -114,7 +114,7 @@ void App_RadioFreq_WorkTimeHandle(void)
         case E_TREAT_TIMES_RESET:
             if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
             {
-                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
                 s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
                 s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_RFCtrlInfo.TreatCounts--;
@@ -140,7 +140,7 @@ void App_RadioFreq_WorkTimeHandle(void)
         case E_TREAT_TIMES_WAIT:
             if(pTransData->RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatCounts > 0)
             {
-                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
+                s_RFCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
                 s_RFCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
                 s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_RFCtrlInfo.TreatCounts--;

@@ -23,18 +23,18 @@ extern "C" {
 #include "app_memory.h"
 #include "app_treatmgr.h"
 
-/* ???????? */
-#define SW_WORK_LEVEL_MAX          26          ///< ????? (0-26)
-#define SW_FREQ_LEVEL_MAX          16          ///< ???????? (1-16)
-#define SW_WORK_POINT_MAX          10000       ///< ???????
-#define SW_VOLTAGE_THRESHOLD_MV    3000        ///< ????????? (3V = 3000mV)
-#define SW_TEMP_MONITOR_PERIOD_MS  10          ///< ?????? (10ms)
+/* Work/Freq/Point limits */
+#define SW_WORK_LEVEL_MAX          26          ///< Max work level (1-26)
+#define SW_FREQ_LEVEL_MAX          16          ///< Max frequency level (1-16)
+#define SW_WORK_POINT_MAX          10000       ///< Max work points per treatment
+#define SW_VOLTAGE_THRESHOLD_MV    3000        ///< Min voltage threshold (3V = 3000mV)
+#define SW_TEMP_MONITOR_PERIOD_MS  10          ///< Head temp monitor period (10ms)
 
-/* PWM???? */
-#define SW_PWM_ESW_P_HIGH_TIME_MS     5       ///< PWM_ESW+?????? (5ms)
-#define SW_PWM_ESW_P_WAIT_TIME_MS     17      ///< PWM_ESW+?????? (17ms)
-#define SW_PWM_ESW_N_BASE_TIME_MS     3       ///< PWM_ESW-?????????? (3ms)
-#define SW_PWM_ESW_N_STEP_TIME_MS     0.28f   ///< PWM_ESW-?????? (0.28ms)
+/* PWM timing */
+#define SW_PWM_ESW_P_HIGH_TIME_MS     5       ///< PWM_ESW+ high time (5ms)
+#define SW_PWM_ESW_P_WAIT_TIME_MS     17      ///< Wait time after ESW_P before ESW_N (17ms)
+#define SW_PWM_ESW_N_BASE_TIME_MS     3       ///< PWM_ESW-N base high time (3ms)
+#define SW_PWM_ESW_N_STEP_TIME_MS     0.28f   ///< PWM_ESW-N step per level (0.28ms)
 
 typedef enum
 {
@@ -74,31 +74,32 @@ typedef struct
     SW_PWM_State_EnumDef pwmState;
     bool isWaitReturn;
 
-    uint16_t TempLimit;            ///< ???????? (0.1?C)
-    uint16_t TreatCounts;           ///< ????????
-    uint16_t CurrentHigh_ESW_P;    ///< PWM_ESW+?????? (mV)
-    uint16_t CurrentLow_ESW_P;     ///< PWM_ESW+?????? (mV)
-    uint16_t CurrentHigh_ESW_N;   ///< PWM_ESW-?????? (mV)
-    uint16_t CurrentLow_ESW_N;     ///< PWM_ESW-?????? (mV)
+    uint16_t TempLimit;            ///< Head temp limit (0.1 C)
+    uint16_t TreatCounts;          ///< Remaining treatment times
+    uint16_t CurrentHigh_ESW_P;    ///< PWM_ESW+ current high threshold (mV)
+    uint16_t CurrentLow_ESW_P;     ///< PWM_ESW+ current low threshold (mV)
+    uint16_t CurrentHigh_ESW_N;   ///< PWM_ESW-N current high threshold (mV)
+    uint16_t CurrentLow_ESW_N;    ///< PWM_ESW-N current low threshold (mV)
     
-    uint8_t WorkLevel;             ///< ???? (0-26)
-    uint8_t FreqLevel;             ///< ?????? (1-16)
-    uint16_t RemainPoints;         ///< ??????
-    uint16_t HeadTemp;             ///< ?????? (0.1?C)
+    uint8_t WorkLevel;             ///< Work level (1-26)
+    uint8_t FreqLevel;             ///< Frequency level (1-16)
+    uint16_t RemainPoints;         ///< Remaining work points
+    uint16_t HeadTemp;             ///< Head temperature (0.1 C)
     
+    uint8_t LastStartState;
     uint8_t ErrorCode;
     
     SW_TreatParams_t TreatParams;
     SW_TransData_t Trans;
     
-    /* PWM?????? */
-    uint32_t pwmStateStartTime;    ///< PWM??????? (ms)
-    uint32_t cycleStartTime;       ///< ??????? (ms)
-    uint32_t cyclePeriodMs;        ///< ???? (ms)??????????
-    uint32_t pwmESW_NHighTimeMs;   ///< PWM_ESW-?????? (ms)
+    /* PWM timing (ms) */
+    uint32_t pwmStateStartTime;    ///< Current PWM state start time (ms)
+    uint32_t cycleStartTime;       ///< Current cycle start time (ms)
+    uint32_t cyclePeriodMs;        ///< Cycle period (ms), 1000/freqLevel
+    uint32_t pwmESW_NHighTimeMs;   ///< PWM_ESW-N high time (ms)
     
-    /* ?????? */
-    uint32_t lastTempMonitorTime;  ///< ???????????
+    /* Monitoring */
+    uint32_t lastTempMonitorTime;  ///< Last head temp monitor tick
 } SW_CtrlInfo_t;
 
 void App_Shockwave_Init(void);

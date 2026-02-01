@@ -5,7 +5,7 @@
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
-* @copyright: Copyright (c) 2050
+* @copyright: Copyright (c) 2025
 **********************************************************************************/
 #include "app_shockwave.h"
 #include "app_treatmgr.h"
@@ -21,7 +21,7 @@
 static SW_CtrlInfo_t s_SWCtrlInfo;
 
 /**
- * @brief Calculate cycle period from frequency level (1-16????1S??62.5ms)
+ * @brief Calculate cycle period from frequency level (1-16; level1=1000ms, level16=62.5ms)
  * @param freqLevel Frequency level (1-16)
  * @retval Cycle period in milliseconds
  */
@@ -30,13 +30,13 @@ static uint32_t App_Shockwave_CalculateCyclePeriod(uint8_t freqLevel)
     if(freqLevel == 0 || freqLevel > SW_FREQ_LEVEL_MAX) {
         freqLevel = 1;
     }
-    // ?? = 1000ms / ??
-    // ??1: 1000ms, ??16: 62.5ms
+    // period_ms = 1000 / freqLevel
+    // level 1: 1000ms, level 16: 62.5ms
     return 1000 / freqLevel;
 }
 
 /**
- * @brief Calculate PWM_ESW- high time from work level
+ * @brief Calculate PWM_ESW-N high time from work level
  * @param level Work level (1-26)
  * @retval High time in milliseconds
  */
@@ -48,7 +48,7 @@ static uint32_t App_Shockwave_CalculateESW_NHighTime(uint8_t level)
     if(level > SW_WORK_LEVEL_MAX) {
         level = SW_WORK_LEVEL_MAX;
     }
-    // ?????? = 3 + (level - 1) * 0.28 ms
+    // high_time_us = 3000 + (level - 1) * 280 (i.e. 3 + (level-1)*0.28 ms)
     uint32_t time_us = 3000 + (level - 1) * 280; 
     return (time_us + 500) / 1000;  
 }
@@ -66,7 +66,7 @@ void App_Shockwave_UpdateStatus(void)
     s_SWCtrlInfo.Trans.TxStatus.work_level = s_SWCtrlInfo.WorkLevel;
     s_SWCtrlInfo.Trans.TxStatus.head_temp = s_SWCtrlInfo.HeadTemp;
     
-    // ???????? mgr ??
+    // Get connection state from treat mgr (probe + foot switch)
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_SHOCKWAVE);
     bool footClosed = App_TreatMgr_GetFootSwitchClosed();
     if (headConnected && footClosed) {
@@ -83,29 +83,30 @@ void App_Shockwave_UpdateStatus(void)
 
 void App_Shockwave_RxDataHandle(void)
 {
-    /* RxWorkState ? WorkTimeHandle ???? */
+    SW_TransData_t *pTransData = App_Comm_GetSWTransData();)
+    s_SWCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
+    s_SWCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
 }
 
 void App_Shockwave_WorkTimeHandle(void)
 {
-    SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     static uint8_t s_lastRxWorkState = 0x00;
 
-    if(pTransData->RxWorkState.work_state != s_lastRxWorkState) {
-        if (pTransData->RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
+    if(s_SWCtrlInfo.Trans.RxWorkState.work_state != s_lastRxWorkState) {
+        if (s_SWCtrlInfo.Trans.RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
             s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_RESET;
         }
-        s_lastRxWorkState = pTransData->RxWorkState.work_state;
+        s_lastRxWorkState = s_SWCtrlInfo.Trans.RxWorkState.work_state;
     }
 
     switch(s_SWCtrlInfo.TreatCountsState)
     {
         case E_TREAT_TIMES_POWER_ON:
-            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
+            if(s_SWCtrlInfo.Trans.RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
             {
-                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
-                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
+                s_SWCtrlInfo.RemainPoints = s_SWCtrlInfo.Trans.RxWorkState.work_time;
+                s_SWCtrlInfo.WorkLevel = s_SWCtrlInfo.Trans.RxWorkState.work_level;
+                s_SWCtrlInfo.FreqLevel = s_SWCtrlInfo.Trans.RxWorkState.frequency;
                 s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_SWCtrlInfo.TreatCounts--;
                 s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
@@ -114,11 +115,11 @@ void App_Shockwave_WorkTimeHandle(void)
             }
             break;
         case E_TREAT_TIMES_RESET:
-            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
+            if(s_SWCtrlInfo.Trans.RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
             {
-                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
-                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
+                s_SWCtrlInfo.RemainPoints = s_SWCtrlInfo.Trans.RxWorkState.work_time;
+                s_SWCtrlInfo.WorkLevel = s_SWCtrlInfo.Trans.RxWorkState.work_level;
+                s_SWCtrlInfo.FreqLevel = s_SWCtrlInfo.Trans.RxWorkState.frequency;
                 s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_SWCtrlInfo.TreatCounts--;
                 s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
@@ -133,17 +134,6 @@ void App_Shockwave_WorkTimeHandle(void)
             }
             break;
         case E_TREAT_TIMES_WAIT:
-            if(pTransData->RxWorkState.work_time > 0 && s_SWCtrlInfo.TreatCounts > 0)
-            {
-                s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
-                s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-                s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
-                s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
-                s_SWCtrlInfo.TreatCounts--;
-                s_SWCtrlInfo.TreatParams.TreatRemainTimes = s_SWCtrlInfo.TreatCounts;
-                App_Memory_SaveSWParams(&s_SWCtrlInfo.TreatParams);
-                LOG_I("SW: Remaining treat times decreased to: %d", s_SWCtrlInfo.TreatCounts);
-            }
             break;
         default:
             break;
@@ -165,12 +155,12 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
                 break;
             case E_SW_RUN_WORKING:
                 LOG_I("SW state changed to WORKING");
-                // ????????????2s??
+                // Start buzzer for 2s when entering working
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             case E_SW_RUN_STOP:
                 LOG_I("SW state changed to STOP");
-                // ????????????2s??
+                // Start buzzer for 2s when stopping
                 Drv_IODevice_StartBuzzer(2000);
                 break;
             default:
@@ -181,50 +171,57 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
 
 void App_Shockwave_Monitor(void)
 {
-    // ???????? mgr ?????
+    // Reserved for treat mgr monitoring / extended checks
 }
 
 bool App_Shockwave_StartCheck()
 {
-    SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     
-    if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
+    if(s_SWCtrlInfo.Trans.RxWorkState.work_state != WORK_STATE_START) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x00;
         return false;
     }
     
-    if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > SW_WORK_POINT_MAX) {
+    if(s_SWCtrlInfo.Trans.RxWorkState.work_time == 0 || s_SWCtrlInfo.Trans.RxWorkState.work_time > SW_WORK_POINT_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x01;
         return false;
     }
     
-    if(pTransData->RxWorkState.work_level == 0 || pTransData->RxWorkState.work_level > SW_WORK_LEVEL_MAX) {
+    if(s_SWCtrlInfo.Trans.RxWorkState.work_level == 0 || s_SWCtrlInfo.Trans.RxWorkState.work_level > SW_WORK_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x02;
         return false;
     }
     
-    if(pTransData->RxWorkState.frequency == 0 || pTransData->RxWorkState.frequency > SW_FREQ_LEVEL_MAX) {
+    if(s_SWCtrlInfo.Trans.RxWorkState.frequency == 0 || s_SWCtrlInfo.Trans.RxWorkState.frequency > SW_FREQ_LEVEL_MAX) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x03;
         return false;
     }
     
     if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x04;
         return false;
     }
     
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_SHOCKWAVE) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_PROBE_NOT_CONNECTED;
+        s_SWCtrlInfo.LastStartState = 0x05;
         return false;
     }
     
     if(s_SWCtrlInfo.TreatCounts == 0) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x06;
         return false;
     }
 
     if(s_SWCtrlInfo.RemainPoints == 0) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
+        s_SWCtrlInfo.LastStartState = 0x07;
         return false;
     }
     
@@ -234,25 +231,23 @@ bool App_Shockwave_StartCheck()
 
 void App_Shockwave_SetWorkParams(void)
 {
-    SW_TransData_t *pTransData = App_Comm_GetSWTransData();
+    // Set work/freq/points from Rx
+    s_SWCtrlInfo.WorkLevel = s_SWCtrlInfo.Trans.RxWorkState.work_level;
+    s_SWCtrlInfo.FreqLevel = s_SWCtrlInfo.Trans.RxWorkState.frequency;
+    s_SWCtrlInfo.RemainPoints = s_SWCtrlInfo.Trans.RxWorkState.work_time;
     
-    // ??????
-    s_SWCtrlInfo.WorkLevel = pTransData->RxWorkState.work_level;
-    s_SWCtrlInfo.FreqLevel = pTransData->RxWorkState.frequency;
-    s_SWCtrlInfo.RemainPoints = pTransData->RxWorkState.work_time;
-    
-    // ??????
+    // Cycle period from frequency level
     s_SWCtrlInfo.cyclePeriodMs = App_Shockwave_CalculateCyclePeriod(s_SWCtrlInfo.FreqLevel);
     
-    // ??PWM_ESW-??????
+    // PWM_ESW-N high time from work level
     s_SWCtrlInfo.pwmESW_NHighTimeMs = App_Shockwave_CalculateESW_NHighTime(s_SWCtrlInfo.WorkLevel);
     
-    // ?????pwr_control1??????????????????????????????????????
+    // Switch to READY channel (pwr_control1 etc.)
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
-	// ?????PWM???
+	// Init PWM state
 	s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
-	s_SWCtrlInfo.cycleStartTime = 0;  // ?????????
+	s_SWCtrlInfo.cycleStartTime = 0;  // Will be set on first cycle
 	Drv_TIM4_SetESW_P(false);
 	Drv_TIM4_SetESW_N(false);
     
@@ -266,10 +261,10 @@ bool App_Shockwave_IsCurrentNormal(void)
     uint16_t current = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_I);
     bool isNormal = true;
     
-    // ????PWM?????????
+    // Check current only when corresponding PWM is high
     if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_P_HIGH)
     {
-        // PWM_ESW+?????????????PWM_ESW+??????
+        // PWM_ESW+ high: check within ESW_P current range
         if(current < s_SWCtrlInfo.CurrentLow_ESW_P)
         {
             s_SWCtrlInfo.ErrorCode = E_SW_ERROR_CURRENT_ESW_P_LOW;
@@ -284,7 +279,7 @@ bool App_Shockwave_IsCurrentNormal(void)
     }
     else if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_N_HIGH)
     {
-        // PWM_ESW-?????????????PWM_ESW-??????
+        // PWM_ESW-N high: check within ESW_N current range
         if(current < s_SWCtrlInfo.CurrentLow_ESW_N)
         {
             s_SWCtrlInfo.ErrorCode = E_SW_ERROR_CURRENT_ESW_N_LOW;
@@ -306,7 +301,7 @@ bool App_Shockwave_IsVoltageNormal(void)
     uint16_t voltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_U);
     bool isNormal = true;
     
-    // ??????3V????
+    // Voltage threshold 3V (3000mV)
     if(voltage < SW_VOLTAGE_THRESHOLD_MV)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_VOLTAGE_LOW;
@@ -334,7 +329,7 @@ bool App_Shockwave_IsHeadTempNormal(void)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_TEMP_TOO_HIGH;
         LOG_W("SW: Head temperature too high: %d (limit: %d)", temp, s_SWCtrlInfo.TempLimit);
-        // ???????????????
+        // Over temp, stop treatment
         isNormal = false;
     }
     else
@@ -356,10 +351,10 @@ void App_Shockwave_ProcessPWM(void)
     switch(s_SWCtrlInfo.pwmState)
     {
         case E_SW_PWM_STATE_IDLE:
-            // ???????????
+            // Start new cycle when no cycle or cycle elapsed
             if(s_SWCtrlInfo.cycleStartTime == 0)
             {
-                // ?????????????
+                // First cycle or start of next cycle
                 s_SWCtrlInfo.cycleStartTime = currentTime;
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -368,19 +363,19 @@ void App_Shockwave_ProcessPWM(void)
             }
             else
             {
-                // ?????????
+                // Check if current cycle period elapsed
                 uint32_t cycleElapsed = currentTime - s_SWCtrlInfo.cycleStartTime;
                 if(cycleElapsed >= s_SWCtrlInfo.cyclePeriodMs)
                 {
-                    // ??????????
+                    // New cycle: start ESW_P high
                     s_SWCtrlInfo.cycleStartTime = currentTime;
                     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                     s_SWCtrlInfo.pwmStateStartTime = currentTime;
                     Drv_TIM4_SetESW_P(true);
                     Drv_TIM4_SetESW_N(false);
-                    s_SWCtrlInfo.RemainPoints--;  // ??????
+                    s_SWCtrlInfo.RemainPoints--;  // One point per cycle
                 }
-                // ??????
+                // Else remain idle until next cycle
             }
             break;
             
@@ -388,7 +383,7 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= SW_PWM_ESW_P_HIGH_TIME_MS)
             {
-                // PWM_ESW+????5ms????????????????
+                // PWM_ESW+ high 5ms done, turn off and enter wait
                 Drv_TIM4_SetESW_P(false);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_WAIT;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -399,7 +394,7 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= SW_PWM_ESW_P_WAIT_TIME_MS)
             {
-                // ??17ms??PWM_ESW-????
+                // After 17ms wait, turn on PWM_ESW-N
                 Drv_TIM4_SetESW_N(true);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_N_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
@@ -410,11 +405,9 @@ void App_Shockwave_ProcessPWM(void)
             elapsedTime = currentTime - s_SWCtrlInfo.pwmStateStartTime;
             if(elapsedTime >= s_SWCtrlInfo.pwmESW_NHighTimeMs)
             {
-                // PWM_ESW-??????????????
+                // PWM_ESW-N high time elapsed, turn off
                 Drv_TIM4_SetESW_N(false);
-                
-                // PWM_ESW-??????????????
-                // ??????????????
+                // Back to IDLE for next cycle
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             }
             break;
@@ -443,8 +436,6 @@ void App_ShockWave_CheckProbe()
 }
 void App_Shockwave_Process(void)
 {
-    static Drv_Timer_t TempMonitorTimer;
-    
     // Process the shockwave module
     App_Shockwave_UpdateStatus();
     App_Shockwave_RxDataHandle();
@@ -455,7 +446,7 @@ void App_Shockwave_Process(void)
     switch(s_SWCtrlInfo.runState)
     {
         case E_SW_RUN_INIT:
-            // ????????
+            // Load params and init treat counts state
             s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             if(App_Memory_LoadSWParams(&s_SWCtrlInfo.TreatParams)) {
                 s_SWCtrlInfo.TempLimit = s_SWCtrlInfo.TreatParams.TempLimit;
@@ -472,63 +463,45 @@ void App_Shockwave_Process(void)
             } else {
                 LOG_E("SW: Failed to load parameters");
                 s_SWCtrlInfo.ErrorCode = E_SW_ERROR_READ_PARAMS_FAILED;
+                s_SWCtrlInfo.CurrentHigh_ESW_P = 1000;
+                s_SWCtrlInfo.CurrentLow_ESW_P = 500;
+                s_SWCtrlInfo.CurrentHigh_ESW_N = 1000;
+                s_SWCtrlInfo.CurrentLow_ESW_N = 50;
+                s_SWCtrlInfo.TempLimit = 400;
             }
+            // Switch to SW channel (pwr_control3/4 etc.)
+            Drv_IODevice_ChangeChannel(CHANNEL_SW);
             App_Shockwave_ChangeState(E_SW_RUN_IDLE);
             break;
             
         case E_SW_RUN_IDLE:
-            // ??App_Shockwave_StartCheck??????????
+            // If StartCheck passes, set params and start working
             if(App_Shockwave_StartCheck()) {
-                // ??????????????
-                App_Shockwave_SetWorkParams();
-
-                // pwr_control3?pwr_control4????????????????
-                Drv_IODevice_ChangeChannel(CHANNEL_SW);
+                App_Shockwave_SetWorkParams();         
+                Drv_IODevice_ChangeChannel(CHANNEL_READY);
                 App_Shockwave_ChangeState(E_SW_RUN_WORKING);
             }
             break;
             
         case E_SW_RUN_WORKING:
-            
-            // ???????
-            if(App_Shockwave_StartCheck() == false || 
-               s_SWCtrlInfo.RemainPoints == 0){
+            // Check all conditions (align with US)
+            if(App_Shockwave_StartCheck() == false ||
+               s_SWCtrlInfo.RemainPoints == 0 ||
+               App_Shockwave_IsCurrentNormal() == false ||
+               App_Shockwave_IsVoltageNormal() == false ||
+               App_Shockwave_IsHeadTempNormal() == false) {
                 App_Shockwave_ChangeState(E_SW_RUN_STOP);
             } else {
-                // ??PWM??
                 App_Shockwave_ProcessPWM();
-                
-                // ??????PWM??????
-                if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_P_HIGH || 
-                   s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_N_HIGH) {
-                    if(App_Shockwave_IsCurrentNormal() == false) {
-                        // ??????????????
-                    }
-                }
-                
-                // ????
-                if(App_Shockwave_IsVoltageNormal() == false) {
-                    // ??????????????
-                }
-                
-                // ??????10ms????
-                if(Drv_Timer_Tick(&TempMonitorTimer, SW_TEMP_MONITOR_PERIOD_MS)) {
-                    if(App_Shockwave_IsHeadTempNormal() == false) {
-                        // ???????????????
-                        App_Shockwave_ChangeState(E_SW_RUN_STOP);
-                    }
-                }
             }
             break;
             
         case E_SW_RUN_STOP:
-            // ??PWM??
+            // Stop PWM output
             Drv_TIM4_SetESW_P(false);
             Drv_TIM4_SetESW_N(false);
-            // ??PWM???
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;
-            // ??????
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
             if(s_SWCtrlInfo.isWaitReturn)
             {
@@ -549,10 +522,7 @@ void App_Shockwave_Process(void)
  */
 void App_Shockwave_Init(void)
 {
-    // ???????????
     memset(&s_SWCtrlInfo, 0, sizeof(SW_CtrlInfo_t));
-    
-    // ?????????
     s_SWCtrlInfo.runState = E_SW_RUN_INIT;
     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
     s_SWCtrlInfo.ErrorCode = E_SW_ERROR_NONE;
@@ -560,9 +530,7 @@ void App_Shockwave_Init(void)
     s_SWCtrlInfo.FreqLevel = 0;
     s_SWCtrlInfo.RemainPoints = 0;
     s_SWCtrlInfo.TreatCounts = 0;
-    
-    /* TIM4 ?? BSP_Init -> BSP_TIM4_Init ??????? */
-    /* ???PWM?????? */
+    /* TIM4 and PWM pins init in BSP_Init -> BSP_TIM4_Init */
     Drv_TIM4_SetESW_P(false);
     Drv_TIM4_SetESW_N(false);
     

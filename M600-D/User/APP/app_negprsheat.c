@@ -185,19 +185,6 @@ void App_NegPrsHeat_WorkTimeHandle(void)
             }
             break;
         case E_TREAT_TIMES_WAIT:
-            if(pTransData->RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatCounts > 0)
-            {
-                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 100;  /* s -> 10ms */
-                s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-                s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
-                s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;
-                s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;
-                s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
-                s_NPHCtrlInfo.TreatCounts--;
-                s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatCounts;
-                App_Memory_SaveNPHParams(&s_NPHCtrlInfo.TreatParams);
-                LOG_I("NPH: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatCounts);
-            }
             break;
         default:
             break;

@@ -210,7 +210,6 @@ void Si5351_Init(void)
     Si5351_SetFrequency_ALL_RESET();
 	
     Si5351_StopPWM();
-    delay_ms(100);
 }
 
 /**

@@ -16,6 +16,8 @@
 #include "app_radiofreq.h"
 #include "app_negprsheat.h"
 #include "drv_delay.h"
+#include "drv_si5351.h"
+#include "drv_dac.h"
 
 TreatMgr_t s_TreatMgr;
 
@@ -93,6 +95,11 @@ void App_TreatMgr_Init(void)
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
     s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
     s_TreatMgr.eFootSwitchClosed = false;
+    // Initialize DAC
+    Drv_DAC_Init();
+    
+    // Initialize SI5351
+    Drv_SI5351_Init();
 }
 
 IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)

@@ -135,7 +135,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>??"</Name>
+          <Name>F</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -164,6 +164,11 @@
           <count>2</count>
           <WinNumber>1</WinNumber>
           <ItemText>s_lastRxWorkState</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_RFCtrlInfo,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

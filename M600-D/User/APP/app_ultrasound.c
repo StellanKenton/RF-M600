@@ -439,12 +439,6 @@ void App_Ultrasound_Init(void)
     s_USCtrlInfo.WorkLevel = 0;
     s_USCtrlInfo.TreatCounts = 0;
     
-    // Initialize DAC
-    Drv_DAC_Init();
-    
-    // Initialize SI5351
-    Drv_SI5351_Init();
-    
     LOG_I("Ultrasound module initialized");
 }
 

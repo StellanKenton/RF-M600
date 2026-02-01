@@ -66,7 +66,8 @@ typedef struct
     uint16_t CurrentHigh;        
     uint16_t CurrentLow;          
     uint16_t TempLimit;            
-    uint16_t TreatCounts;           
+    uint16_t TreatCounts;  
+    uint8_t LastStartState;
     
     uint8_t WorkLevel;             
     uint16_t HeadTemp;             

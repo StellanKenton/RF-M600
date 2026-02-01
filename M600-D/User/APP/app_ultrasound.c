@@ -16,6 +16,8 @@
 #include "drv_adc.h"
 #include "log.h"
 #include "drv_si5351.h"
+#include "drv_delay.h"
+#include "bsp_tim.h"
 
 static US_CtrlInfo_t s_USCtrlInfo;
 
@@ -162,36 +164,6 @@ void App_Ultrasound_SetFrequency(uint16_t frequency)
     LOG_I("Ultrasound frequency set to: %d kHz", frequency);
 }
 
-void App_UltraSound_SetLevel(uint8_t level)
-{
-    if(level > WORK_LEVEL_MAX)
-    {
-        LOG_E("Invalid level: %d (range: 0-%d)", level, WORK_LEVEL_MAX);
-        s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
-        return;
-    }
-    
-    // Calculate pulse repeat time: level 0=20ms, level 39=0.5ms
-    // pulse_time = 20ms - level * 0.5ms
-    float pulse_time_ms = PULSE_REPEAT_TIME_BASE_MS - (level * PULSE_REPEAT_TIME_STEP_MS);
-    
-    // Limit range
-    if(pulse_time_ms < PULSE_REPEAT_TIME_MIN_MS)
-    {
-        pulse_time_ms = PULSE_REPEAT_TIME_MIN_MS;
-    }
-    else if(pulse_time_ms > PULSE_REPEAT_TIME_MAX_MS)
-    {
-        pulse_time_ms = PULSE_REPEAT_TIME_MAX_MS;
-    }
-    
-    // Convert to microseconds and set to SI5351 (input unit: microseconds, 0.5ms = 500us)
-    uint16_t pulse_time_us = (uint16_t)(pulse_time_ms * 1000);
-    Drv_SI5351_SetPulseWidthus(pulse_time_us);
-    s_USCtrlInfo.WorkLevel = level;
-    LOG_I("Ultrasound level set to: %d (pulse time: %.1f ms)", level, pulse_time_ms);
-}
-
 
 bool App_UltraSound_StartCheck()
 {
@@ -267,13 +239,10 @@ void App_UltraSound_SetWorkParams(void)
     
     // Configure work voltage and frequency
     App_Ultrasound_SetFrequency(s_USCtrlInfo.Frequency);
-    App_UltraSound_SetLevel(s_USCtrlInfo.WorkLevel);
-    
     // Set initial work voltage
     Drv_DAC_SetVoltage(s_USCtrlInfo.Voltage);
-    
-    // Switch relay pwr_control1 to ultrasound channel
-    Drv_IODevice_ChangeChannel(CHANNEL_READY);
+    // delay 100ms
+    Drv_Delay_ms(100);
 }
 
 bool App_UltraSound_IsCurrentNormal(void)
@@ -314,33 +283,29 @@ bool App_UltraSound_IsCurrentNormal(void)
         newVoltage = currentVoltage + voltageAdjust;
         
         // Check if voltage adjustment exceeds limit (+/-2V)
-        int16_t voltageDiff = (int16_t)newVoltage - (int16_t)s_USCtrlInfo.VoltageBase;
-        if(voltageDiff > VOLTAGE_ADJUST_LIMIT_MV || voltageDiff < -VOLTAGE_ADJUST_LIMIT_MV)
+        // Limit voltage range
+        if(newVoltage > 2000)
         {
-            // Voltage over limit, report error
-            s_USCtrlInfo.ErrorCode = E_US_ERROR_VOLTAGE_OVER_LIMIT;
-            LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)", 
-                  newVoltage, s_USCtrlInfo.VoltageBase, VOLTAGE_ADJUST_LIMIT_MV);
-            isNormal = false;
+            newVoltage = 2000;
         }
-        else
+        else if(newVoltage <= 1000)
         {
-            // Limit voltage range
-            if(newVoltage > 3300)
-            {
-                newVoltage = 3300;
-            }
-            else if(newVoltage <= 0)
-            {
-                newVoltage = 0;
-            }
-            
-            // Set new voltage
-            Drv_DAC_SetVoltage(newVoltage);
-            LOG_I("Voltage adjusted: %d -> %d mV (current: %d)", currentVoltage, newVoltage, current);
+            newVoltage = 1000;
         }
+        
+        // Set new voltage
+        Drv_DAC_SetVoltage(newVoltage);
+        LOG_I("Voltage adjusted: %d -> %d mV (current: %d)", currentVoltage, newVoltage, current);
     }
     
+    if(if(currentVoltage > s_USCtrlInfo.VoltageBase + VOLTAGE_ADJUST_LIMIT_MV || currentVoltage < s_USCtrlInfo.VoltageBase - VOLTAGE_ADJUST_LIMIT_MV)
+    {
+        // Voltage over limit, report error
+        s_USCtrlInfo.ErrorCode = E_US_ERROR_VOLTAGE_OVER_LIMIT;
+        LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)", 
+              newVoltage, s_USCtrlInfo.VoltageBase, VOLTAGE_ADJUST_LIMIT_MV);
+        isNormal = false;
+    })
     return isNormal;
 }
 
@@ -359,7 +324,6 @@ bool App_UltraSound_IsHeadTempNormal(void)
         if(s_USCtrlInfo.WorkLevel > 0)
         {
             s_USCtrlInfo.WorkLevel--;
-            App_UltraSound_SetLevel(s_USCtrlInfo.WorkLevel);
             LOG_W("Auto reduce level to: %d", s_USCtrlInfo.WorkLevel);
         }
     }
@@ -422,7 +386,8 @@ void App_Ultrasound_Process(void)
                 s_USCtrlInfo.CurrentLow = 500;
                 s_USCtrlInfo.VoltageBase = 1000;
             }
-			
+			// Switch relay pwr_control1 to ultrasound channel
+            Drv_IODevice_ChangeChannel(CHANNEL_US);
             App_Ultrasound_ChangeState(E_US_RUN_IDLE);
             break;
         case E_US_RUN_IDLE:
@@ -430,9 +395,9 @@ void App_Ultrasound_Process(void)
             if(App_UltraSound_StartCheck()) {
                 // Set work params and start ultrasound transmit
                 App_UltraSound_SetWorkParams();
-
+                
                 // pwr_control2 switch to output enabled (normally disabled)
-                Drv_IODevice_ChangeChannel(CHANNEL_US);
+                Drv_IODevice_ChangeChannel(CHANNEL_READY);
                 App_Ultrasound_ChangeState(E_US_RUN_WORKING);
             }
             break;
@@ -497,6 +462,27 @@ US_SetConfig_Reply_t *App_UltraSound_GetConfig(void)
 US_RunState_EnumDef App_Ultrasound_GetRunState(void)
 {
     return s_USCtrlInfo.runState;
+}
+
+void App_Ultrasound_SetHighFreqPowerHandle(void)
+{
+    static uint32_t s_highFreqPowerWorkTime = 0;
+    uint32_t nowLevel = s_USCtrlInfo.WorkLevel*500;    // 500us per level
+    if(s_USCtrlInfo.runState == E_US_RUN_WORKING) {
+        if(s_highFreqPowerWorkTime >= 20000) {
+            s_highFreqPowerWorkTime = 0;
+        } else {
+            if(s_highFreqPowerWorkTime >= nowLevel) {
+                Drv_IO_HighFreqPowerOutput(false);
+            } else {
+                Drv_IO_HighFreqPowerOutput(true);
+            }
+        }
+        s_highFreqPowerWorkTime += 100;
+    } else {
+        s_highFreqPowerWorkTime = 0;
+        Drv_IO_HighFreqPowerOutput(false);
+    }
 }
 
 /**************************End of file********************************/

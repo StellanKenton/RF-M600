@@ -77,6 +77,7 @@ void Drv_IODevice_StartBuzzer(uint32_t duration_ms);
 void Drv_IODevice_ProcessBuzzer(void);
 void Drv_IODevice_SetProbeStatus(char *data);
 void Drv_IODevice_SetProbeStatus(char *data);
+void Drv_IO_HighFreqPowerOutput(bool enable);
 #ifdef __cplusplus
 }
 #endif

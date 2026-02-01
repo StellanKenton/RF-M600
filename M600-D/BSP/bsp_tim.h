@@ -19,6 +19,9 @@ void BSP_TIM2_Init(void);   /* TIM2: System tick timer, 100us interrupt, no PWM 
 void BSP_TIM4_Init(void);   /* TIM4: CH3(PB8), CH4(PB9), PWM, period 65535 */
 
 void BSP_TIM1_SetCompare1(uint16_t pulse);
+void BSP_TIM1_ComplementaryPWM_Enable(void);   /* enable TIM1 CH1/CH1N complementary PWM output */
+void BSP_TIM1_ComplementaryPWM_Disable(void);  /* disable TIM1 CH1/CH1N complementary PWM output */
+
 void BSP_TIM4_SetCompare3(uint16_t pulse);
 void BSP_TIM4_SetCompare4(uint16_t pulse);
 

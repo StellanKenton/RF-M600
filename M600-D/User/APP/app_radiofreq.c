@@ -238,8 +238,7 @@ void App_RadioFreq_SetWorkParams(void)
     
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
     Drv_DAC_SetVoltage(s_RFCtrlInfo.Voltage);
-    
-    Drv_SI5351_SetComplementaryPWM(RF_FREQUENCY_KHZ, 100);
+
     
     Drv_IODevice_ChangeChannel(CHANNEL_READY);
     

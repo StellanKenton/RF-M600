@@ -104,11 +104,13 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 1);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
+            Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 1);
             break;
         case CHANNEL_RF:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 1);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
+            Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 0);
             break;
         case CHANNEL_SW:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 0);
@@ -121,9 +123,6 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
             break;
         case CHANNEL_CLOSE:
-            Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 0);
-            Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
-            Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL1, 0);
             break;
         case CHANNEL_READY:
@@ -183,6 +182,19 @@ void Drv_IODevice_SetProbeStatus(char *data)
     else if (strcmp(data, "clear") == 0) {
         s_probeStatusOverridden = false;
         s_overrideProbeMode = E_IODEVICE_MODE_NOT_CONNECTED;
+    }
+}
+
+
+void Drv_IO_HighFreqPowerOutput(bool enable)
+{
+    if(enable)
+    {
+        Dal_Write_Pin(E_GPIO_OUT_CTR_OUT, 1);
+    }
+    else
+    {
+        Dal_Write_Pin(E_GPIO_OUT_CTR_OUT, 0);
     }
 }
 

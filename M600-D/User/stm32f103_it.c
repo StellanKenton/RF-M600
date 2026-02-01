@@ -9,6 +9,7 @@
 #include "drv_usart.h"
 #include "bsp_adc.h"
 #include "drv_delay.h"
+#include "app_ultrasound.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
  * ----------------------------------------------------------------------------- */
@@ -57,6 +58,7 @@ void TIM2_IRQHandler(void)
     {
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
         Drv_SysTick_Increment();  /* Updates g_SystemTimeUs by 100us */
+        App_Ultrasound_SetHighFreqPowerHandle();
     }
 }
 

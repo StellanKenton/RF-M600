@@ -36,3 +36,5 @@ void Drv_TIM4_SetESW_N(bool state)
 {
     Dal_TIM4_SetCompare4(state ? BSP_TIM4_PERIOD : 0);
 }
+
+

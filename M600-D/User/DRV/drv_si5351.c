@@ -9,10 +9,14 @@
 **********************************************************************************/
 #include "drv_si5351.h"
 #include "bsp_i2c.h"
+#include "bsp_SI5351.h"
+#include "bsp_tim.h"
+
 
 void Drv_SI5351_Init(void)
 {
     // Initialize the SI5351
+    PWM_Generate_Config();
 }
 
 uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
@@ -27,6 +31,7 @@ uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
         frequency = 1400;
     }
     // Set the frequency of the SI5351
+    PWM_Generate(frequency);
     return frequency;
 }
 
@@ -59,24 +64,16 @@ uint16_t Drv_SI5351_SetPulseWidthus(uint16_t pulse_width_us)
  *       used by MCU timers to generate complementary PWM, or SI5351 may
  *       have additional logic to generate PWM directly.
  */
-void Drv_SI5351_SetComplementaryPWM(uint16_t frequency_khz, uint16_t dead_time_ns)
+void Drv_SI5351_SetComplementaryPWM(bool enable)
 {
-    // TODO: Implement I2C communication with SI5351 to configure:
-    // 1. Set output frequency to frequency_khz (for RF: 1000kHz = 1MHz)
-    // 2. Configure complementary outputs (CLK0 and CLK1 or CLK2)
-    // 3. Set dead time between complementary signals
-    // 
-    // Example I2C register configuration:
-    // - SI5351_CLK0_CTRL: Configure CLK0 output
-    // - SI5351_CLK1_CTRL: Configure CLK1 output (complementary)
-    // - SI5351_CLK2_CTRL: Configure CLK2 output if needed
-    // - Calculate PLL and divider values for desired frequency
-    // - Configure phase offset for dead time
-    
-    // Placeholder: Set frequency (this may need to be called separately)
-    Drv_SI5351_SetFrequency(frequency_khz);
-    
-    /* TODO: DAL -> BSP_I2C1_Transmit(addr, buf, len) for SI5351 I2C config */
+    if(enable)
+    {
+        BSP_TIM1_ComplementaryPWM_Enable();
+    }
+    else
+    {
+        BSP_TIM1_ComplementaryPWM_Disable();
+    }
 }
 
 /**************************End of file********************************/

@@ -245,6 +245,7 @@ void App_NegPrsHeat_CheckProbe(void)
 void App_NegPrsHeat_Monitor(void)
 {
     /* Monitor logic (reserved for treatmgr integration) */
+    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetNTCValue(E_NTC_HAND);
 }
 
 bool App_NegPrsHeat_StartCheck()
@@ -314,9 +315,6 @@ void App_NegPrsHeat_SetWorkParams(void)
     
     /* Convert target pressure to ADC voltage */
     s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
-    
-    /* Switch to pwr_control1 / CHANNEL_READY */
-    Drv_IODevice_ChangeChannel(CHANNEL_READY);
     
     /* Init vacuum and motor off */
     s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
@@ -580,70 +578,57 @@ void App_NegPrsHeat_Process(void)
             } else {
                 LOG_E("NPH: Failed to load parameters");
                 s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_READ_PARAMS_FAILED;
+                s_NPHCtrlInfo.TreatParams.TempLimit = 400;
+                s_NPHCtrlInfo.TreatParams.PreheatEnable = 0;
+                s_NPHCtrlInfo.TempLimit = s_NPHCtrlInfo.TreatParams.TempLimit;
+                s_NPHCtrlInfo.PreheatEnable = (s_NPHCtrlInfo.TreatParams.PreheatEnable == 1);
             }
+            Drv_IODevice_ChangeChannel(CHANNEL_NH);
             App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
             break;
             
         case E_NPH_RUN_IDLE:
             /* If StartCheck passes, set params and go PREHEAT or WORKING */
-            if(App_NegPrsHeat_StartCheck()) {
-                App_NegPrsHeat_SetWorkParams();
-                
-                if(s_NPHCtrlInfo.PreheatEnable)
-                {
-                    App_NegPrsHeat_ChangeState(E_NPH_RUN_PREHEAT);
-                }
-                else
-                {
-                    /* No preheat: switch to NH and WORKING */
-                    Drv_IODevice_ChangeChannel(CHANNEL_NH);
+            if(s_NPHCtrlInfo.PreheatEnable)
+            {
+                App_NegPrsHeat_ChangeState(E_NPH_RUN_PREHEAT);
+            } else {
+                if(App_NegPrsHeat_StartCheck()) {
+                    App_NegPrsHeat_SetWorkParams();
+                    Drv_IODevice_ChangeChannel(CHANNEL_READY);
+
                     App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                 }
-            }
+            }   
             break;
             
         case E_NPH_RUN_PREHEAT:
             /* When preheat temp reached, switch to NH and WORKING */
             if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
             {
-                Drv_IODevice_ChangeChannel(CHANNEL_NH);
-                App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
-                LOG_I("NPH: Preheat completed, entering working state");
-            }
-            else if(App_NegPrsHeat_StartCheck() == false)
-            {
-                App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
-            }
-            else
-            {
-                /* Every 10ms: temp monitor and heat control */
-                if(Drv_Timer_Tick(&TempMonitorTimer, NPH_TEMP_MONITOR_PERIOD_MS)) {
-                    if(App_NegPrsHeat_IsHeadTempNormal() == false) {
-                        App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
-                    } else {
-                        App_NegPrsHeat_ControlTemperature();
-                    }
+                if(App_NegPrsHeat_StartCheck()) {
+                    App_NegPrsHeat_SetWorkParams();
+                    Drv_IODevice_ChangeChannel(CHANNEL_READY);
+
+                    App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                 }
+                LOG_I("NPH: Preheat completed, entering working state");
+            } 
+            if(App_NegPrsHeat_IsHeadTempNormal() == false) {
+                App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
+            } else {
+                App_NegPrsHeat_ControlTemperature();
             }
             break;
             
         case E_NPH_RUN_WORKING:
             /* StartCheck fail or remain time 0 -> STOP */
+            App_NegPrsHeat_ControlTemperature();
+            App_NegPrsHeat_ProcessVacuum(); 
             if(App_NegPrsHeat_StartCheck() == false ||
+               App_NegPrsHeat_IsHeadTempNormal() == false ||
                s_NPHCtrlInfo.TreatCounts == 0){
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
-            } else {
-                /* Every 10ms: temp monitor and heat control */
-                if(Drv_Timer_Tick(&TempMonitorTimer, NPH_TEMP_MONITOR_PERIOD_MS)) {
-                    if(App_NegPrsHeat_IsHeadTempNormal() == false) {
-                        App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
-                    } else {
-                        App_NegPrsHeat_ControlTemperature();
-                    }
-                }
-                
-                App_NegPrsHeat_ProcessVacuum();
-                /* TreatCounts decremented in WorkTimeHandle */
             }
             break;
             

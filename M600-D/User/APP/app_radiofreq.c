@@ -83,7 +83,7 @@ void App_RadioFreq_RxDataHandle(void)
     {
         s_RFCtrlInfo.TempLimit = pTransData->RxConfig.temp_limit;
         s_RFCtrlInfo.Trans.RxConfig.temp_limit = s_RFCtrlInfo.TempLimit;
-        s_RFCtrlInfo.TreatParams.TempLimit = s_RFCtrlInfo.TempLimit;ss
+        s_RFCtrlInfo.TreatParams.TempLimit = s_RFCtrlInfo.TempLimit;
         App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
         pTransData->flag.bits.Rely_Config = 0;
         LOG_I("RF Config updated: temp_limit=%d", s_RFCtrlInfo.TempLimit);

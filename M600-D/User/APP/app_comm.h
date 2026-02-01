@@ -318,7 +318,7 @@ typedef struct
     Heat_ByteUnion flag;
     Heat_GetStatus_Reply_t TxStatus;
     Heat_SetWorkState_Send_t RxWorkState;
-    Heat_SetPreheat_Send_t RxPreheat;
+    Heat_SetPreheat_Send_t RxConfig;
 } Heat_TransData_t;
 
 Heat_TransData_t *App_Comm_GetHeatTransData(void);

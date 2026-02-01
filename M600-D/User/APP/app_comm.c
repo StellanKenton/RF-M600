@@ -220,9 +220,9 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     if(pRxFrame->data_len < 5){
                         break;
                     }
-                    s_AppCommInfo.Heat.RxPreheat.preheat_state = pData[0];
-                    s_AppCommInfo.Heat.RxPreheat.work_time = pData[1] | (uint16_t)pData[2] << 8;
-                    s_AppCommInfo.Heat.RxPreheat.temp_limit = pData[3] | (uint16_t)pData[4] << 8;
+                    s_AppCommInfo.Heat.RxConfig.preheat_state = pData[0];
+                    s_AppCommInfo.Heat.RxConfig.work_time = pData[1] | (uint16_t)pData[2] << 8;
+                    s_AppCommInfo.Heat.RxConfig.temp_limit = pData[3] | (uint16_t)pData[4] << 8;
                     s_AppCommInfo.Heat.flag.bits.Rely_Config = 1;
                     break;
             }

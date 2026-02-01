@@ -102,11 +102,11 @@ void App_NegPrsHeat_RxDataHandle(void)
     if(pTransData->flag.bits.Rely_Config)
     {
         /* RxPreheat requests preheat: apply temp_limit and work_time */
-        if(pTransData->RxPreheat.preheat_state == 0x01)
+        if(pTransData->RxConfig.preheat_state == 0x01)
         {
             s_NPHCtrlInfo.PreheatEnable = true;
-            s_NPHCtrlInfo.PreheatTempLimit = pTransData->RxPreheat.temp_limit;
-            s_NPHCtrlInfo.PreheatTime = pTransData->RxPreheat.work_time;
+            s_NPHCtrlInfo.PreheatTempLimit = pTransData->RxConfig.temp_limit;
+            s_NPHCtrlInfo.PreheatTime = pTransData->RxConfig.work_time;
         }
         else
         {
@@ -550,9 +550,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
 }
 
 void App_NegPrsHeat_Process(void)
-{
-    static Drv_Timer_t TempMonitorTimer;
-    
+{   
     // Process the negative pressure heat module
     App_NegPrsHeat_UpdateStatus();
     App_NegPrsHeat_RxDataHandle();

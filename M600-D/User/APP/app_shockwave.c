@@ -83,9 +83,8 @@ void App_Shockwave_UpdateStatus(void)
 
 void App_Shockwave_RxDataHandle(void)
 {
-    SW_TransData_t *pTransData = App_Comm_GetSWTransData();)
+    SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     s_SWCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
-    s_SWCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
 }
 
 void App_Shockwave_WorkTimeHandle(void)

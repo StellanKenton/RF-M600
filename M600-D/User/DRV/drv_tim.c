@@ -1,40 +1,16 @@
 /************************************************************************************
  * @file     : drv_tim.c
- * @brief    : Timer driver - DRV calls DAL, DAL calls BSP (Std lib)
+ * @brief    : Timer driver - ESW_P/ESW_N via GPIO (PB8/PB9), no TIM4
  ***********************************************************************************/
 #include "drv_tim.h"
-#include "bsp_tim.h"
-
-#define BSP_TIM4_PERIOD  65535u
-
-static void Dal_TIM4_SetCompare3(uint16_t pulse)
-{
-    BSP_TIM4_SetCompare3(pulse);
-}
-
-static void Dal_TIM4_SetCompare4(uint16_t pulse)
-{
-    BSP_TIM4_SetCompare4(pulse);
-}
-
-void Drv_TIM4_SetCompare3(uint16_t pulse)
-{
-    Dal_TIM4_SetCompare3(pulse);
-}
-
-void Drv_TIM4_SetCompare4(uint16_t pulse)
-{
-    Dal_TIM4_SetCompare4(pulse);
-}
+#include "bsp_gpio.h"
 
 void Drv_TIM4_SetESW_P(bool state)
 {
-    Dal_TIM4_SetCompare3(state ? BSP_TIM4_PERIOD : 0);
+    BSP_GPIO_WritePin(BSP_GPIO_OUT_ESW_P, state ? 1 : 0);
 }
 
 void Drv_TIM4_SetESW_N(bool state)
 {
-    Dal_TIM4_SetCompare4(state ? BSP_TIM4_PERIOD : 0);
+    BSP_GPIO_WritePin(BSP_GPIO_OUT_ESW_N, state ? 1 : 0);
 }
-
-

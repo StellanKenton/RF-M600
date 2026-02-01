@@ -76,14 +76,14 @@ void App_RadioFreq_RxDataHandle(void)
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     /* Copy RxWorkState and RxConfig to local Trans (align with US process) */
-    s_RFCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
-    s_RFCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
+    
+    
 
     if(pTransData->flag.bits.Rely_Config)
     {
         s_RFCtrlInfo.TempLimit = pTransData->RxConfig.temp_limit;
         s_RFCtrlInfo.Trans.RxConfig.temp_limit = s_RFCtrlInfo.TempLimit;
-        s_RFCtrlInfo.TreatParams.TempLimit = s_RFCtrlInfo.TempLimit;
+        s_RFCtrlInfo.TreatParams.TempLimit = s_RFCtrlInfo.TempLimit;ss
         App_Memory_SaveRFParams(&s_RFCtrlInfo.TreatParams);
         pTransData->flag.bits.Rely_Config = 0;
         LOG_I("RF Config updated: temp_limit=%d", s_RFCtrlInfo.TempLimit);

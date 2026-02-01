@@ -530,7 +530,7 @@ void App_Shockwave_Init(void)
     s_SWCtrlInfo.FreqLevel = 0;
     s_SWCtrlInfo.RemainPoints = 0;
     s_SWCtrlInfo.TreatCounts = 0;
-    /* TIM4 and PWM pins init in BSP_Init -> BSP_TIM4_Init */
+    /* ESW_P/ESW_N (PB8/PB9) init in BSP_Init -> BSP_GPIO_Init */
     Drv_TIM4_SetESW_P(false);
     Drv_TIM4_SetESW_N(false);
     

@@ -1,6 +1,6 @@
 /************************************************************************************
  * @file     : drv_tim.h
- * @brief    : Timer driver - DRV API, DAL calls BSP (Std lib). TIM4 CH3/CH4 for ESW.
+ * @brief    : Timer driver - ESW_P/ESW_N via GPIO (PB8/PB9), shockwave compatible.
  ***********************************************************************************/
 #ifndef DRV_TIM_H
 #define DRV_TIM_H
@@ -13,10 +13,8 @@
 extern "C" {
 #endif
 
-void Drv_TIM4_SetCompare3(uint16_t pulse);
-void Drv_TIM4_SetCompare4(uint16_t pulse);
-void Drv_TIM4_SetESW_P(bool state);   /* TIM4_CH3: high = 65535, low = 0 */
-void Drv_TIM4_SetESW_N(bool state);   /* TIM4_CH4: high = 65535, low = 0 */
+void Drv_TIM4_SetESW_P(bool state);   /* PB8 GPIO: ESW+ */
+void Drv_TIM4_SetESW_N(bool state);   /* PB9 GPIO: ESW- */
 
 #ifdef __cplusplus
 }

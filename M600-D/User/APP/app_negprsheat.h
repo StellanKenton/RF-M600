@@ -5,7 +5,7 @@
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
-* @copyright: Copyright (c) 2050
+* @copyright: Copyright (c) 2025
 ***********************************************************************************/
 #ifndef APP_NEGPRSHEAT_H
 #define APP_NEGPRSHEAT_H
@@ -23,7 +23,7 @@ extern "C" {
 #include "app_memory.h"
 #include "app_treatmgr.h"
 
-/* ???????? */
+/* NPH parameter limits: work time(s), pressure(KPa), suck/release(ms), temp monitor */
 #define NPH_WORK_TIME_MAX           3600        
 #define NPH_PRESSURE_MIN_KPA        10          
 #define NPH_PRESSURE_MAX_KPA        100         

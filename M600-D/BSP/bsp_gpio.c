@@ -25,7 +25,7 @@ void BSP_GPIO_Init(void)
     GPIO_ResetBits(GPIOC, MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
                           pwr_control2_Pin | pwr_control1_Pin);
     GPIO_ResetBits(GPIOB, MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
-                          CTR_HP_lose_Pin | CTR_HEAT_HP_Pin);
+                          CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin);
     GPIO_ResetBits(CTR_FAN_Port, CTR_FAN_Pin);
 
     /* GPIOC outputs: Buzzer, pwr_control1~4 */
@@ -40,9 +40,9 @@ void BSP_GPIO_Init(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* GPIOB outputs: MCU_CTR_OUT, MCU_CTR_US_RF, CTR_HP_motor, CTR_HP_lose, CTR_HEAT_HP */
+    /* GPIOB outputs: MCU_CTR_OUT, MCU_CTR_US_RF, CTR_HP_motor, CTR_HP_lose, CTR_HEAT_HP, ESW_P(PB8), ESW_N(PB9) */
     GPIO_InitStructure.GPIO_Pin   = MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
-                                    CTR_HP_lose_Pin | CTR_HEAT_HP_Pin;
+                                    CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -90,6 +90,8 @@ void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state)
         case BSP_GPIO_OUT_CTR_HP_MOTOR: port = CTR_HP_motor_Port;  gpio_pin = CTR_HP_motor_Pin;   break;
         case BSP_GPIO_OUT_CTR_HP_LOSE: port = CTR_HP_lose_Port;    gpio_pin = CTR_HP_lose_Pin;    break;
         case BSP_GPIO_OUT_CTR_HEAT_HP: port = CTR_HEAT_HP_Port;    gpio_pin = CTR_HEAT_HP_Pin;    break;
+        case BSP_GPIO_OUT_ESW_P:       port = ESW_P_Port;          gpio_pin = ESW_P_Pin;         break;
+        case BSP_GPIO_OUT_ESW_N:       port = ESW_N_Port;          gpio_pin = ESW_N_Pin;         break;
         default: return;
     }
     if (state)
@@ -106,7 +108,6 @@ void BSP_Init(void)
     BSP_DAC_Init();
     BSP_TIM1_Init();
     BSP_TIM2_Init();
-    BSP_TIM4_Init();
     BSP_USART1_Init(115200);
     BSP_USART2_Init(115200);
     BSP_I2C1_Init();

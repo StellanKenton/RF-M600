@@ -37,6 +37,10 @@ extern "C" {
 #define CTR_HEAT_HP_Port     GPIOB
 #define CTR_FAN_Pin          GPIO_Pin_2
 #define CTR_FAN_Port         GPIOD
+#define ESW_P_Pin            GPIO_Pin_8   /* PB8, shockwave ESW+ (was TIM4_CH3) */
+#define ESW_P_Port           GPIOB
+#define ESW_N_Pin            GPIO_Pin_9   /* PB9, shockwave ESW- (was TIM4_CH4) */
+#define ESW_N_Port           GPIOB
 
 /* Inputs */
 #define MCU_FOOT_Pin         GPIO_Pin_0
@@ -78,6 +82,8 @@ typedef enum {
     BSP_GPIO_OUT_CTR_HP_MOTOR,
     BSP_GPIO_OUT_CTR_HP_LOSE,
     BSP_GPIO_OUT_CTR_HEAT_HP,
+    BSP_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
+    BSP_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
     BSP_GPIO_OUT_MAX
 } BSP_GPIO_Output_t;
 
@@ -85,7 +91,7 @@ void BSP_GPIO_Init(void);
 uint8_t BSP_GPIO_ReadPin(BSP_GPIO_Input_t pin);   /* 0=low, 1=high */
 void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state);  /* 0=low, 1=high */
 
-/** Call all M600 BSP inits: GPIO, ADC, TIM1, TIM4, USART1(115200), USART2(115200). */
+/** Call all M600 BSP inits: GPIO, ADC, TIM1, TIM2, USART1(115200), USART2(115200). PB8/PB9 as GPIO (ESW_P/ESW_N). */
 void BSP_Init(void);
 
 #ifdef __cplusplus

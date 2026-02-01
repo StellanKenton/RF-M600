@@ -364,7 +364,8 @@ class SerialAssistant:
             data_bytes.append(0x00)
         elif cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
-                work_state = self.get_param_value('work_state') or 1
+                v = self.get_param_value('work_state')
+                work_state = v if v is not None else 1
                 work_time = self.get_param_value('work_time') or 60
                 work_level = self.get_param_value('work_level') or 10
                 data_bytes.append(work_state)
@@ -372,7 +373,8 @@ class SerialAssistant:
                 data_bytes.append((work_time >> 8) & 0xFF)
                 data_bytes.append(work_level)
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                work_state = self.get_param_value('work_state') or 1
+                v = self.get_param_value('work_state')
+                work_state = v if v is not None else 1
                 work_time = self.get_param_value('work_time') or 60
                 work_level = self.get_param_value('work_level') or 10
                 data_bytes.append(work_state)
@@ -380,7 +382,8 @@ class SerialAssistant:
                 data_bytes.append((work_time >> 8) & 0xFF)
                 data_bytes.append(work_level)
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
-                work_state = self.get_param_value('work_state') or 1
+                v = self.get_param_value('work_state')
+                work_state = v if v is not None else 1
                 work_time = self.get_param_value('work_time') or 60
                 work_level = self.get_param_value('work_level') or 10
                 frequency = self.get_param_value('frequency') or 8
@@ -390,7 +393,8 @@ class SerialAssistant:
                 data_bytes.append(work_level)
                 data_bytes.append(frequency)
             elif module == PROTOCOL_MODULE_HEAT:
-                work_state = self.get_param_value('work_state') or 1
+                v = self.get_param_value('work_state')
+                work_state = v if v is not None else 1
                 work_time = self.get_param_value('work_time') or 60
                 pressure = self.get_param_value('pressure') or 50
                 suck_time = self.get_param_value('suck_time') or 10
@@ -422,7 +426,8 @@ class SerialAssistant:
                 data_bytes.append(temp_limit & 0xFF)
                 data_bytes.append((temp_limit >> 8) & 0xFF)
             elif module == PROTOCOL_MODULE_HEAT:
-                preheat_state = self.get_param_value('preheat_state') or 1
+                pv = self.get_param_value('preheat_state')
+                preheat_state = pv if pv is not None else 1
                 work_time = self.get_param_value('work_time') or 300
                 temp_limit = self.get_param_value('temp_limit') or 400
                 data_bytes.append(preheat_state)

@@ -7,6 +7,66 @@
 
 #define ADC_REF_MV      3300u
 #define ADC_RESOLUTION  4096u
+#define NTC_SERIES_R    10000u  /* series R with NTC, ohm */
+#define NTC_RAW_OPEN    3900u   /* ADC raw > this: NTC open */
+#define NTC_RAW_SHORT   50u     /* ADC raw < this: NTC short */
+
+/* NTC 10R table: -40~105C, per 1C, from spec (10R NTC) */
+static const uint32_t s_ntc_temp_table[] = {
+    30488, 28599, 26838, 25195, 23663, 22233, 20897, 19651, 18486, 17397,
+    16380, 15428, 14538, 13705, 12925, 12195, 11511, 10869, 10267, 9703,
+    9173, 8675, 8208, 7768, 7355, 6967, 6601, 6256, 5932, 5626,
+    5338, 5066, 4810, 4568, 4339, 4123, 3919, 3726, 3543, 3371,
+    3204, 3053, 2906, 2768, 2636, 2512, 2394, 2282, 2175, 2074,
+    1979, 1888, 1802, 1720, 1642, 1568, 1498, 1431, 1367, 1307,
+    1249, 1195, 1143, 1093, 1046, 1000, 958, 917, 878, 841,
+    806, 772, 740, 710, 681, 653, 626, 601, 577, 553,
+    531, 510, 490, 471, 452, 435, 418, 402, 387, 372,
+    358, 344, 331, 319, 307, 296, 285, 275, 265, 255,
+    246, 237, 229, 221, 213, 205, 198, 191, 185, 178,
+    172, 166, 161, 155, 150, 145, 140, 136, 131, 127,
+    123, 119, 115, 111, 108, 105, 101, 98, 95, 92,
+    89, 86, 84, 81, 79, 76, 74, 72, 70, 68,
+    66, 64, 62, 60, 58, 57,
+};
+#define NTC_TABLE_SIZE  (sizeof(s_ntc_temp_table) / sizeof(s_ntc_temp_table[0]))
+
+static ADC_Channel_EnumDef Dal_NTC_MapChannel(NTC_Type_EnumDef ntcType)
+{
+    switch (ntcType) {
+        case E_NTC_HAND: return E_ADC_CHANNEL_HAND_NTC;
+        case E_NTC_MAIN: return E_ADC_CHANNEL_Heat_REF01;
+        default:         return E_ADC_CHANNEL_MAX;
+    }
+}
+
+/* Convert NTC ADC raw to temp: return (temp+40)*10, -40C=0, 0C=400, 105C=1450 */
+static uint16_t Dal_NTC_ADCToTemp(uint32_t adcRaw)
+{
+    uint32_t tempMv = ((uint32_t)ADC_REF_MV * adcRaw) / ADC_RESOLUTION;
+    uint32_t vDiff = ADC_REF_MV - tempMv;
+    if (vDiff == 0u)
+        return (uint16_t)((NTC_TABLE_SIZE - 1) * 10u);
+    uint32_t rOhm = (tempMv * NTC_SERIES_R) / vDiff;
+    uint32_t r10 = rOhm / 10u;
+
+    uint16_t numN = 0, numP;
+    for (uint16_t i = 0; i < NTC_TABLE_SIZE; i++) {
+        if (r10 > s_ntc_temp_table[i]) {
+            numP = i;
+            if (numP == 0)
+                return 0u;
+            uint32_t d = s_ntc_temp_table[numN] - s_ntc_temp_table[numP];
+            if (d == 0u)
+                return (uint16_t)(numN * 10u);
+            uint32_t m = s_ntc_temp_table[numN] - r10;
+            uint16_t frac = (uint16_t)((10u * m) / d);
+            return (uint16_t)(frac + numN * 10u);
+        }
+        numN = i;
+    }
+    return (uint16_t)((NTC_TABLE_SIZE - 1) * 10u);
+}
 
 static BSP_ADC_Channel_t Dal_ADC_MapChannel(ADC_Channel_EnumDef ch)
 {
@@ -99,4 +159,17 @@ uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel)
         case E_ADC_CHANNEL_HAND_NTC: return Drv_ADC_ReadHandNTC();
         default:                     return 0;
     }
+}
+
+uint16_t Drv_ADC_GetNTCValue(NTC_Type_EnumDef ntcType)
+{
+    if (ntcType >= E_NTC_MAX)
+        return 0;
+    ADC_Channel_EnumDef ch = Dal_NTC_MapChannel(ntcType);
+    uint16_t raw = Dal_ADC_ReadChannel(ch);
+    if (raw > NTC_RAW_OPEN)
+        return NTC_FAULT_OPEN;
+    if (raw < NTC_RAW_SHORT)
+        return NTC_FAULT_SHORT;
+    return Dal_NTC_ADCToTemp(raw);
 }

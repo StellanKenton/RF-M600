@@ -224,7 +224,6 @@ bool App_UltraSound_StartCheck()
     }
     
     // All checks passed
-    LOG_I("US: Start check passed");
     return true;
 }
 
@@ -298,31 +297,30 @@ bool App_UltraSound_IsCurrentNormal(void)
         LOG_I("Voltage adjusted: %d -> %d mV (current: %d)", currentVoltage, newVoltage, current);
     }
     
-    if(if(currentVoltage > s_USCtrlInfo.VoltageBase + VOLTAGE_ADJUST_LIMIT_MV || currentVoltage < s_USCtrlInfo.VoltageBase - VOLTAGE_ADJUST_LIMIT_MV)
+    if(currentVoltage > s_USCtrlInfo.VoltageBase + VOLTAGE_ADJUST_LIMIT_MV || currentVoltage < s_USCtrlInfo.VoltageBase - VOLTAGE_ADJUST_LIMIT_MV)
     {
         // Voltage over limit, report error
         s_USCtrlInfo.ErrorCode = E_US_ERROR_VOLTAGE_OVER_LIMIT;
         LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)", 
               newVoltage, s_USCtrlInfo.VoltageBase, VOLTAGE_ADJUST_LIMIT_MV);
         isNormal = false;
-    })
+    }
     return isNormal;
 }
 
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
-    uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
+    uint16_t temp = Drv_ADC_GetNTCValue(E_NTC_HAND);
     s_USCtrlInfo.HeadTemp = temp;
     
     if(temp > s_USCtrlInfo.TempLimit)
     {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_TEMP_TOO_HIGH;
-        LOG_W("Head temperature too high: %d (limit: %d)", temp, s_USCtrlInfo.TempLimit);
-        
         // Temp over limit, auto reduce level (min 0)
         if(s_USCtrlInfo.WorkLevel > 0)
         {
+            LOG_W("Head temperature too high: %d (limit: %d)", temp, s_USCtrlInfo.TempLimit);
             s_USCtrlInfo.WorkLevel--;
             LOG_W("Auto reduce level to: %d", s_USCtrlInfo.WorkLevel);
         }

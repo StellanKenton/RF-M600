@@ -13,6 +13,12 @@ extern "C" {
 #endif
 
 typedef enum {
+    E_NTC_HAND = 0,   /* 换能器/手柄NTC (transducer IGBT temp) - ADC13 */
+    E_NTC_MAIN,       /* 电路板NTC (circuit board temp) - ADC6 Heat_REF01 */
+    E_NTC_MAX
+} NTC_Type_EnumDef;
+
+typedef enum {
     E_ADC_CHANNEL_US_I = 0,
     E_ADC_CHANNEL_RF_I,
     E_ADC_CHANNEL_Heat_REF02,
@@ -30,6 +36,11 @@ uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
 uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel);
 uint16_t Drv_ADC_ReadVOUT(void);
 uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel);
+
+/* NTC temperature: returns (temp+40)*10, 0~1450 for -40~105C; fault: NTC_FAULT_OPEN/SHORT */
+#define NTC_FAULT_OPEN  0xFFFFu
+#define NTC_FAULT_SHORT 0xFFEEu
+uint16_t Drv_ADC_GetNTCValue(NTC_Type_EnumDef ntcType);
 
 #ifdef __cplusplus
 }

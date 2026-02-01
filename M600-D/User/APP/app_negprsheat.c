@@ -56,41 +56,39 @@ static uint8_t App_NegPrsHeat_VoltageToPressure(uint16_t voltage_mv)
 
 void App_NegPrsHeat_UpdateStatus(void)
 {
-    Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
-    
     // Update work state
     if(s_NPHCtrlInfo.runState == E_NPH_RUN_WORKING) {
-        pTransData->TxStatus.work_state = 0x01;
+        s_NPHCtrlInfo.Trans.TxStatus.work_state = 0x01;
     } else if(s_NPHCtrlInfo.runState == E_NPH_RUN_PREHEAT) {
-        pTransData->TxStatus.preheat_state = 0x01;
-        pTransData->TxStatus.work_state = 0x00;
+        s_NPHCtrlInfo.Trans.TxStatus.preheat_state = 0x01;
+        s_NPHCtrlInfo.Trans.TxStatus.work_state = 0x00;
     } else {
-        pTransData->TxStatus.work_state = 0x00;
-        pTransData->TxStatus.preheat_state = 0x00;
+        s_NPHCtrlInfo.Trans.TxStatus.work_state = 0x00;
+        s_NPHCtrlInfo.Trans.TxStatus.preheat_state = 0x00;
     }
     
-    pTransData->TxStatus.temp_limit = s_NPHCtrlInfo.WorkTempLimit;
-    pTransData->TxStatus.remain_heat_time = s_NPHCtrlInfo.TreatRemainTimes / 100;  /* 10ms -> s */
-    pTransData->TxStatus.suck_time = s_NPHCtrlInfo.SuckTime;
-    pTransData->TxStatus.release_time = s_NPHCtrlInfo.ReleaseTime;
-    pTransData->TxStatus.pressure = s_NPHCtrlInfo.Pressure;
-    pTransData->TxStatus.head_temp = s_NPHCtrlInfo.HeadTemp;
-    pTransData->TxStatus.preheat_temp_limit = s_NPHCtrlInfo.PreheatTempLimit;
-    pTransData->TxStatus.remain_preheat_time = s_NPHCtrlInfo.PreheatTime;
+    s_NPHCtrlInfo.Trans.TxStatus.temp_limit = s_NPHCtrlInfo.WorkTempLimit;
+    s_NPHCtrlInfo.Trans.TxStatus.remain_heat_time = s_NPHCtrlInfo.TreatCounts / 100;  /* 10ms -> s */
+    s_NPHCtrlInfo.Trans.TxStatus.suck_time = s_NPHCtrlInfo.SuckTime;
+    s_NPHCtrlInfo.Trans.TxStatus.release_time = s_NPHCtrlInfo.ReleaseTime;
+    s_NPHCtrlInfo.Trans.TxStatus.pressure = s_NPHCtrlInfo.Pressure;
+    s_NPHCtrlInfo.Trans.TxStatus.head_temp = s_NPHCtrlInfo.HeadTemp;
+    s_NPHCtrlInfo.Trans.TxStatus.preheat_temp_limit = s_NPHCtrlInfo.PreheatTempLimit;
+    s_NPHCtrlInfo.Trans.TxStatus.remain_preheat_time = s_NPHCtrlInfo.PreheatTime;
     
     /* Get probe/foot state from treatmgr and update conn_state */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
     bool footClosed = App_TreatMgr_GetFootSwitchClosed();
     if (headConnected && footClosed) {
-        pTransData->TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_CLOSED;
+        s_NPHCtrlInfo.Trans.TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_CLOSED;
     } else if (!headConnected && footClosed) {
-        pTransData->TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_CLOSED;
+        s_NPHCtrlInfo.Trans.TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_CLOSED;
     } else if (headConnected && !footClosed) {
-        pTransData->TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_OPEN;
+        s_NPHCtrlInfo.Trans.TxStatus.conn_state = CONN_STATE_CONNECTED_FOOT_OPEN;
     } else {
-        pTransData->TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_OPEN;
+        s_NPHCtrlInfo.Trans.TxStatus.conn_state = CONN_STATE_DISCONNECTED_FOOT_OPEN;
     }
-    pTransData->TxStatus.error_code = s_NPHCtrlInfo.ErrorCode;
+    s_NPHCtrlInfo.Trans.TxStatus.error_code = s_NPHCtrlInfo.ErrorCode;
 }
 
 void App_NegPrsHeat_RxDataHandle(void)
@@ -98,7 +96,8 @@ void App_NegPrsHeat_RxDataHandle(void)
     Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
     
     /* RxWorkState and WorkTimeHandle are processed in WorkTimeHandle() */
-    
+    s_NPHCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
+    s_NPHCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
     /* Config flag set: apply RxPreheat and save params */
     if(pTransData->flag.bits.Rely_Config)
     {
@@ -128,58 +127,57 @@ void App_NegPrsHeat_RxDataHandle(void)
 
 void App_NegPrsHeat_WorkTimeHandle(void)
 {
-    Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
     static uint8_t s_lastRxWorkState = 0x00;
 
-    if(pTransData->RxWorkState.work_state != s_lastRxWorkState) {
-        if (pTransData->RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.work_state != s_lastRxWorkState) {
+        if (s_NPHCtrlInfo.Trans.RxWorkState.work_state == WORK_STATE_RESET && s_lastRxWorkState != WORK_STATE_RESET) {
             s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_RESET;
         }
-        s_lastRxWorkState = pTransData->RxWorkState.work_state;
+        s_lastRxWorkState = s_NPHCtrlInfo.Trans.RxWorkState.work_state;
     }
 
     switch(s_NPHCtrlInfo.TreatCountsState)
     {
         case E_TREAT_TIMES_POWER_ON:
-            if(pTransData->RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatCounts > 0)
+            if(s_NPHCtrlInfo.Trans.RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatRemainTimes > 0)
             {
-                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
-                s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-                s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
-                s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;
-                s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;
+                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> 10ms */
+                s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
+                s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
+                s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;
+                s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;
                 s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
-                s_NPHCtrlInfo.TreatCounts--;
-                s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatCounts;
+                s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatRemainTimes - 1;
+                s_NPHCtrlInfo.TreatRemainTimes--;
                 App_Memory_SaveNPHParams(&s_NPHCtrlInfo.TreatParams);
-                LOG_I("NPH: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatCounts);
+                LOG_I("NPH: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatRemainTimes);
             }
             break;
         case E_TREAT_TIMES_RESET:
-            if(pTransData->RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatCounts > 0)
+            if(s_NPHCtrlInfo.Trans.RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatRemainTimes > 0)
             {
-                s_NPHCtrlInfo.TreatRemainTimes = pTransData->RxWorkState.work_time * 1000;  /* s -> 10ms */
-                s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-                s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
-                s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;
-                s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;
+                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> 10ms */
+                s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
+                s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
+                s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;
+                s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;
                 s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
-                s_NPHCtrlInfo.TreatCounts--;
-                s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatCounts;
+                s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatRemainTimes - 1;
+                s_NPHCtrlInfo.TreatRemainTimes--;
                 App_Memory_SaveNPHParams(&s_NPHCtrlInfo.TreatParams);
-                LOG_I("NPH: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatCounts);
+                LOG_I("NPH: Remaining treat times decreased to: %d", s_NPHCtrlInfo.TreatRemainTimes);
             }
             break;
         case E_TREAT_TIMES_WORKING:
-            if(s_NPHCtrlInfo.TreatRemainTimes > 0 && s_NPHCtrlInfo.runState == E_NPH_RUN_WORKING)
+            if(s_NPHCtrlInfo.TreatCounts > 0 && s_NPHCtrlInfo.runState == E_NPH_RUN_WORKING)
             {
-                if(s_NPHCtrlInfo.TreatRemainTimes >= TREAT_TASK_TIME) {
-                    s_NPHCtrlInfo.TreatRemainTimes -= TREAT_TASK_TIME;
+                if(s_NPHCtrlInfo.TreatCounts >= TREAT_TASK_TIME) {
+                    s_NPHCtrlInfo.TreatCounts -= TREAT_TASK_TIME;
                 } else {
-                    s_NPHCtrlInfo.TreatRemainTimes = 0;
+                    s_NPHCtrlInfo.TreatCounts = 0;
                 }
             }
-            if(s_NPHCtrlInfo.TreatRemainTimes == 0)
+            if(s_NPHCtrlInfo.TreatCounts == 0)
             {
                 s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WAIT;
             }
@@ -251,36 +249,34 @@ void App_NegPrsHeat_Monitor(void)
 
 bool App_NegPrsHeat_StartCheck()
 {
-    Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
-    
     /* 1. work_state must be START */
-    if(pTransData->RxWorkState.work_state != WORK_STATE_START) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.work_state != WORK_STATE_START) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     /* 2. work_time valid: non-zero, 0~3600s */
-    if(pTransData->RxWorkState.work_time == 0 || pTransData->RxWorkState.work_time > NPH_WORK_TIME_MAX) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.work_time == 0 || s_NPHCtrlInfo.Trans.RxWorkState.work_time > NPH_WORK_TIME_MAX) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     /* 3. pressure in 10~100 KPa */
-    if(pTransData->RxWorkState.pressure < NPH_PRESSURE_MIN_KPA || 
-       pTransData->RxWorkState.pressure > NPH_PRESSURE_MAX_KPA) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.pressure < NPH_PRESSURE_MIN_KPA || 
+       s_NPHCtrlInfo.Trans.RxWorkState.pressure > NPH_PRESSURE_MAX_KPA) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
     /* 4. suck/release time 0.1~60s, unit 100ms */
-    if(pTransData->RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/100) || 
-       pTransData->RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/100)) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/100) || 
+       s_NPHCtrlInfo.Trans.RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/100)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
     
-    if(pTransData->RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/100) || 
-       pTransData->RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/100)) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/100) || 
+       s_NPHCtrlInfo.Trans.RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/100)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -295,12 +291,12 @@ bool App_NegPrsHeat_StartCheck()
         return false;
     }
     
-    if(s_NPHCtrlInfo.TreatCounts == 0) {
+    if(s_NPHCtrlInfo.TreatRemainTimes == 0) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
 
-    if(s_NPHCtrlInfo.TreatRemainTimes == 0) {
+    if(s_NPHCtrlInfo.TreatCounts == 0) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -311,12 +307,10 @@ bool App_NegPrsHeat_StartCheck()
 
 void App_NegPrsHeat_SetWorkParams(void)
 {
-    Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
-    
-    s_NPHCtrlInfo.WorkTempLimit = pTransData->RxWorkState.temp_limit;
-    s_NPHCtrlInfo.Pressure = pTransData->RxWorkState.pressure;
-    s_NPHCtrlInfo.SuckTime = pTransData->RxWorkState.suck_time;  /* unit: 100ms */
-    s_NPHCtrlInfo.ReleaseTime = pTransData->RxWorkState.release_time;  /* unit: 100ms */
+    s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
+    s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
+    s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;  /* unit: 100ms */
+    s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;  /* unit: 100ms */
     
     /* Convert target pressure to ADC voltage */
     s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
@@ -334,7 +328,7 @@ void App_NegPrsHeat_SetWorkParams(void)
     Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
     
     LOG_I("NPH: Work params set - temp_limit=%d, work_time=%d, pressure=%d, suck=%d, release=%d", 
-          s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.TreatRemainTimes, 
+          s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.TreatCounts, 
           s_NPHCtrlInfo.Pressure, s_NPHCtrlInfo.SuckTime, s_NPHCtrlInfo.ReleaseTime);
 }
 
@@ -575,13 +569,13 @@ void App_NegPrsHeat_Process(void)
             s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             if(App_Memory_LoadNPHParams(&s_NPHCtrlInfo.TreatParams)) {
                 s_NPHCtrlInfo.TempLimit = s_NPHCtrlInfo.TreatParams.TempLimit;
-                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.TreatParams.TreatRemainTimes;
+                s_NPHCtrlInfo.TreatRemainTimes = s_NPHCtrlInfo.TreatParams.TreatRemainTimes;
                 s_NPHCtrlInfo.PreheatEnable = (s_NPHCtrlInfo.TreatParams.PreheatEnable == 1);
                 s_NPHCtrlInfo.PreheatTempLimit = s_NPHCtrlInfo.TreatParams.PreheatTempLimit;
                 s_NPHCtrlInfo.PreheatTime = s_NPHCtrlInfo.TreatParams.PreheatTime;
                 
                 LOG_I("NPH: Parameters loaded - temp_limit=%d, remain_times=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d",
-                      s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatCounts,
+                      s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatRemainTimes,
                       s_NPHCtrlInfo.PreheatEnable, s_NPHCtrlInfo.PreheatTempLimit, s_NPHCtrlInfo.PreheatTime);
             } else {
                 LOG_E("NPH: Failed to load parameters");
@@ -636,7 +630,7 @@ void App_NegPrsHeat_Process(void)
         case E_NPH_RUN_WORKING:
             /* StartCheck fail or remain time 0 -> STOP */
             if(App_NegPrsHeat_StartCheck() == false ||
-               s_NPHCtrlInfo.TreatRemainTimes == 0){
+               s_NPHCtrlInfo.TreatCounts == 0){
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
             } else {
                 /* Every 10ms: temp monitor and heat control */
@@ -649,7 +643,7 @@ void App_NegPrsHeat_Process(void)
                 }
                 
                 App_NegPrsHeat_ProcessVacuum();
-                /* TreatRemainTimes decremented in WorkTimeHandle */
+                /* TreatCounts decremented in WorkTimeHandle */
             }
             break;
             

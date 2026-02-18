@@ -1,7 +1,7 @@
 /************************************************************************************
 * @file     : app_comm.h
-* @brief    : 
-* @details  : 
+* @brief    : Host communication protocol - frame format and module data structures
+* @details  : Protocol constants, frame struct, US/RF/SW/Heat Tx/Rx structures
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0

@@ -1,7 +1,7 @@
 /***********************************************************************************
 * @file     : app_treatmgr.c
-* @brief    : 
-* @details  : 
+* @brief    : Treatment manager implementation - probe check, fan control, state dispatch
+* @details  : Board temp/fan, probe debounce, call US/RF/SW/NPH process by state
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0

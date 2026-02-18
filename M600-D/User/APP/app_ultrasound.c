@@ -1,7 +1,7 @@
 /***********************************************************************************
 * @file     : app_ultrasound.c
-* @brief    : 
-* @details  : 
+* @brief    : Ultrasound treatment module implementation
+* @details  : State machine, work time, current/temp monitor, frequency and DAC control
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0

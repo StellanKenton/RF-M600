@@ -22,7 +22,7 @@
 static RF_CtrlInfo_t s_RFCtrlInfo;
 
 /**
- * @brief Calculate voltage from work level (1-20????11-30V)
+ * @brief Calculate voltage from work level (level 1-20 maps to 11-30V)
  * @param level Work level (0-20)
  * @retval Voltage in mV
  */
@@ -57,7 +57,7 @@ void App_RadioFreq_UpdateStatus(void)
     s_RFCtrlInfo.Trans.TxStatus.work_level = s_RFCtrlInfo.WorkLevel;
     s_RFCtrlInfo.Trans.TxStatus.head_temp = s_RFCtrlInfo.HeadTemp;
     
-    // ???????? mgr ??
+    /* Get connection state from treat mgr (probe + foot switch) */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY);
     bool footClosed = App_TreatMgr_GetFootSwitchClosed();
     if (headConnected && footClosed) {

@@ -1,7 +1,7 @@
 /************************************************************************************
 * @file     : app_ultrasound.h
-* @brief    : 
-* @details  : 
+* @brief    : Ultrasound treatment module header
+* @details  : Run state, error code, control info and work level/voltage/freq limits
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
@@ -60,8 +60,8 @@ typedef struct
     US_RunState_EnumDef runState;
     Treat_Times_EnumDef TreatCountsState;
     bool isWaitReturn;
-    uint16_t Voltage;              ///< ???? (mV)
-    uint16_t VoltageBase;          ///< ???????? (mV)??????????
+    uint16_t Voltage;              ///< Current output voltage (mV)
+    uint16_t VoltageBase;          ///< Base voltage from config (mV), used for over-limit check
     uint16_t CurrentHigh;
     uint16_t CurrentLow;
     uint16_t Frequency;

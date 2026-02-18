@@ -1,7 +1,7 @@
 /************************************************************************************
 * @file     : app_radiofreq.h
 * @brief    : Radio Frequency treatment module header file
-* @details  : 
+* @details  : RF run state, error code, voltage/current/temp limits and control info
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
@@ -23,17 +23,17 @@ extern "C" {
 #include "app_memory.h"
 #include "app_treatmgr.h"
 
-/* ??????????????1MHz */
-#define RF_FREQUENCY_KHZ           1000        ///< ?????????? (kHz)
-#define RF_WORK_LEVEL_MAX          20          ///< ????? (0-20)
-#define RF_VOLTAGE_MIN_MV          11000       ///< ??????? (11V = 11000mV)
-#define RF_VOLTAGE_MAX_MV          30000       ///< ??????? (30V = 30000mV)
-#define RF_VOLTAGE_INIT_MV         7000        ///< ????????? (7V = 7000mV)
-#define RF_CURRENT_THRESHOLD_MV    500         ///< ????? (0.5V = 500mV)
-#define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< ?????? (10ms)
-#define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< ?????? (1s)
+/* RF working frequency 1MHz */
+#define RF_FREQUENCY_KHZ           1000        ///< RF frequency (kHz)
+#define RF_WORK_LEVEL_MAX          20          ///< Work level (0-20)
+#define RF_VOLTAGE_MIN_MV          11000       ///< Min output voltage (11V = 11000mV)
+#define RF_VOLTAGE_MAX_MV          30000       ///< Max output voltage (30V = 30000mV)
+#define RF_VOLTAGE_INIT_MV         7000        ///< Init/standby voltage (7V = 7000mV)
+#define RF_CURRENT_THRESHOLD_MV    500         ///< Current threshold (0.5V = 500mV)
+#define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< Current monitor period (10ms)
+#define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< Temp monitor period (1s)
 
-/* ??????????1-20????11-30V */
+/* Voltage per level: level 1-20 maps to 11-30V */
 #define RF_VOLTAGE_PER_LEVEL_MV    ((RF_VOLTAGE_MAX_MV - RF_VOLTAGE_MIN_MV) / RF_WORK_LEVEL_MAX)
 
 typedef enum
@@ -78,9 +78,9 @@ typedef struct
     RF_TreatParams_t TreatParams;
     RF_TransData_t Trans;
     
-    /* ?????? */
-    uint32_t lastCurrentMonitorTime;   ///< ???????????
-    uint32_t lastTempMonitorTime;      ///< ???????????
+    /* Timestamp for periodic monitor */
+    uint32_t lastCurrentMonitorTime;   ///< Last current monitor tick (ms)
+    uint32_t lastTempMonitorTime;      ///< Last temp monitor tick (ms)
 } RF_CtrlInfo_t;
 
 void App_RadioFreq_Init(void);

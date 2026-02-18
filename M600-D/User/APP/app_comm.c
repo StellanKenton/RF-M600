@@ -1,7 +1,7 @@
 /***********************************************************************************
 * @file     : app_comm.c
-* @brief    : 
-* @details  : 
+* @brief    : Host communication module - protocol frame RX/TX and module status reply
+* @details  : CRC16, frame parse, US/RF/SW/Heat status reply
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0

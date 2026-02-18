@@ -1,7 +1,7 @@
 /**
 * Copyright (c) 2023, AstroCeta, Inc. All rights reserved.
-* \file app_system.h
-* \brief Implementation of a ring buffer for efficient data handling.
+* \file app_system.c
+* \brief System management - init, mode switch, treatment manager and communication process.
 * \date 2025-07-30
 * \author AstroCeta, Inc.
 **/

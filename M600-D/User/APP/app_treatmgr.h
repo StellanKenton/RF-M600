@@ -1,7 +1,7 @@
 /************************************************************************************
 * @file     : app_treatmgr.h
-* @brief    : 
-* @details  : 
+* @brief    : Treatment manager - probe detection, foot switch, module routing
+* @details  : State per probe type (US/RF/SW/NPH), debounce, wait-return handling
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0

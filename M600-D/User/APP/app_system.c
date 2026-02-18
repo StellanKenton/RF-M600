@@ -11,6 +11,7 @@
 #include "drv_wdg.h"
 #include "app_treatmgr.h"
 #include "app_comm.h"
+#include "app_handcomm.h"
 #include "drv_adc.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
@@ -54,6 +55,8 @@ void System_Init(void)
     LOG_I("Treatment manager initialized.");
     App_Comm_Init();
     LOG_I("Communication initialized.");
+    App_HandComm_Init();
+    LOG_I("Handle communication initialized.");
 }
 
 void SystemManager(void)
@@ -77,6 +80,7 @@ void SystemManager(void)
             break;
     }
     App_Comm_Process();
+    App_HandComm_Process();
     Log_Process(10);
 }
 

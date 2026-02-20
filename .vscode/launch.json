@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/Space/Cosmos/RF-M600/M600-D/BSP",
-      "program": "d:/Space/Cosmos/RF-M600/M600-D/BSP/build/Debug/outDebug",
+      "cwd": "d:/Space/Cosmos/RF-M600/M600-D/User/DRV",
+      "program": "d:/Space/Cosmos/RF-M600/M600-D/User/DRV/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

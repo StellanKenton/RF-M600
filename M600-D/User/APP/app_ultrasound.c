@@ -130,11 +130,11 @@ void App_Ultrasound_WorkTimeHandle(void)
             break;
         case E_TREAT_TIMES_WORKING:
             if(s_USCtrlInfo.TreatCounts > 0 && s_USCtrlInfo.runState == E_US_RUN_WORKING)
-            {    
+            {
                 s_USCtrlInfo.TreatCounts-= TREAT_TASK_TIME;
                 if(s_USCtrlInfo.TreatCounts < TREAT_TASK_TIME)
                 {
-                    s_USCtrlInfo.TreatCounts = 0; 
+                    s_USCtrlInfo.TreatCounts = 0;
                 }
             }
             if(s_USCtrlInfo.TreatCounts == 0)
@@ -173,56 +173,56 @@ bool App_UltraSound_StartCheck()
         s_USCtrlInfo.StartCheckStep = 1;
         return false;
     }
-    
+
     // 2. Check if remaining work time is > 0 (range 0-3600s)
     if(s_USCtrlInfo.Trans.RxWorkState.work_time == 0 || s_USCtrlInfo.Trans.RxWorkState.work_time > 3600) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 2;
         return false;
     }
-    
+
     // 3. Check if work level is valid (range 1-40)
     if(s_USCtrlInfo.Trans.RxWorkState.work_level == 0 || s_USCtrlInfo.Trans.RxWorkState.work_level > WORK_LEVEL_MAX) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 3;
         return false;
     }
-    
+
     // 4. Check if foot switch is closed
     if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 4;
         return false;
     }
-    
+
     // 5. Check if ultrasound probe is correctly identified
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_ULTRASOUND) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_PROBE_NOT_CONNECTED;
         s_USCtrlInfo.StartCheckStep = 5;
         return false;
     }
-    
+
     // 6. Check if there are remaining treatment times
     if(s_USCtrlInfo.TreatCounts == 0) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 6;
         return false;
     }
-    
+
     // 7. Check if config parameters are valid
     if(s_USCtrlInfo.Trans.RxConfig.frequency == 0 || s_USCtrlInfo.Trans.RxConfig.temp_limit == 0 || s_USCtrlInfo.Trans.RxConfig.voltage == 0) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 7;
         return false;
     }
-    
+
     // 8. Check if treatment parameters are valid
     if(s_USCtrlInfo.CurrentHigh == 0) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 8;
         return false;
     }
-    
+
     // All checks passed
     return true;
 }
@@ -235,7 +235,7 @@ void App_UltraSound_SetWorkParams(void)
     s_USCtrlInfo.VoltageBase = s_USCtrlInfo.Trans.RxConfig.voltage;  // Save base voltage for over-limit check
     s_USCtrlInfo.Frequency = s_USCtrlInfo.Trans.RxConfig.frequency;
     s_USCtrlInfo.TempLimit = s_USCtrlInfo.Trans.RxConfig.temp_limit;
-    
+
     // Configure work voltage and frequency
     App_Ultrasound_SetFrequency(s_USCtrlInfo.Frequency);
     // Set initial work voltage
@@ -251,14 +251,14 @@ bool App_UltraSound_IsCurrentNormal(void)
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
     int16_t voltageAdjust = 0;
     uint16_t newVoltage = currentVoltage;
-    
+
     if(current > s_USCtrlInfo.CurrentHigh)
     {
         // Current too high, need to reduce voltage
         // Simple PI control: adjust voltage based on current error
         int16_t currentError = current - ((s_USCtrlInfo.CurrentHigh + s_USCtrlInfo.CurrentLow) / 2);
         voltageAdjust = -(currentError * 10) / 100;  // Simple proportional control
-        
+
         s_USCtrlInfo.ErrorCode = E_US_ERROR_CURRENT_TOO_HIGH;
         LOG_W("Current is too high: %d (target: %d-%d)", current, s_USCtrlInfo.CurrentLow, s_USCtrlInfo.CurrentHigh);
     }
@@ -267,7 +267,7 @@ bool App_UltraSound_IsCurrentNormal(void)
         // Current too low, need to increase voltage
         int16_t currentError = ((s_USCtrlInfo.CurrentHigh + s_USCtrlInfo.CurrentLow) / 2) - current;
         voltageAdjust = (currentError * 10) / 100;  // Simple proportional control
-        
+
         s_USCtrlInfo.ErrorCode = E_US_ERROR_CURRENT_TOO_LOW;
         LOG_W("Current is too low: %d (target: %d-%d)", current, s_USCtrlInfo.CurrentLow, s_USCtrlInfo.CurrentHigh);
     }
@@ -275,12 +275,12 @@ bool App_UltraSound_IsCurrentNormal(void)
     {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_NONE;
     }
-    
+
     // If voltage adjustment is needed
     if(voltageAdjust != 0)
     {
         newVoltage = currentVoltage + voltageAdjust;
-        
+
         // Check if voltage adjustment exceeds limit (+/-2V)
         // Limit voltage range
         if(newVoltage > 2000)
@@ -291,17 +291,17 @@ bool App_UltraSound_IsCurrentNormal(void)
         {
             newVoltage = 1000;
         }
-        
+
         // Set new voltage
         Drv_DAC_SetVoltage(newVoltage);
         LOG_I("Voltage adjusted: %d -> %d mV (current: %d)", currentVoltage, newVoltage, current);
     }
-    
+
     if(currentVoltage > s_USCtrlInfo.VoltageBase + VOLTAGE_ADJUST_LIMIT_MV || currentVoltage < s_USCtrlInfo.VoltageBase - VOLTAGE_ADJUST_LIMIT_MV)
     {
         // Voltage over limit, report error
         s_USCtrlInfo.ErrorCode = E_US_ERROR_VOLTAGE_OVER_LIMIT;
-        LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)", 
+        LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)",
               newVoltage, s_USCtrlInfo.VoltageBase, VOLTAGE_ADJUST_LIMIT_MV);
         isNormal = false;
     }
@@ -313,7 +313,7 @@ bool App_UltraSound_IsHeadTempNormal(void)
     bool isNormal = true;
     uint16_t temp = Drv_ADC_GetNTCValue(E_NTC_HAND);
     s_USCtrlInfo.HeadTemp = temp;
-    
+
     if(temp > s_USCtrlInfo.TempLimit)
     {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_TEMP_TOO_HIGH;
@@ -371,7 +371,7 @@ void App_Ultrasound_Process(void)
                 s_USCtrlInfo.CurrentHigh = s_USCtrlInfo.TreatParams.CurrentHigh;
                 s_USCtrlInfo.CurrentLow = s_USCtrlInfo.TreatParams.CurrentLow;
                 s_USCtrlInfo.VoltageBase = s_USCtrlInfo.TreatParams.Voltage;
-                
+
             } else {
                 LOG_E("Failed to load ultrasound parameters");
                 s_USCtrlInfo.ErrorCode = E_US_ERROR_READ_PARAMS_FAILED;
@@ -393,16 +393,16 @@ void App_Ultrasound_Process(void)
             if(App_UltraSound_StartCheck()) {
                 // Set work params and start ultrasound transmit
                 App_UltraSound_SetWorkParams();
-                
+
                 // pwr_control2 switch to output enabled (normally disabled)
                 Drv_IODevice_ChangeChannel(CHANNEL_READY);
                 App_Ultrasound_ChangeState(E_US_RUN_WORKING);
             }
             break;
-        case E_US_RUN_WORKING:           
+        case E_US_RUN_WORKING:
             // Check all conditions
-            if(App_UltraSound_StartCheck() == false || 
-            App_UltraSound_IsCurrentNormal() == false || 
+            if(App_UltraSound_StartCheck() == false ||
+            App_UltraSound_IsCurrentNormal() == false ||
             App_UltraSound_IsHeadTempNormal() == false ){
                 App_Ultrasound_ChangeState(E_US_RUN_STOP);
             }
@@ -432,13 +432,13 @@ void App_Ultrasound_Init(void)
 {
     // Initialize control info structure
     memset(&s_USCtrlInfo, 0, sizeof(US_CtrlInfo_t));
-    
+
     // Set initial state
     s_USCtrlInfo.runState = E_US_RUN_INIT;
     s_USCtrlInfo.ErrorCode = E_US_ERROR_NONE;
     s_USCtrlInfo.WorkLevel = 0;
     s_USCtrlInfo.TreatCounts = 0;
-    
+
     LOG_I("Ultrasound module initialized");
 }
 

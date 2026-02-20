@@ -10,6 +10,7 @@
 #include "drv_memory.h"
 #include "drv_24c02.h"
 #include <string.h>
+#include "log.h"
 
 #define MEMORY_BOOT_CHECK_LEN      16U
 #define MEMORY_SN_PREFIX           "M600-SN"
@@ -50,6 +51,9 @@ bool Drv_Memory_Init(void)
                 break;
             }
         }
+    } else {
+        // output boot_data to Log
+        LOG_I("boot_data: %s", boot_data);
     }
 
     if (need_default_sn)
@@ -78,19 +82,19 @@ bool Drv_Memory_Read(uint16_t address, uint8_t *data, uint16_t length)
     {
         return false;
     }
-    
+
     // Check parameters
     if (data == NULL || length == 0)
     {
         return false;
     }
-    
+
     // Check address range
     if (address >= MEMORY_SIZE || (address + length) > MEMORY_SIZE)
     {
         return false;
     }
-    
+
     // TODO: Implement actual memory read operation
     // For EEPROM (I2C):
     // - Send start condition
@@ -105,14 +109,14 @@ bool Drv_Memory_Read(uint16_t address, uint8_t *data, uint16_t length)
     // - Unlock Flash if needed
     // - Read from Flash memory address
     // - Lock Flash if needed
-    
+
     // Placeholder: Copy from a simulated memory buffer
     // In actual implementation, replace this with real hardware access
     for (uint16_t i = 0; i < length; i++)
     {
         data[i] = 0xFF;  // Default value, replace with actual read
     }
-    
+
     return true;
 }
 
@@ -130,19 +134,19 @@ bool Drv_Memory_Write(uint16_t address, const uint8_t *data, uint16_t length)
     {
         return false;
     }
-    
+
     // Check parameters
     if (data == NULL || length == 0)
     {
         return false;
     }
-    
+
     // Check address range
     if (address >= MEMORY_SIZE || (address + length) > MEMORY_SIZE)
     {
         return false;
     }
-    
+
     // TODO: Implement actual memory write operation
     // For EEPROM (I2C):
     // - Send start condition
@@ -158,12 +162,12 @@ bool Drv_Memory_Write(uint16_t address, const uint8_t *data, uint16_t length)
     // - Program Flash memory address
     // - Verify write operation
     // - Lock Flash if needed
-    
+
     // Placeholder: Write to a simulated memory buffer
     // In actual implementation, replace this with real hardware access
     // Note: EEPROM writes may need page boundaries consideration
     // Note: Flash writes may need erase before write
-    
+
     return true;
 }
 

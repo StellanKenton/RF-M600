@@ -16,7 +16,7 @@
 *
 ***********************************************************************************************/
 
-/****************************°üº¬µÄÍ·ÎÄ¼þ**************************/
+/****************************ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½**************************/
 #include "bsp_24C02.h"
 #include "bsp_i2c.h"
 //#include "bsp_delay.h"
@@ -37,10 +37,10 @@ static FunctionalState I2C_Start(void)
     SDA2_H;
     SCL2_H;
     I2C_delay();
-    if(!SDA2_READ)return DISABLE;	/* SDAÏßÎªµÍµçÆ½Ôò×ÜÏßÃ¦,ÍË³ö */
+    if(!SDA2_READ)return DISABLE;	/* SDAï¿½ï¿½Îªï¿½Íµï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¦,ï¿½Ë³ï¿½ */
     SDA2_L;
     I2C_delay();
-    if(SDA2_READ) return DISABLE;	/* SDAÏßÎª¸ßµçÆ½Ôò×ÜÏß³ö´í,ÍË³ö */
+    if(SDA2_READ) return DISABLE;	/* SDAï¿½ï¿½Îªï¿½ßµï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½,ï¿½Ë³ï¿½ */
     SDA2_L;
     I2C_delay();
     return ENABLE;
@@ -50,7 +50,7 @@ static FunctionalState I2C_Start(void)
 * Description    : None
 * Input          : None
 * Output         : None
-* Return         : ·µ»ØÎª:=1ÓÐACK,=0ÎÞACK
+* Return         : ï¿½ï¿½ï¿½ï¿½Îª:=1ï¿½ï¿½ACK,=0ï¿½ï¿½ACK
 * Attention		 : None
 *******************************************************************************************/
 static FunctionalState I2C_WaitAck(void)
@@ -71,8 +71,8 @@ static FunctionalState I2C_WaitAck(void)
 }
 /******************************************************************************************
 * Function Name  : I2C_SendByte
-* Description    : Êý¾Ý´Ó¸ßÎ»µ½µÍÎ»
-* Input          : - SendByte: ·¢ËÍµÄÊý¾Ý
+* Description    : ï¿½ï¿½ï¿½Ý´Ó¸ï¿½Î»ï¿½ï¿½ï¿½ï¿½Î»
+* Input          : - SendByte: ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
 * Output         : None
 * Return         : None
 * Attention		 : None
@@ -116,10 +116,10 @@ static void I2C_Stop(void)
 }
 /********************************************************************************************
 * Function Name  : I2C_ReceiveByte
-* Description    : Êý¾Ý´Ó¸ßÎ»µ½µÍÎ»
+* Description    : ï¿½ï¿½ï¿½Ý´Ó¸ï¿½Î»ï¿½ï¿½ï¿½ï¿½Î»
 * Input          : None
 * Output         : None
-* Return         : I2C×ÜÏß·µ»ØµÄÊý¾Ý
+* Return         : I2Cï¿½ï¿½ï¿½ß·ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 * Attention		 : None
 *********************************************************************************************/
 static uint8_t I2C_ReceiveByte(void)
@@ -183,24 +183,24 @@ static void I2C_Ack(void)
 }
 /*********************************************************************************************
 * Function Name  : I2C_ReadByte
-* Description    : ¶ÁÈ¡Ò»´®Êý¾Ý
-* Input          : - pBuffer: ´æ·Å¶Á³öÊý¾Ý
-*           	   - length: ´ý¶Á³ö³¤¶È
-*                  - ReadAddress: ´ý¶Á³öµØÖ·
-*                  - DeviceAddress: Æ÷¼þÀàÐÍ(24c16»òSD2403)
+* Description    : ï¿½ï¿½È¡Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* Input          : - pBuffer: ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*           	   - length: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*                  - ReadAddress: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+*                  - DeviceAddress: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(24c16ï¿½ï¿½SD2403)
 * Output         : None
-* Return         : ·µ»ØÎª:=1³É¹¦¶ÁÈë,=0Ê§°Ü
+* Return         : ï¿½ï¿½ï¿½ï¿½Îª:=1ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½,=0Ê§ï¿½ï¿½
 * Attention		 : None
 **********************************************************************************************/
 FunctionalState I2C_ReadByte(uint8_t* pBuffer,   uint16_t length,   uint16_t ReadAddress,  uint8_t DeviceAddress)
 {
     if(!I2C_Start())return DISABLE;
-    I2C_SendByte( (((ReadAddress & 0x0700) >> 7) | DeviceAddress) & 0xFFFE); /* ÉèÖÃ¸ßÆðÊ¼µØÖ·+Æ÷¼þµØÖ· */
+    I2C_SendByte( (((ReadAddress & 0x0700) >> 7) | DeviceAddress) & 0xFFFE); /* ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ö·+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö· */
     if(!I2C_WaitAck()) {
         I2C_Stop();
         return DISABLE;
     }
-    I2C_SendByte((uint8_t)(ReadAddress & 0x00FF));   /* ÉèÖÃµÍÆðÊ¼µØÖ· */
+    I2C_SendByte((uint8_t)(ReadAddress & 0x00FF));   /* ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ö· */
     I2C_WaitAck();
     I2C_Start();
     I2C_SendByte(((ReadAddress & 0x0700) >> 7) | DeviceAddress | 0x0001);
@@ -218,28 +218,28 @@ FunctionalState I2C_ReadByte(uint8_t* pBuffer,   uint16_t length,   uint16_t Rea
 }
 /*********************************************************************************************
 * Function Name  : I2C_WriteByte
-* Description    : Ð´Ò»×Ö½ÚÊý¾Ý
-* Input          : - SendByte: ´ýÐ´ÈëÊý¾Ý
-*           	   - WriteAddress: ´ýÐ´ÈëµØÖ·
-*                  - DeviceAddress: Æ÷¼þÀàÐÍ(24c16»òSD2403)
+* Description    : Ð´Ò»ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
+* Input          : - SendByte: ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*           	   - WriteAddress: ï¿½ï¿½Ð´ï¿½ï¿½ï¿½Ö·
+*                  - DeviceAddress: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(24c16ï¿½ï¿½SD2403)
 * Output         : None
-* Return         : ·µ»ØÎª:=1³É¹¦Ð´Èë,=0Ê§°Ü
+* Return         : ï¿½ï¿½ï¿½ï¿½Îª:=1ï¿½É¹ï¿½Ð´ï¿½ï¿½,=0Ê§ï¿½ï¿½
 * Attention		 : None
 ********************************************************************************************/
 FunctionalState I2C_WriteByte(uint8_t SendByte, uint16_t WriteAddress, uint8_t DeviceAddress)
 {
     if(!I2C_Start())return DISABLE;
-    I2C_SendByte( (((WriteAddress & 0x0700) >> 7) | DeviceAddress) & 0xFFFE); /*ÉèÖÃ¸ßÆðÊ¼µØÖ·+Æ÷¼þµØÖ· */
+    I2C_SendByte( (((WriteAddress & 0x0700) >> 7) | DeviceAddress) & 0xFFFE); /*ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ö·+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö· */
     if(!I2C_WaitAck()) {
         I2C_Stop();
         return DISABLE;
     }
-    I2C_SendByte((uint8_t)(WriteAddress & 0x00FF));   /* ÉèÖÃµÍÆðÊ¼µØÖ· */
+    I2C_SendByte((uint8_t)(WriteAddress & 0x00FF));   /* ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ö· */
     I2C_WaitAck();
     I2C_SendByte(SendByte);
     I2C_WaitAck();
     I2C_Stop();
-    /* ×¢Òâ£ºÒòÎªÕâÀïÒªµÈ´ýEEPROMÐ´Íê£¬¿ÉÒÔ²ÉÓÃ²éÑ¯»òÑÓÊ±·½Ê½(10ms)	*/
+    /* ×¢ï¿½â£ºï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Òªï¿½È´ï¿½EEPROMÐ´ï¿½ê£¬ï¿½ï¿½ï¿½Ô²ï¿½ï¿½Ã²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê½(10ms)	*/
     /* Systick_Delay_1ms(10); */
     delay_ms(10);
 
@@ -249,40 +249,40 @@ EEPROM_TypeDef St_Eeprom;
 static uint8_t Temp_LevelProject = 0;
 static uint16_t Temp_TimeProject = 0;
 /*************************************************************************************************
-* º¯ Êý Ãû£ºvoid Eeprom_Para_Init(void)
-* ¹¦ÄÜÃèÊö£ºeeprom²ÎÊý³õÊ¼»¯
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£º void
-* ×÷    Õß£ºHardWare_Department@Medlander
-* ÈÕ    ÆÚ£º2021.07.13
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Eeprom_Para_Init(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eepromï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ void
+* ï¿½ï¿½    ï¿½ß£ï¿½HardWare_Department@Medlander
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.07.13
 *************************************************************************************************/
 void Eeprom_Para_Init(void)
 {
-    /*eeprom²ÎÊý³õÊ¼»¯*/
+    /*eepromï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½*/
     memset(&St_Eeprom, 0, sizeof(St_Eeprom));
 }
 /*************************************************************************************************
-* º¯ Êý Ãû£ºvoid Eeprom_ReadeData_Handle(const uint8_t blockInfo,uint8_t *rx_buf)
-* ¹¦ÄÜÃèÊö£º´ÓeepromÖÐ¶Á³öÊý¾Ý
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£º void
-* ×÷    Õß£ºHardWare_Department@Medlander
-* ÈÕ    ÆÚ£º2021.07.13
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Eeprom_ReadeData_Handle(const uint8_t blockInfo,uint8_t *rx_buf)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eepromï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ void
+* ï¿½ï¿½    ï¿½ß£ï¿½HardWare_Department@Medlander
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.07.13
 *************************************************************************************************/
 void Eeprom_ReadeData_Handle(__IO uint8_t blockInfo, uint8_t *rx_buf)
 {
     I2C_ReadByte( rx_buf, 8, blockInfo * 8, AT24C02_ADR);
 }
 /*************************************************************************************************
-* º¯ Êý Ãû£ºvoid Eeprom_WriteData_Handle(const uint8_t blockInfo,uint8_t *tx_buf)
-* ¹¦ÄÜÃèÊö£ºÐ´Êý¾Ý
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£º void
-* ×÷    Õß£ºHardWare_Department@Medlander
-* ÈÕ    ÆÚ£º2021.07.13
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Eeprom_WriteData_Handle(const uint8_t blockInfo,uint8_t *tx_buf)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ void
+* ï¿½ï¿½    ï¿½ß£ï¿½HardWare_Department@Medlander
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.07.13
 *************************************************************************************************/
 void Eeprom_WriteData_Handle(const uint8_t blockInfo,uint8_t *tx_buf)
 {
@@ -295,13 +295,13 @@ void Eeprom_WriteData_Handle(const uint8_t blockInfo,uint8_t *tx_buf)
     }
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic uint8_t Eeprom_DataHandle(__IO BLOCK_ENUM Block,uint8_t *Tx,__IO uint8_t Val,__IO uint8_t ReadBack_State)
-* ¹¦ÄÜÃèÊö£ºeeprom´æ´¢Êý¾Ý´¦Àí
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºHardWare_Department@Medlander
-* ÈÕ    ÆÚ£º2020.08.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static uint8_t Eeprom_DataHandle(__IO BLOCK_ENUM Block,uint8_t *Tx,__IO uint8_t Val,__IO uint8_t ReadBack_State)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½eepromï¿½æ´¢ï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½HardWare_Department@Medlander
+* ï¿½ï¿½    ï¿½Ú£ï¿½2020.08.04
 ***********************************************************************************************/
 static uint8_t Eeprom_DataHandle(__IO BLOCK_ENUM Block,uint8_t *Tx,__IO uint8_t Val,__IO uint8_t ReadBack_State)
 {
@@ -378,13 +378,13 @@ static uint8_t Eeprom_DataHandle(__IO BLOCK_ENUM Block,uint8_t *Tx,__IO uint8_t 
     return Ret;
 }
 /*************************************************************************************************
-* º¯ Êý Ãû£ºuint8_t EepromWrite_NeedReadBack_Handle(__IO uint8_t Block,uint8_t *tx_buf,__IO uint8_t State,__IO uint8_t TypeState)
-* ¹¦ÄÜÃèÊö£º½«Êý¾ÝÐ´Èëeeprom
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£º void
-* ×÷    Õß£ºHardWare_Department@Medlander
-* ÈÕ    ÆÚ£º2021.07.13
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½uint8_t EepromWrite_NeedReadBack_Handle(__IO uint8_t Block,uint8_t *tx_buf,__IO uint8_t State,__IO uint8_t TypeState)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½eeprom
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ void
+* ï¿½ï¿½    ï¿½ß£ï¿½HardWare_Department@Medlander
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.07.13
 *************************************************************************************************/
 uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__IO uint8_t State,__IO uint8_t TypeState)
 {
@@ -401,18 +401,18 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
             Num = 8;
             if(Block == E_MODEL)
             {
-                Num = 16;  /*½«×Ó¹¬¸´¾É£¨×Ô¶¨Òå£©Ò»²¢²Á³ý*/
+                Num = 16;  /*ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½Ô¶ï¿½ï¿½å£©Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
             }
             else if(Block == E_ZHUANGJIZHUCE)
             {
-                /*×°»ú×¢²áBLOCKºÍÉè±¸±àºÅBLOCK¹²¼Æ4¸ö¿éÇøÒ»²¢²Ù×÷*/
+                /*×°ï¿½ï¿½×¢ï¿½ï¿½BLOCKï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½BLOCKï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
                 ClearSelf_Flag = 0x01;
             }
             else if(Block == E_DEVIECE_SN)
             {
                 Block = E_ZHUANGJIZHUCE;
                 Num = 32;
-                /*×°»ú×¢²áBLOCKºÍÉè±¸±àºÅBLOCK¹²¼Æ4¸ö¿éÇøÒ»²¢²Ù×÷*/
+                /*×°ï¿½ï¿½×¢ï¿½ï¿½BLOCKï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½BLOCKï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
             }
 
             memcpy(TempData,tx_buf,Num);
@@ -431,7 +431,7 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
             Cnt =0;
             if(State == 0x01)
             {
-                Step = 0x02;   /*¶ÁÖµ·µ»Ø*/
+                Step = 0x02;   /*ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½*/
             }
             else
             {
@@ -445,7 +445,7 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
                 {
                     if(ClearSelf_Flag == 0x01)
                     {
-                        Step = 0x01;  /*×°»ú×¢²áÇåµô×Ó¹¬¸´¾É£¨×Ô¶¨Òå£©*/
+                        Step = 0x01;  /*×°ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½Ô¶ï¿½ï¿½å£©*/
                         ClearSelf_Flag = 0;
                     }
                     else
@@ -467,7 +467,7 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
         {
             for(i = 0; i < 8; i++)
             {
-                I2C_WriteByte(Tx[i], E_SELF_PROJECT * 8 + i, AT24C02_ADR);    // Çå³ý×Ó¹¬¸´¾É£¨×Ô¶¨Òå£©
+                I2C_WriteByte(Tx[i], E_SELF_PROJECT * 8 + i, AT24C02_ADR);    // ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½Ô¶ï¿½ï¿½å£©
             }
             FirstFlag = 0;
         }
@@ -490,7 +490,7 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
         if(FirstFlag == 0x01)
         {
             FirstFlag = 0;
-            I2C_ReadByte( Rx, Num, Block * Num, AT24C02_ADR);     // ³ý·ÇÄÄÌìÐèÒª±È¶ÔËùÓÐÐ´ÈëÖµ£¬Çë½ÓÊÖµÄÈË°Ñ´Ëº¯ÊýµÚ¶þ¸öÈë²Î¸ÄÎªNum
+            I2C_ReadByte( Rx, Num, Block * Num, AT24C02_ADR);     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½È¶ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ë°Ñ´Ëºï¿½ï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½Î¸ï¿½ÎªNum
         }
 
         for(i = 0; i< Num; i++)
@@ -506,11 +506,11 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
         St_Eeprom.E_EepromState = E_EEPROM_IDLE;
         if(ErrCnt != 0)
         {
-            Ret = 0x01;   /*Ð´ÈëÊ§°Ü*/
+            Ret = 0x01;   /*Ð´ï¿½ï¿½Ê§ï¿½ï¿½*/
         }
         else
         {
-            Ret = 0x02;   /*Ð´Èë³É¹¦*/
+            Ret = 0x02;   /*Ð´ï¿½ï¿½É¹ï¿½*/
         }
 
         break;
@@ -524,13 +524,13 @@ uint8_t EepromWrite_NeedReadBack_Handle(__IO BLOCK_ENUM Block,uint8_t *tx_buf,__
     return Ret;
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic MODEL_ENUM Get_ModelType(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡Éè±¸ÐÍºÅÀàÐÍ   mld_esu 001A  ¡C¡Cmld_esu 002A    ¡C¡Cmld_esu 003A     mld_esu 004A¡C
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static MODEL_ENUM Get_ModelType(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½è±¸ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½   mld_esu 001A  ï¿½Cï¿½Cmld_esu 002A    ï¿½Cï¿½Cmld_esu 003A     mld_esu 004Aï¿½C
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 static MODEL_ENUM Get_ModelType(void)
 {
@@ -547,13 +547,13 @@ static MODEL_ENUM Get_ModelType(void)
     return State;
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic void Get_ProbeTemperature(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡ÖÎÁÆÌ½Í·ÎÂ¶ÈãÐÖµ
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static void Get_ProbeTemperature(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ì½Í·ï¿½Â¶ï¿½ï¿½ï¿½Öµ
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 static void Get_ProbeTemperature(void)
 {
@@ -573,21 +573,21 @@ static void Get_ProbeTemperature(void)
     }
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic void Get_Diy_Project(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡×Ó¹¬¸´¾ÉÒÇ£¨×Ô¶¨Òå£©µµÎ»ºÍÊ±¼ä¡C
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static void Get_Diy_Project(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½Ô¶ï¿½ï¿½å£©ï¿½ï¿½Î»ï¿½ï¿½Ê±ï¿½ï¿½C
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 static void Get_Diy_Project(void)
 {
    uint8_t SelfProject[8] = {0};
 
-    /***********×Ó¹¬¸´¾ÉµµÎ»×Ô¶¨ÒåÊý¾Ý»ñÈ¡**********************************/
+    /***********ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½Éµï¿½Î»ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý»ï¿½È¡**********************************/
     Eeprom_ReadeData_Handle(E_SELF_PROJECT,SelfProject);
-    St_Eeprom.IC_Treat_Power = SelfProject[0];   // Ò»´úÊÇ4µµ£¬¶þ´úÊÇ6µµ£¬Èç¹û²»ÊÇ¶þ´ú¶Á³öµÈÓÚ6Ò²ÒªµÈÓÚ0
+    St_Eeprom.IC_Treat_Power = SelfProject[0];   // Ò»ï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½6Ò²Òªï¿½ï¿½ï¿½ï¿½0
     if(St_Eeprom.IC_Treat_Power > 0x08)
     {
         St_Eeprom.IC_Treat_Power = 0;
@@ -599,13 +599,13 @@ static void Get_Diy_Project(void)
     }
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic void Get_Zhuangjizhuce_Info(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡×°»ú×¢²áÏà¹ØÐÅÏ¢¡C
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static void Get_Zhuangjizhuce_Info(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡×°ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½C
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 static uint8_t Get_Zhuangjizhuce_Info(void)
 {
@@ -630,13 +630,13 @@ static uint8_t Get_Zhuangjizhuce_Info(void)
     return Ret;
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºstatic void Get_Sn_Info(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡SN±àÂëÐÅÏ¢¡C
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½static void Get_Sn_Info(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡SNï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½C
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 static void Get_Sn_Info(void)
 {
@@ -646,13 +646,13 @@ static void Get_Sn_Info(void)
     }
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£º¶ÁÈ¡Éè±¸ÐÅÏ¢
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½è±¸ï¿½ï¿½Ï¢
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 uint8_t Get_DeviceInfo(void)
 {
@@ -681,13 +681,13 @@ uint8_t Get_DeviceInfo(void)
     return Ret1;
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Refresh_Project(__IO uint8_t Level,__IO uint16_t Time,__IO uint8_t State)
-* ¹¦ÄÜÃèÊö£ºÖÎÁÆ¹ý³ÌÖÐË¢ÐÂÖÎÁÆ·½°¸µÄµµÎ»¼°Ê±¼ä
-* ÊäÈë²ÎÊý£ºµµÎ»¡¢Ê±¼ä¡¢µ±Ç°ÖÎÁÆÄ£Ê½£¨ÓÃ»§or²âÊÔ£©¡¢µ±Ç°ÖÎÁÆÄ£Ê½£¨ÓÃ»§or²âÊÔ£©ÉÏÒ»¸öÄ£Ê½
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Refresh_Project(__IO uint8_t Level,__IO uint16_t Time,__IO uint8_t State)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½Äµï¿½Î»ï¿½ï¿½Ê±ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Ê±ï¿½ä¡¢ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Ã»ï¿½orï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Ã»ï¿½orï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä£Ê½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 void Refresh_Project(__IO uint8_t Level,__IO uint16_t Time,__IO uint8_t State)
 {
@@ -732,13 +732,13 @@ void Refresh_Project(__IO uint8_t Level,__IO uint16_t Time,__IO uint8_t State)
 
 
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£º³õÊ¼»¯¶ÁÈ¡Éè±¸µÄ¹¤×÷ÆµÂÊ ÁõÀÏ°å
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½è±¸ï¿½Ä¹ï¿½ï¿½ï¿½Æµï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 
 
@@ -746,7 +746,7 @@ void Get_Readfreq_data1(void)
 {
     uint8_t SelfProject[2] = {0};
 
-    /***********³õÊ¼»¯¶ÁÈ¡ÆµÂÊ**********************************/
+    /***********ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡Æµï¿½ï¿½**********************************/
     Eeprom_ReadeData_Handle(E_freq_data1_EEPROM,SelfProject);
   //  St_Eeprom.freq_data1 = (((uint16_t)SelfProject[0]) >> 8) + SelfProject[1];
 		St_Eeprom.freq_data1 = (SelfProject[0] << 8 | SelfProject[1]);
@@ -769,7 +769,7 @@ void Get_Readfreq_data1(void)
 		}
 }
 
-//ÉèÖÃÉäÆµÊä³öµÄ¹Ì¶¨ÆµÂÊ500K
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½Ä¹Ì¶ï¿½Æµï¿½ï¿½500K
 void Get_RFReadfreq_data1(void)
 {
 
@@ -777,20 +777,20 @@ void Get_RFReadfreq_data1(void)
 
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£ºÐ´ÈëÖ¸¶¨µÄ¹¤×÷ÆµÂÊ ÁõÀÏ°å  RF
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½Æµï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½  RF
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
    
 
 void Get_Writefreq_data1(u16 Freq_vary)
 {
 	  uint8_t newfreq[2] = {0};
-	  if(700<= Freq_vary && Freq_vary<= 1400)   //ÅÐ¶ÏÐ´ÈëµÄÆµÂÊÊÇ·ñÔÚ·¶Î§
+	  if(700<= Freq_vary && Freq_vary<= 1400)   //ï¿½Ð¶ï¿½Ð´ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú·ï¿½Î§
 	  {
 		  Si5351_Open_CLK1( Freq_vary );
 			newfreq[0] =  Freq_vary >> 8;
@@ -807,26 +807,26 @@ void Get_Writefreq_data1(u16 Freq_vary)
 			US_confi_reply[6] = 0X02 ;
 		  UART_freq[6] = 0XFF;
 			UART_freq[7] = 0XFF;
-			circ_send(UART_freq, sizeof(UART_freq)); 	         //³¬ÏÞ·¢´íÎó´úÂë
+			circ_send(UART_freq, sizeof(UART_freq)); 	         //ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	   }
 
 }
 
 u8  UART_NTC[8] ={0x5A, 0xA5, 0x05, 0x82, 0x20, 0x30, 0x00, 0x00};  //
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£º³õÊ¼»¯¶ÁÈ¡Éè±¸µÄÎÂ¶ÈÉÏÏÞ ÁõÀÏ°å
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½è±¸ï¿½ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 void Get_ReadNTC_data1(void)
 {
     uint8_t SelfProject[2] = {0};
 
-    /***********³õÊ¼»¯¶ÁÈ¡ÎÂ¶ÈÉÏÏÞ**********************************/
+    /***********ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½**********************************/
     Eeprom_ReadeData_Handle(E_maxNTC_data1_EEPROM,SelfProject);
     St_Eeprom.maxNTC_data1 = (SelfProject[0] << 8 | SelfProject[1]);
     if(St_Eeprom.maxNTC_data1 <= 480  && St_Eeprom.maxNTC_data1 >= 250)   
@@ -835,7 +835,7 @@ void Get_ReadNTC_data1(void)
 	    UART_NTC[7] =St_Eeprom.maxNTC_data1 & 0XFF;
 	    circ_send(UART_NTC, sizeof(UART_NTC));  
     }else{
-		  St_Eeprom.maxNTC_data1 = 0x190;   //Ä¬ÈÏÉÏÏÞ40¡æ
+		  St_Eeprom.maxNTC_data1 = 0x190;   //Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
 			UART_NTC[6] =  0x01;
 			UART_NTC[7] =  0x90;
 			circ_send(UART_NTC, sizeof(UART_NTC));
@@ -847,18 +847,18 @@ void Get_ReadNTC_data1(void)
 		}
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£ºÐ´ÈëÖ¸¶¨µÄÎÂ¶ÈÉÏÏÞ ÁõÀÏ°å
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 void Get_WriteNTC_data1(u16 NTC_vary)
 {
 	  uint8_t newNTC[2] = {0};
-	  if(250<= NTC_vary && NTC_vary<= 480)   //ÅÐ¶ÏÐ´ÈëµÄÎÂ¶ÈÉÏÏÞÊÇ·ñÔÚ·¶Î§
+	  if(250<= NTC_vary && NTC_vary<= 480)   //ï¿½Ð¶ï¿½Ð´ï¿½ï¿½ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú·ï¿½Î§
 	  {
 			newNTC[0] =  NTC_vary >> 8;
 			newNTC[1] =  NTC_vary & 0XFF;
@@ -869,32 +869,32 @@ void Get_WriteNTC_data1(u16 NTC_vary)
 			US_confi_reply[8] = 0X00 ;
 		//	Eeprom_ReadeData_Handle(E_maxNTC_data1_EEPROM,newNTC);
    //   St_Eeprom.maxNTC_data1 = (newNTC[0] << 8 | newNTC[1]);
-    // Get_ReadNTC_data1();    //ÖØÐÂ¶ÁÈ¡£¬È·ÈÏÐ´³É¹¦
+    // Get_ReadNTC_data1();    //ï¿½ï¿½ï¿½Â¶ï¿½È¡ï¿½ï¿½È·ï¿½ï¿½Ð´ï¿½É¹ï¿½
 		}else
 		 {
 		  UART_NTC[6] = 0XFF;
 			UART_NTC[7] = 0XFF;
 			circ_send(UART_NTC, sizeof(UART_NTC)); 	 
-      US_confi_reply[8] = 0X02 ;			 //³¬ÏÞ·¢´íÎó´úÂë
+      US_confi_reply[8] = 0X02 ;			 //ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	   }
 }
 
 u8  UART_U_DCDC[8] ={0x5A, 0xA5, 0x05, 0x82, 0x20, 0xA0, 0x00, 0x00};  //
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£º³õÊ¼»¯¶ÁÈ¡Éè±¸µÄµçÑ¹ÉèÖÃÖµ ÁõÀÏ°å
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½è±¸ï¿½Äµï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½Öµ ï¿½ï¿½ï¿½Ï°ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 
 void RF_Get_U_DCDC_data1(void)
 {
     uint8_t SelfProject[2] = {0};
 
-    /***********³õÊ¼»¯¶ÁÈ¡µçÑ¹Öµ**********************************/
+    /***********ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ñ¹Öµ**********************************/
     Eeprom_ReadeData_Handle(E_set_U_data1_EEPROM,SelfProject);
     St_Eeprom.U_DCDC_data1 = (SelfProject[0] << 8 | SelfProject[1]);
     if(St_Eeprom.U_DCDC_data1 <= 2000  && St_Eeprom.U_DCDC_data1 >= 600)
@@ -903,7 +903,7 @@ void RF_Get_U_DCDC_data1(void)
 	    UART_U_DCDC[7] =St_Eeprom.U_DCDC_data1 & 0XFF;
 	    circ_send(UART_U_DCDC, sizeof(UART_U_DCDC));  
     }else{
-		  St_Eeprom.U_DCDC_data1 = 0x5DC;   //Ä¬ÈÏÉÏÏÞ40¡æ
+		  St_Eeprom.U_DCDC_data1 = 0x5DC;   //Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
 			UART_U_DCDC[6] =  0x05;
 			UART_U_DCDC[7] =  0xDC;
 			circ_send(UART_U_DCDC, sizeof(UART_U_DCDC));
@@ -918,7 +918,7 @@ void Get_U_DCDC_data1(void)
 {
     uint8_t SelfProject[2] = {0};
 
-    /***********³õÊ¼»¯¶ÁÈ¡µçÑ¹Öµ**********************************/
+    /***********ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ñ¹Öµ**********************************/
     Eeprom_ReadeData_Handle(E_set_U_data1_EEPROM,SelfProject);
     St_Eeprom.U_DCDC_data1 = (SelfProject[0] << 8 | SelfProject[1]);
     if(St_Eeprom.U_DCDC_data1 <= 2000  && St_Eeprom.U_DCDC_data1 >= 600)
@@ -927,7 +927,7 @@ void Get_U_DCDC_data1(void)
 	    UART_U_DCDC[7] =St_Eeprom.U_DCDC_data1 & 0XFF;
 	    circ_send(UART_U_DCDC, sizeof(UART_U_DCDC));  
     }else{
-		  St_Eeprom.U_DCDC_data1 = 0x5DC;   //Ä¬ÈÏÉÏÏÞ40¡æ
+		  St_Eeprom.U_DCDC_data1 = 0x5DC;   //Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
 			UART_U_DCDC[6] =  0x05;
 			UART_U_DCDC[7] =  0xDC;
 			circ_send(UART_U_DCDC, sizeof(UART_U_DCDC));
@@ -938,19 +938,19 @@ void Get_U_DCDC_data1(void)
 		}
 }
 /***********************************************************************************************
-* º¯ Êý Ãû£ºvoid Get_DeviceInfo(void)
-* ¹¦ÄÜÃèÊö£ºÐ´ÈëÖ¸¶¨µÄµçÑ¹Öµ ÁõÀÏ°å
-* ÊäÈë²ÎÊý£ºÎÞ
-* Êä³ö²ÎÊý£ºÎÞ
-* ·µ»ØÀàÐÍ£ºvoid
-* ×÷    Õß£ºArthur
-* ÈÕ    ÆÚ£º2021.12.04
+* ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½void Get_DeviceInfo(void)
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Äµï¿½Ñ¹Öµ ï¿½ï¿½ï¿½Ï°ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½void
+* ï¿½ï¿½    ï¿½ß£ï¿½Arthur
+* ï¿½ï¿½    ï¿½Ú£ï¿½2021.12.04
 ***********************************************************************************************/
 void RF_Get_WriteU_DCDC_data1(u16 U_DCDC_vary)
 {
 	  uint8_t new_DCDC_DATA[2] = {0};
 		uint8_t SelfProject[2] = {0};
-	  if(600<= U_DCDC_vary && U_DCDC_vary<= 2000)   //ÅÐ¶ÏÐ´ÈëµÄµçÑ¹ÊÇ·ñÔÚ·¶Î§
+	  if(600<= U_DCDC_vary && U_DCDC_vary<= 2000)   //ï¿½Ð¶ï¿½Ð´ï¿½ï¿½Äµï¿½Ñ¹ï¿½Ç·ï¿½ï¿½Ú·ï¿½Î§
 	  {
 			new_DCDC_DATA[0] =  U_DCDC_vary >> 8;
 			new_DCDC_DATA[1] =  U_DCDC_vary & 0XFF;
@@ -961,22 +961,22 @@ void RF_Get_WriteU_DCDC_data1(u16 U_DCDC_vary)
 			UART_U_DCDC[7] =  SelfProject[1];
 			circ_send(UART_U_DCDC, sizeof(UART_U_DCDC));
 			US_confi_reply[7] = 0X00 ;
-    // Get_ReadNTC_data1();    //ÖØÐÂ¶ÁÈ¡£¬È·ÈÏÐ´³É¹¦
+    // Get_ReadNTC_data1();    //ï¿½ï¿½ï¿½Â¶ï¿½È¡ï¿½ï¿½È·ï¿½ï¿½Ð´ï¿½É¹ï¿½
 		}else
 		 {
 		  UART_U_DCDC[6] = 0XFF;
 			UART_U_DCDC[7] = 0XFF;
-			circ_send(UART_U_DCDC, sizeof(UART_U_DCDC)); 	         //³¬ÏÞ·¢´íÎó´úÂë
+			circ_send(UART_U_DCDC, sizeof(UART_U_DCDC)); 	         //ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			US_confi_reply[7] = 0X02 ;
 	   }
 
 }
-//ÉäÆµ
+//ï¿½ï¿½Æµ
 void Get_RFReadNTC_data1(void)
 {
     uint8_t SelfProject[2] = {0};
 
-    /***********³õÊ¼»¯¶ÁÈ¡ÎÂ¶ÈÉÏÏÞ**********************************/
+    /***********ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¡ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½**********************************/
     Eeprom_ReadeData_Handle(E_RFmaxNTC_data1_EEPROM,SelfProject);
     St_Eeprom.RFmaxNTC_data1 = (SelfProject[0] << 8 | SelfProject[1]);
     if(St_Eeprom.RFmaxNTC_data1 <= 480  && St_Eeprom.RFmaxNTC_data1 >= 250)   
@@ -985,7 +985,7 @@ void Get_RFReadNTC_data1(void)
 	    UART_NTC[7] =St_Eeprom.RFmaxNTC_data1 & 0XFF;
 	    circ_send(UART_NTC, sizeof(UART_NTC));  
     }else{
-		  St_Eeprom.RFmaxNTC_data1 = 0x190;   //Ä¬ÈÏÉÏÏÞ40¡æ
+		  St_Eeprom.RFmaxNTC_data1 = 0x190;   //Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½40ï¿½ï¿½
 			UART_NTC[6] =  0x01;
 			UART_NTC[7] =  0x90;
 			circ_send(UART_NTC, sizeof(UART_NTC));
@@ -1001,7 +1001,7 @@ void Get_RFReadNTC_data1(void)
 void Get_RFWriteNTC_data1(u16 NTC_vary)
 {
 	  uint8_t newNTC[2] = {0};
-	  if(250<= NTC_vary && NTC_vary<= 480)   //ÅÐ¶ÏÐ´ÈëµÄÎÂ¶ÈÉÏÏÞÊÇ·ñÔÚ·¶Î§
+	  if(250<= NTC_vary && NTC_vary<= 480)   //ï¿½Ð¶ï¿½Ð´ï¿½ï¿½ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú·ï¿½Î§
 	  {
 			newNTC[0] =  NTC_vary >> 8;
 			newNTC[1] =  NTC_vary & 0XFF;
@@ -1012,13 +1012,13 @@ void Get_RFWriteNTC_data1(u16 NTC_vary)
 			RF_confi_reply[6] = 0X00 ;
 		//	Eeprom_ReadeData_Handle(E_maxNTC_data1_EEPROM,newNTC);
    //   St_Eeprom.maxNTC_data1 = (newNTC[0] << 8 | newNTC[1]);
-    // Get_ReadNTC_data1();    //ÖØÐÂ¶ÁÈ¡£¬È·ÈÏÐ´³É¹¦
+    // Get_ReadNTC_data1();    //ï¿½ï¿½ï¿½Â¶ï¿½È¡ï¿½ï¿½È·ï¿½ï¿½Ð´ï¿½É¹ï¿½
 		}else
 		 {
 		  UART_NTC[6] = 0XFF;
 			UART_NTC[7] = 0XFF;
 			circ_send(UART_NTC, sizeof(UART_NTC)); 	 
-      RF_confi_reply[6] = 0X02 ;			 //³¬ÏÞ·¢´íÎó´úÂë
+      RF_confi_reply[6] = 0X02 ;			 //ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	   }
 }
 

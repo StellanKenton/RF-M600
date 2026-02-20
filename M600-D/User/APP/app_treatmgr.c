@@ -18,6 +18,8 @@
 #include "drv_delay.h"
 #include "drv_si5351.h"
 #include "drv_dac.h"
+#include "drv_24c02.h"
+#include "drv_memory.h"
 
 TreatMgr_t s_TreatMgr;
 
@@ -98,8 +100,14 @@ void App_TreatMgr_Init(void)
     // Initialize DAC
     Drv_DAC_Init();
     
+	// Initialize 24C02 EEPROM
+    Drv_24C02_Init();
+		
     // Initialize SI5351
-    Drv_SI5351_Init();
+ //   Drv_SI5351_Init();
+
+    // Initialize Memory 
+    Drv_Memory_Init();
 }
 
 IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)

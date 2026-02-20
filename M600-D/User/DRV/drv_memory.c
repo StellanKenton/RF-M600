@@ -8,6 +8,13 @@
 * @copyright: Copyright (c) 2050
 **********************************************************************************/
 #include "drv_memory.h"
+#include "drv_24c02.h"
+#include <string.h>
+
+#define MEMORY_BOOT_CHECK_LEN      16U
+#define MEMORY_SN_PREFIX           "M600-SN"
+#define MEMORY_SN_PREFIX_LEN       7U
+#define MEMORY_SN_DEFAULT_STR      "M600-SN000000007"
 
 /* Memory configuration */
 #define MEMORY_SIZE             0x1000      ///< Total memory size (4KB)
@@ -22,12 +29,37 @@ static bool s_MemoryInitialized = false;
  */
 bool Drv_Memory_Init(void)
 {
-    // TODO: Initialize EEPROM or Flash memory hardware here
-    // For example:
-    // - Initialize I2C/SPI interface for EEPROM
-    // - Initialize Flash memory controller
-    // - Check memory availability
-    
+    uint8_t boot_data[MEMORY_BOOT_CHECK_LEN] = {0};
+    static uint8_t default_sn[] = MEMORY_SN_DEFAULT_STR;
+    bool need_default_sn = false;  /* 需要写入默认序列号 */
+    uint16_t i;
+
+    if (!Drv_24C02_Read(boot_data, MEMORY_BOOT_CHECK_LEN, 0))
+    {
+        return false;
+    }
+
+    /* 前面字节不是"M600-SN"，且剩下的字节存在0xFF -> 判定为错误序列号，需写入默认序列号 */
+    if (memcmp(boot_data, MEMORY_SN_PREFIX, MEMORY_SN_PREFIX_LEN) != 0)
+    {
+        for (i = MEMORY_SN_PREFIX_LEN; i < MEMORY_BOOT_CHECK_LEN; i++)
+        {
+            if (boot_data[i] == 0xFF)
+            {
+                need_default_sn = true;  /* 剩余字节存在0xFF，判定为错误 */
+                break;
+            }
+        }
+    }
+
+    if (need_default_sn)
+    {
+        if (!Drv_24C02_Write(default_sn, (uint16_t)(sizeof(default_sn) - 1U), 0))
+        {
+            return false;
+        }
+    }
+
     s_MemoryInitialized = true;
     return true;
 }

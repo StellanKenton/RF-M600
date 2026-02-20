@@ -30,10 +30,7 @@ int main(void)
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
     Drv_System_Init();   /* DAL -> BSP: GPIO, ADC, DAC, TIM, USART, I2C, SysTick */
-
-    __disable_irq();
     System_Init();
-    __enable_irq();
 
     while (1)
     {

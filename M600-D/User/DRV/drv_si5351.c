@@ -11,11 +11,21 @@
 #include "bsp_i2c.h"
 #include "bsp_SI5351.h"
 #include "bsp_tim.h"
+#include "drv_soft_i2c.h"
 
+#define SI5351_I2C_INSTANCE    DRV_SOFT_I2C_INSTANCE_1  /* Use I2C instance 1 */
+
+Drv_SoftI2C_Config_t i2c_config = {
+    .SCL_Port = GPIOB,
+    .SCL_Pin = GPIO_Pin_6,
+    .SDA_Port = GPIOB,
+    .SDA_Pin = GPIO_Pin_7
+};
 
 void Drv_SI5351_Init(void)
 {
     // Initialize the SI5351
+    Drv_SoftI2C_Init(SI5351_I2C_INSTANCE, &i2c_config);
     PWM_Generate_Config();
 }
 

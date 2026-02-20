@@ -9,14 +9,14 @@
  * @copyright: Copyright (c) 2025
  ***********************************************************************************/
 #include "drv_soft_i2c.h"
-#include "delay.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 #include <stdbool.h>
 #include <string.h>
 /* ==================== Private Definitions ==================== */
 
-#define I2C_DELAY_US    100     /* I2C timing delay in microseconds */
+/* NOP-based delay: ~100us at 72MHz (Cortex-M3 ~4 cycles/loop: sub+cmp+ branch+nop) */
+#define I2C_DELAY_LOOPS  (72u * 100u / 4u)
 
 /* Maximum number of I2C instances */
 #define MAX_I2C_INSTANCES   DRV_SOFT_I2C_INSTANCE_MAX
@@ -39,11 +39,14 @@ static bool s_i2c_initialized[MAX_I2C_INSTANCES] = {false, false};
 /* ==================== Private Functions ==================== */
 
 /**
- * @brief I2C delay function
+ * @brief I2C delay function - NOP-based, no system timer dependency
  */
 static void I2C_Delay(void)
 {
-    delay_us(I2C_DELAY_US);
+    volatile uint32_t n = I2C_DELAY_LOOPS;
+    while (n--) {
+        __NOP();
+    }
 }
 
 /**

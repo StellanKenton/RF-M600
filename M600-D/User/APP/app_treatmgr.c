@@ -39,23 +39,23 @@ static uint16_t App_TreatMgr_ReadBoardTemp(void)
 {
     uint16_t temp1_voltage = Drv_ADC_ReadVoltage(E_ADC_CHANNEL_Heat_REF01);
     uint16_t temp2_voltage = Drv_ADC_ReadVoltage(E_ADC_CHANNEL_Heat_REF02);
-    
+
     // TODO: Convert voltage to temperature based on actual sensor characteristics
     // Using simplified linear conversion as placeholder
     // Calibration required per sensor datasheet:
     // - NTC thermistor: use Steinhart-Hart equation or lookup table
     // - Linear sensor: use linear conversion formula
     // - Other sensors: convert based on characteristic curve
-    
+
     // Average of two sensors (if both valid)
     uint16_t avg_voltage = (temp1_voltage + temp2_voltage) / 2;
-    
+
     // Simplified linear conversion (calibrate for actual hardware)
     // Assumption: 0V = 0C, 3.3V = 100C = 1000 * 0.1C
     // temp = (voltage_mv * 1000) / 3300
     // Note: placeholder implementation, replace with actual sensor characteristics
     uint16_t board_temp = (avg_voltage * 1000) / 3300;
-    
+
     return board_temp;
 }
 
@@ -66,7 +66,7 @@ static void App_TreatMgr_ControlFan(void)
 {
     static bool fanState = false;
     uint16_t boardTemp = App_TreatMgr_ReadBoardTemp();
-    
+
     if(boardTemp > BOARD_TEMP_FAN_ON_THRESHOLD)
     {
         // Temperature above 85C, start fan
@@ -99,14 +99,14 @@ void App_TreatMgr_Init(void)
     s_TreatMgr.eFootSwitchClosed = false;
     // Initialize DAC
     Drv_DAC_Init();
-    
+
 	// Initialize 24C02 EEPROM
     Drv_24C02_Init();
-		
+
     // Initialize SI5351
  //   Drv_SI5351_Init();
 
-    // Initialize Memory 
+    // Initialize Memory
     Drv_Memory_Init();
 }
 
@@ -189,7 +189,7 @@ void ProbeStatusCheck()
                 break;
             case E_IODEVICE_MODE_NOT_CONNECTED:
                 LOG_I("Probe***** status changed to NOT_CONNECTED");
-                break;  
+                break;
             case E_IODEVICE_MODE_ERROR:
                 LOG_I("Probe status changed to ERROR");
                 break;
@@ -232,7 +232,7 @@ void App_TreatMgr_Process(void)
     static Drv_Timer_t TreatMgrTimer;
     static Drv_Timer_t BoardTempMonitorTimer;
 
-    
+
     if(Drv_Timer_Tick(&TreatMgrTimer, TREAT_TASK_TIME) == false){
         return;
     }
@@ -253,7 +253,7 @@ void App_TreatMgr_Process(void)
     switch(s_TreatMgr.eState)
     {
         case E_TREATMGR_STATE_IDLE:
-            
+
             // Handle idle state
             switch(s_TreatMgr.eProbeStatus)
             {

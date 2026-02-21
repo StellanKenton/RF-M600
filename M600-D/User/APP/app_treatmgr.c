@@ -20,7 +20,7 @@
 #include "drv_dac.h"
 #include "drv_24c02.h"
 #include "drv_memory.h"
-
+#include "app_memory.h"
 TreatMgr_t s_TreatMgr;
 
 /* Board temperature monitoring parameters */
@@ -249,6 +249,9 @@ void App_TreatMgr_Process(void)
     }
     // Check if wait for reconnection is needed
     App_TreatMgr_CheckWaitReturn();
+
+    // Process Memory
+    App_Memory_Process();
 
     switch(s_TreatMgr.eState)
     {

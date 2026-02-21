@@ -449,44 +449,131 @@ void App_Memory_Process(void)
     SW_TransData_t *pSW = App_Comm_GetSWTransData();
     Heat_TransData_t *pHeat = App_Comm_GetHeatTransData();
 
-    (void)pSW;
-
-    if(pUS != NULL && pUS->flag.bits.Process_Config == 1)
+    if (pUS != NULL && pUS->flag.bits.Process_Config == 1)
     {
-        s_USParams.Frequency = pUS->RxConfig.frequency;
-        s_USParams.TempLimit = pUS->RxConfig.temp_limit;
-        s_USParams.Voltage   = pUS->RxConfig.voltage;
+        uint8_t freq_result   = CONFIG_RESULT_SUCCESS;
+        uint8_t voltage_result = CONFIG_RESULT_SUCCESS;
+        uint8_t temp_result   = CONFIG_RESULT_SUCCESS;
 
-        App_Memory_SaveUSParams(&s_USParams);
+        /* Check over limit */
+        if (pUS->RxConfig.frequency < PARAM_US_FREQ_MIN || pUS->RxConfig.frequency > PARAM_US_FREQ_MAX)
+        {
+            freq_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+        if (pUS->RxConfig.voltage < PARAM_US_VOLTAGE_MIN || pUS->RxConfig.voltage > PARAM_US_VOLTAGE_MAX)
+        {
+            voltage_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+        if (pUS->RxConfig.temp_limit < PARAM_TEMP_MIN || pUS->RxConfig.temp_limit > PARAM_TEMP_MAX)
+        {
+            temp_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+
+        if (freq_result == CONFIG_RESULT_SUCCESS && voltage_result == CONFIG_RESULT_SUCCESS && temp_result == CONFIG_RESULT_SUCCESS)
+        {
+            US_TreatParams_t readback;
+            s_USParams.Frequency = pUS->RxConfig.frequency;
+            s_USParams.TempLimit = pUS->RxConfig.temp_limit;
+            s_USParams.Voltage   = pUS->RxConfig.voltage;
+
+            if (App_Memory_SaveUSParams(&s_USParams) == true)
+            {
+                if (!App_Memory_LoadUSParams(&readback) || memcmp(&readback, &s_USParams, sizeof(US_TreatParams_t)) != 0)
+                {
+                    freq_result = voltage_result = temp_result = CONFIG_RESULT_FAIL;
+                }
+            }
+            else {
+                freq_result = voltage_result = temp_result = CONFIG_RESULT_FAIL;
+            }
+        }
+
+        pUS->TxConfig.freq_result    = freq_result;
+        pUS->TxConfig.voltage_result = voltage_result;
+        pUS->TxConfig.temp_result   = temp_result;
+        pUS->flag.bits.Rely_Config  = 1;
         pUS->flag.bits.Process_Config = 0;
     }
 
-    if(pRF != NULL && pRF->flag.bits.Process_Config == 1)
+    if (pRF != NULL && pRF->flag.bits.Process_Config == 1)
     {
-        s_RFParams.TempLimit = pRF->RxConfig.temp_limit;
+        uint8_t temp_result = CONFIG_RESULT_SUCCESS;
 
-        App_Memory_SaveRFParams(&s_RFParams);
+        if (pRF->RxConfig.temp_limit < PARAM_TEMP_MIN || pRF->RxConfig.temp_limit > PARAM_TEMP_MAX)
+        {
+            temp_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+
+        if (temp_result == CONFIG_RESULT_SUCCESS)
+        {
+            RF_TreatParams_t readback;
+            s_RFParams.TempLimit = pRF->RxConfig.temp_limit;
+
+            if (App_Memory_SaveRFParams(&s_RFParams) == true)
+            {
+                if (!App_Memory_LoadRFParams(&readback) || memcmp(&readback, &s_RFParams, sizeof(RF_TreatParams_t)) != 0)
+                {
+                    temp_result = CONFIG_RESULT_FAIL;
+                }
+            }
+            else
+            {
+                temp_result = CONFIG_RESULT_FAIL;
+            }
+        }
+
+        pRF->TxConfig.temp_result   = temp_result;
+        pRF->flag.bits.Rely_Config  = 1;
         pRF->flag.bits.Process_Config = 0;
     }
 
-    if(pHeat != NULL && pHeat->flag.bits.Process_Config == 1)
+    if (pHeat != NULL && pHeat->flag.bits.Process_Config == 1)
     {
+        uint8_t result = CONFIG_RESULT_SUCCESS;
+
         if (pHeat->RxConfig.preheat_state == 0x01)
         {
-            s_NPHParams.PreheatEnable    = 1;
-            s_NPHParams.PreheatTempLimit = pHeat->RxConfig.temp_limit;
-            s_NPHParams.PreheatTime      = pHeat->RxConfig.work_time;
-        }
-        else
-        {
-            s_NPHParams.PreheatEnable = 0;
+            if (pHeat->RxConfig.temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.temp_limit > PARAM_TEMP_MAX)
+            {
+                result = CONFIG_RESULT_OVER_LIMIT;
+            }
+            if (result == CONFIG_RESULT_SUCCESS && pHeat->RxConfig.work_time > PARAM_WORK_TIME_MAX)
+            {
+                result = CONFIG_RESULT_OVER_LIMIT;
+            }
         }
 
-        App_Memory_SaveNPHParams(&s_NPHParams);
+        if (result == CONFIG_RESULT_SUCCESS)
+        {
+            if (pHeat->RxConfig.preheat_state == 0x01)
+            {
+                s_NPHParams.PreheatEnable    = 1;
+                s_NPHParams.PreheatTempLimit = pHeat->RxConfig.temp_limit;
+                s_NPHParams.PreheatTime      = pHeat->RxConfig.work_time;
+            }
+            else
+            {
+                s_NPHParams.PreheatEnable = 0;
+            }
+
+            NPH_TreatParams_t readback;
+            if (App_Memory_SaveNPHParams(&s_NPHParams) == true)
+            {
+                if (!App_Memory_LoadNPHParams(&readback) || memcmp(&readback, &s_NPHParams, sizeof(NPH_TreatParams_t)) != 0)
+                {
+                    result = CONFIG_RESULT_FAIL;
+                }
+            }
+            else
+            {
+                result = CONFIG_RESULT_FAIL;
+            }
+        }
+
+        pHeat->TxConfig.result        = result;
+        pHeat->flag.bits.Rely_Config  = 1;
         pHeat->flag.bits.Process_Config = 0;
     }
-
-
 }
 
 /**************************End of file********************************/

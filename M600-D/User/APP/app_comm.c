@@ -178,7 +178,6 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                         break;
                     }
                     s_AppCommInfo.RF.RxConfig.temp_limit = pData[0] | (uint16_t)pData[1] << 8;
-                    s_AppCommInfo.RF.flag.bits.Rely_Config = 1;
                     s_AppCommInfo.RF.flag.bits.Process_Config = 1;
                     break;
             }
@@ -224,7 +223,6 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     s_AppCommInfo.Heat.RxConfig.preheat_state = pData[0];
                     s_AppCommInfo.Heat.RxConfig.work_time = pData[1] | (uint16_t)pData[2] << 8;
                     s_AppCommInfo.Heat.RxConfig.temp_limit = pData[3] | (uint16_t)pData[4] << 8;
-                    s_AppCommInfo.Heat.flag.bits.Rely_Config = 1;
                     s_AppCommInfo.Heat.flag.bits.Process_Config = 1;
                     break;
             }
@@ -296,6 +294,16 @@ static void App_Comm_ReplyUSStatus(void)
     App_Comm_CreateAndSend(PROTOCOL_MODULE_ULTRASOUND, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 
+static void App_Comm_ReplyUSConfig(void)
+{
+    uint8_t TxData[8];
+    uint8_t DataLen = 0;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.freq_result;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.voltage_result;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.temp_result;
+    App_Comm_CreateAndSend(PROTOCOL_MODULE_ULTRASOUND, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
+}
+
 static void App_Comm_ReplyRFStatus(void)
 {
     RF_GetStatus_Reply_t *pStatus = App_RadioFreq_GetStatus();
@@ -316,6 +324,14 @@ static void App_Comm_ReplyRFStatus(void)
     TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_RADIO_FREQUENCY);
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.error_code;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_RADIO_FREQ, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
+}
+
+static void App_Comm_ReplyRFConfig(void)
+{
+    uint8_t TxData[8];
+    uint8_t DataLen = 0;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxConfig.temp_result;
+    App_Comm_CreateAndSend(PROTOCOL_MODULE_RADIO_FREQ, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
 }
 
 static void App_Comm_ReplySWStatus(void)
@@ -370,6 +386,14 @@ static void App_Comm_ReplyHeatStatus(void)
     App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 
+static void App_Comm_ReplyHeatConfig(void)
+{
+    uint8_t TxData[8];
+    uint8_t DataLen = 0;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.result;
+    App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
+}
+
 void App_Comm_SendData(void)
 {
     if(Drv_GetUSART1_DMA_SendStatus()){
@@ -394,6 +418,21 @@ void App_Comm_SendData(void)
     if(s_AppCommInfo.Heat.flag.bits.Rely_Status){
         s_AppCommInfo.Heat.flag.bits.Rely_Status = 0;
         App_Comm_ReplyHeatStatus();
+    }
+
+    if(s_AppCommInfo.US.flag.bits.Rely_Config){
+        s_AppCommInfo.US.flag.bits.Rely_Config = 0;
+        App_Comm_ReplyUSConfig();
+    }
+
+    if(s_AppCommInfo.RF.flag.bits.Rely_Config){
+        s_AppCommInfo.RF.flag.bits.Rely_Config = 0;
+        App_Comm_ReplyRFConfig();
+    }
+
+    if(s_AppCommInfo.Heat.flag.bits.Rely_Config){
+        s_AppCommInfo.Heat.flag.bits.Rely_Config = 0;
+        App_Comm_ReplyHeatConfig();
     }
 }
 

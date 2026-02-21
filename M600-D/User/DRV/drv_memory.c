@@ -95,29 +95,7 @@ bool Drv_Memory_Read(uint16_t address, uint8_t *data, uint16_t length)
         return false;
     }
 
-    // TODO: Implement actual memory read operation
-    // For EEPROM (I2C):
-    // - Send start condition
-    // - Send device address + write bit
-    // - Send memory address (high byte, low byte)
-    // - Send repeated start condition
-    // - Send device address + read bit
-    // - Read data bytes
-    // - Send stop condition
-    //
-    // For Flash:
-    // - Unlock Flash if needed
-    // - Read from Flash memory address
-    // - Lock Flash if needed
-
-    // Placeholder: Copy from a simulated memory buffer
-    // In actual implementation, replace this with real hardware access
-    for (uint16_t i = 0; i < length; i++)
-    {
-        data[i] = 0xFF;  // Default value, replace with actual read
-    }
-
-    return true;
+    return Drv_24C02_Read(data, length, address);
 }
 
 /**
@@ -147,28 +125,7 @@ bool Drv_Memory_Write(uint16_t address, const uint8_t *data, uint16_t length)
         return false;
     }
 
-    // TODO: Implement actual memory write operation
-    // For EEPROM (I2C):
-    // - Send start condition
-    // - Send device address + write bit
-    // - Send memory address (high byte, low byte)
-    // - Send data bytes (may need to split into pages)
-    // - Wait for write completion (polling or delay)
-    // - Send stop condition
-    //
-    // For Flash:
-    // - Unlock Flash if needed
-    // - Erase page/sector if needed
-    // - Program Flash memory address
-    // - Verify write operation
-    // - Lock Flash if needed
-
-    // Placeholder: Write to a simulated memory buffer
-    // In actual implementation, replace this with real hardware access
-    // Note: EEPROM writes may need page boundaries consideration
-    // Note: Flash writes may need erase before write
-
-    return true;
+    return Drv_24C02_Write((uint8_t *)data, length, address);
 }
 
 /**************************End of file********************************/

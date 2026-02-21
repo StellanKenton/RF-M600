@@ -19,7 +19,14 @@
 extern "C" {
 #endif
 
-
+/* Parameter range limits (from protocol) */
+#define PARAM_TEMP_MIN        350U
+#define PARAM_TEMP_MAX        480U
+#define PARAM_US_FREQ_MIN     1000U
+#define PARAM_US_FREQ_MAX     1400U
+#define PARAM_US_VOLTAGE_MIN  1000U
+#define PARAM_US_VOLTAGE_MAX  2000U
+#define PARAM_WORK_TIME_MAX   3600U
 
 
 /**
@@ -163,6 +170,11 @@ const NPH_TreatParams_t *App_Memory_GetNPHParams(void);
  * @retval Pointer to US params
  */
 const US_TreatParams_t *App_Memory_GetUSParams(void);
+
+/**
+ * @brief Process memory
+ */
+void App_Memory_Process(void);
 
 #ifdef __cplusplus
 }

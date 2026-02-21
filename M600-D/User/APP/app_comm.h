@@ -306,6 +306,11 @@ typedef struct
     uint16_t temp_limit;          ///< 350-480 (35-48℃)
 } Heat_SetPreheat_Send_t;
 
+/* Heat - Set Config/Preheat (0x02) - Reply */
+typedef struct
+{
+    uint8_t result;              ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+} Heat_SetConfig_Reply_t;
 
 typedef union {
     uint16_t byte;
@@ -321,6 +326,7 @@ typedef struct
 {
     Heat_ByteUnion flag;
     Heat_GetStatus_Reply_t TxStatus;
+    Heat_SetConfig_Reply_t TxConfig;
     Heat_SetWorkState_Send_t RxWorkState;
     Heat_SetPreheat_Send_t RxConfig;
 } Heat_TransData_t;

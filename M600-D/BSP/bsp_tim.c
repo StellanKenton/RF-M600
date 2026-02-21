@@ -28,8 +28,10 @@ void BSP_TIM1_Init(void)
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_13;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    /* Time base: prescaler 0, period 4, up count (for ETR clock) */
-    TIM_TimeBaseStructure.TIM_Period            = 4 - 1;
+    /* Time base: prescaler 0, period 2, up count (for ETR clock) */
+    /* Period = 2 means PWM frequency = ETR_freq / 2 */
+    /* For 1MHz PWM output: need 2MHz ETR input */
+    TIM_TimeBaseStructure.TIM_Period            = 2 - 1;
     TIM_TimeBaseStructure.TIM_Prescaler         = 0;
     TIM_TimeBaseStructure.TIM_ClockDivision     = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode       = TIM_CounterMode_Up;
@@ -45,7 +47,7 @@ void BSP_TIM1_Init(void)
     TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
-    TIM_OCInitStructure.TIM_Pulse       = 2;
+    TIM_OCInitStructure.TIM_Pulse       = 1;
     TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;
     TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
     TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;
@@ -68,7 +70,7 @@ void BSP_TIM1_Init(void)
     /* Do not enable timer/PWM here; call BSP_TIM1_ComplementaryPWM_Enable() when PWM output is needed. */
     TIM_CtrlPWMOutputs(TIM1, DISABLE);
     TIM_Cmd(TIM1, DISABLE);
-    
+
 }
 
 void BSP_TIM2_Init(void)
@@ -112,7 +114,7 @@ void BSP_TIM1_SetCompare1(uint16_t pulse)
 
 void BSP_TIM1_ComplementaryPWM_Enable(void)
 {
-    TIM_Cmd(TIM1, ENABLE);   
+    TIM_Cmd(TIM1, ENABLE);
     TIM_CtrlPWMOutputs(TIM1, ENABLE);
 }
 

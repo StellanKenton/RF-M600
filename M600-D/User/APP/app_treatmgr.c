@@ -104,7 +104,7 @@ void App_TreatMgr_Init(void)
     Drv_24C02_Init();
 
     // Initialize SI5351
- //   Drv_SI5351_Init();
+    Drv_SI5351_Init();
 
     // Initialize Memory
     App_Memory_Init();

@@ -13,6 +13,7 @@
 #include "app_comm.h"
 #include "app_handcomm.h"
 #include "drv_adc.h"
+#include "drv_si5351.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
@@ -48,7 +49,7 @@ void System_Init(void)
     cm_backtrace_init(FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);
     LOG_I("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
     LOG_I("System initialized.");
-    LOG_I("Firmware: %s, Version: %s, Hardware: %s", FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);        
+    LOG_I("Firmware: %s, Version: %s, Hardware: %s", FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);
 
     // Initialize the treatment manager
     App_TreatMgr_Init();
@@ -57,6 +58,12 @@ void System_Init(void)
     LOG_I("Communication initialized.");
     App_HandComm_Init();
     LOG_I("Handle communication initialized.");
+
+    // output pwm test - 1MHz complementary PWM on TIM1
+//    Drv_SI5351_Init();                      // Initialize Si5351
+//    Drv_SI5351_SetFrequency(923);          // Set Si5351 CLK1 to 2MHz as TIM1 ETR clock source (2MHz / 2 = 1MHz PWM)
+//    Drv_SI5351_SetComplementaryPWM(true);   // Enable TIM1 complementary PWM output (CH1/CH1N)
+//    LOG_I("TIM1 complementary PWM enabled at 1MHz");
 }
 
 void SystemManager(void)
@@ -94,5 +101,3 @@ void SystemProcess(void)
     Drv_WatchDogFeed();
 }
 /**************************End of file********************************/
-
-

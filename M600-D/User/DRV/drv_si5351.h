@@ -1,7 +1,7 @@
 /************************************************************************************
 * @file     : drv_si5351.h
-* @brief    : 
-* @details  : 
+* @brief    :
+* @details  :
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
@@ -31,4 +31,3 @@ void Drv_SI5351_SetComplementaryPWM(bool enable);
 #endif
 #endif  // DRV_SI5351_H
 /**************************End of file********************************/
-

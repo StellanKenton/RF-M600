@@ -14,21 +14,23 @@
 #include "stm32f10x_conf.h"
 #include "stm32f10x_pwr.h"
 #include "bsp_SI5351.h"
-#include "drv_soft_i2c.h"
+#include "lib_aiic.h"
 #include "delay.h"
 #include "math.h"
 #include <string.h>
-
+#include "bsp_gpio.h"
 /* ==================== Private Variables ==================== */
 
 SI5351A_TypeDef St_SI5351A;
 SI5351A_FRACTION_TypeDef St_fraction = {0};
 
+/* SI5351 I2C node structure */
+iic_Node sSI5351Dev;
+
 /* ==================== Private Definitions ==================== */
 
 /* SI5351 I2C Configuration */
 #define SI5351_I2C_ADDR        0x60    /* SI5351 I2C device address (7-bit) */
-#define SI5351_I2C_INSTANCE    DRV_SOFT_I2C_INSTANCE_1  /* Use I2C instance 1 */
 
 /* ==================== Private Types ==================== */
 
@@ -140,12 +142,11 @@ si5351a_revb_register_t const si5351a_1000_CLK1_registers[SI5351A_REVB_REG_CONFI
  * @brief Send a register value to SI5351 via software I2C
  * @param regAddr: Register address (8-bit)
  * @param value: Register value (8-bit)
- * @note This function replaces the old IICsendreg implementation
- *       and uses drv_soft_i2c driver functions
+ * @note This function uses lib_aiic driver functions
  */
 static void IICsendreg(uint8_t regAddr, uint8_t value)
 {
-    Drv_SoftI2C_WriteReg(SI5351_I2C_INSTANCE, SI5351_I2C_ADDR, regAddr, &value, 1);
+    Drv_IIC_WriteReg(&sSI5351Dev, SI5351_I2C_ADDR, regAddr, value);
 }
 
 /**
@@ -200,16 +201,43 @@ void Si5351_SetFrequency_ALL_RESET(void)
  */
 void Si5351_Init(void)
 {
+    /* Initialize IIC node for SI5351 */
+    /* SI5351 uses PB6(SCL) and PB7(SDA) - same as hardware I2C1 pins */
+    /* Initialize GPIO for software I2C */
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+
+    /* Configure PB6(SCL) and PB7(SDA) as open-drain output for software I2C */
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    /* Release bus: SCL and SDA high */
+    GPIO_SetBits(GPIOB, GPIO_Pin_6 | GPIO_Pin_7);
+
+    /* Configure IIC node structure */
+    sSI5351Dev.SCLPort = GPIOB;
+    sSI5351Dev.SCL_Pin = GPIO_Pin_6;
+    sSI5351Dev.SDAPort = GPIOB;
+    sSI5351Dev.SDA_Pin = GPIO_Pin_7;
+    sSI5351Dev.SpeedDelay = CycleCount;
+
     /* Initialize structure parameters */
     St_SI5351A.para.max_ch = 2;
     St_SI5351A.para.min_ch = 0;
 
-    St_SI5351A.para.max_freq = 1300;  /* Maximum frequency: 1300 kHz */
+    St_SI5351A.para.max_freq = 4000;  /* Maximum frequency: 4000 kHz */
     St_SI5351A.para.min_freq = 450;   /* Minimum frequency: 450 kHz */
 
     Si5351_SetFrequency_ALL_RESET();
-	
+
     Si5351_StopPWM();
+
+    // /* Output 1MHz clock on CLK0 after initialization */
+    // delay_ms(10);  /* Wait for reset to complete */
+    // PWM_Generate(1300);
 }
 
 /**
@@ -241,15 +269,15 @@ void Si5351_StopPWM( void )
 void Si5351_GetPara(SI5351A_FRACTION_TypeDef *para, SI5351A_FREQ_TypeDef freq)
 {
 	double tmp_freq = 0;
-	
+
     para->quotient = (double)freq.pll_freq / freq.freq_out;
 
     para->int_quotient = (uint32_t)(floor(freq.pll_freq / freq.freq_out));
-	
+
 	tmp_freq = (double)(freq.pll_freq % freq.freq_out) / freq.freq_out;
-	
+
     para->numerator = (uint32_t)(tmp_freq*DENOM_20BIT);
-	
+
     para->denominator = DENOM_20BIT;
 }
 
@@ -392,6 +420,7 @@ int8_t Si5351_SetFrequency(uint8_t ch, uint32_t frequency)
     uint32_t num;
     uint32_t denom;
     uint32_t divider;
+    uint32_t frequency_hz;  /* Frequency in Hz */
 
     SI5351_ERROR_EnumDef error = ERROR_SI5351_OK;
 
@@ -420,14 +449,17 @@ int8_t Si5351_SetFrequency(uint8_t ch, uint32_t frequency)
      * MSN_P3[19:0] = c
      */
 
-    divider = FREQ_PLL / frequency;  /* PLL frequency: 900 MHz, divided by target frequency */
+    /* Convert frequency from kHz to Hz for calculation */
+    frequency_hz = frequency * 1000;
+
+    divider = FREQ_PLL / frequency_hz;  /* PLL frequency: 900 MHz, divided by target frequency */
 
     if (divider % 2)
     {
         divider--;  /* Ensure an even integer divider */
     }
 
-    pllFreq = divider * frequency;      /* Calculate pllFrequency: divider * target frequency */
+    pllFreq = divider * frequency_hz;   /* Calculate pllFrequency: divider * target frequency in Hz */
     mult = pllFreq / xtalFreq;          /* Determine integer multiplier for pllFrequency */
     l = pllFreq % xtalFreq;             /* Calculate remainder */
     f = l;                               /* Convert to float for calculation */
@@ -614,17 +646,26 @@ void Si5351_PWM_TIM( uint32_t freq )
 }
 
 /**
- * @brief Generate PWM signal with specified frequency
- * @param freq: CLK1 output frequency in kHz
- * @note Frequency range: 700-1300 kHz, default: 840 kHz
+ * @brief Generate PWM signal with specified frequency on CLK1
+ * @param freq: CLK1 output frequency in kHz (e.g., 1000 = 1MHz)
+ * @note Frequency range: 450-1300 kHz
+ *       This function directly outputs the specified frequency without scaling
+ *       Example: PWM_Generate(1000) outputs exactly 1MHz on CLK1
  */
 void PWM_Generate( uint32_t freq )
 {
-    if(freq < 700 || freq > 1300)
+    /* Validate frequency range */
+    if(freq < St_SI5351A.para.min_freq || freq > St_SI5351A.para.max_freq)
     {
         freq = DEFAULT_FREQUENCY;
     }
-    Si5351_Open_CLK1( freq );
+
+    /* Set source to SELF mode for direct frequency output */
+    St_SI5351A.para.St_freq.which_source = SOURCE_SI5351_SELF;
+
+    /* Use Si5351_SetFrequency for accurate output on CLK1 */
+    /* This function properly calculates PLL and divider values */
+    Si5351_SetFrequency(1, freq);  /* Channel 1 = CLK1, freq in kHz */
 }
 
 /**

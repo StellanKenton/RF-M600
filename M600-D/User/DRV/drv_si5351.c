@@ -1,7 +1,7 @@
 /***********************************************************************************
 * @file     : drv_si5351.c
-* @brief    : 
-* @details  : 
+* @brief    :
+* @details  :
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
@@ -15,39 +15,32 @@
 
 #define SI5351_I2C_INSTANCE    DRV_SOFT_I2C_INSTANCE_1  /* Use I2C instance 1 */
 
-Drv_SoftI2C_Config_t i2c_config = {
-    .SCL_Port = GPIOB,
-    .SCL_Pin = GPIO_Pin_6,
-    .SDA_Port = GPIOB,
-    .SDA_Pin = GPIO_Pin_7
-};
 
 void Drv_SI5351_Init(void)
 {
     // Initialize the SI5351
-    Drv_SoftI2C_Init(SI5351_I2C_INSTANCE, &i2c_config);
     PWM_Generate_Config();
 }
 
 uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
 {
     // Set the frequency of the SI5351
-    if(frequency <= 700)
+    if(frequency <= 800)
     {
-        frequency = 0;
+        frequency = 800;
     }
-    else if(frequency > 1400)
+    else if(frequency > 1300)
     {
-        frequency = 1400;
+        frequency = 1300;
     }
     // Set the frequency of the SI5351
-    PWM_Generate(frequency);
+    PWM_Generate(frequency*2);
     return frequency;
 }
 
 uint16_t Drv_SI5351_SetPulseWidthus(uint16_t pulse_width_us)
 {
-    // Set the pulse width of the SI5351 
+    // Set the pulse width of the SI5351
     // input 0.5ms value to 5, 20ms value to 200
     if(pulse_width_us < 500)
     {
@@ -87,5 +80,3 @@ void Drv_SI5351_SetComplementaryPWM(bool enable)
 }
 
 /**************************End of file********************************/
-
-

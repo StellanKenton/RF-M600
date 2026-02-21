@@ -38,6 +38,13 @@ uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
     return frequency;
 }
 
+uint16_t Drv_SI5351_SetFrequencyRaw(uint16_t frequency)
+{
+    // Set the frequency of the SI5351 without range limit and frequency multiplication
+    PWM_Generate(frequency);
+    return frequency;
+}
+
 uint16_t Drv_SI5351_SetPulseWidthus(uint16_t pulse_width_us)
 {
     // Set the pulse width of the SI5351

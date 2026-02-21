@@ -6,3 +6,9 @@
 *.axf
 *.dep
 *.senki
+
+# VSCode files
+.vscode/BROWSE.VC.DB
+.vscode/*.db
+.vscode/*.db-shm
+.vscode/*.db-wal

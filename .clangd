@@ -1,0 +1,36 @@
+# 指定 compile_commands.json 的路径
+CompilationDatabase: D:/Space/Cosmos/RF-M600
+
+CompileFlags:
+  # compile_commands.json 已包含所有编译选项，这里只做补充调整
+  Remove:
+    # 移除可能导致问题的编译器特定选项
+    - -mfloat-abi=*
+    - -mfpu=*
+    - -target
+    - -mcpu=*
+    - -mthumb
+
+Diagnostics:
+  # 禁用一些不必要的警告
+  UnusedIncludes: None
+  MissingIncludes: Relaxed
+  ClangTidy:
+    Remove:
+      - modernize-*
+      - readability-magic-numbers
+      - cppcoreguidelines-avoid-magic-numbers
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+
+Hover:
+  ShowAKA: Yes
+
+# 索引配置 - 确保所有源文件都被索引
+Index:
+  Background: Build
+  StandardLibrary: No
+

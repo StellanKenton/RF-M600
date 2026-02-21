@@ -630,11 +630,6 @@
               <FileType>1</FileType>
               <FilePath>..\User\DRV\drv_24c02.c</FilePath>
             </File>
-            <File>
-              <FileName>lib_aiic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\DRV\lib_aiic.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -749,6 +744,11 @@
               <FileName>lib_ringbuffer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\LIB\lib_ringbuffer.c</FilePath>
+            </File>
+            <File>
+              <FileName>lib_aiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\LIB\lib_aiic.c</FilePath>
             </File>
           </Files>
         </Group>

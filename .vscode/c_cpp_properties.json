@@ -6,8 +6,8 @@
         "${workspaceFolder}/**"
       ],
       "defines": [
-        "USE_STDPERIPH_DRIVER",
         "STM32F10X_HD",
+        "USE_STDPERIPH_DRIVER",
         "__weak=__attribute__((weak))",
         "__packed=__attribute__((__packed__))"
       ],
@@ -15,11 +15,15 @@
       "cStandard": "${default}",
       "cppStandard": "${default}",
       "intelliSenseMode": "windows-gcc-x64",
+      "compilerArgs": [],
       "browse": {
         "path": [
-          "${workspaceFolder}/**"
+          "${workspaceFolder}/M600-D/User/**",
+          "${workspaceFolder}/M600-D/BSP",
+          "${workspaceFolder}/M600-D/Libraries/**"
         ],
-        "limitSymbolsToIncludedHeaders": false
+        "limitSymbolsToIncludedHeaders": false,
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
       }
     }
   ],

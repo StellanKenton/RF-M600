@@ -45,7 +45,6 @@
 ".\objects\drv_wdg.o"
 ".\objects\drv_soft_i2c.o"
 ".\objects\drv_24c02.o"
-".\objects\lib_aiic.o"
 ".\objects\delay.o"
 ".\objects\main.o"
 ".\objects\stm32f103_it.o"
@@ -65,6 +64,7 @@
 ".\objects\cm_backtrace.o"
 ".\objects\cmb_fault.o"
 ".\objects\lib_ringbuffer.o"
+".\objects\lib_aiic.o"
 --strict --scatter ".\Objects\M600.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

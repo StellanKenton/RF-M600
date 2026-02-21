@@ -228,7 +228,7 @@ void Si5351_Init(void)
     St_SI5351A.para.max_ch = 2;
     St_SI5351A.para.min_ch = 0;
 
-    St_SI5351A.para.max_freq = 4000;  /* Maximum frequency: 4000 kHz */
+    St_SI5351A.para.max_freq = 4000;  /* Maximum frequency: 4000 kHz  2 times*/
     St_SI5351A.para.min_freq = 450;   /* Minimum frequency: 450 kHz */
 
     Si5351_SetFrequency_ALL_RESET();

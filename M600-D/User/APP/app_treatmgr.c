@@ -250,9 +250,6 @@ void App_TreatMgr_Process(void)
     // Check if wait for reconnection is needed
     App_TreatMgr_CheckWaitReturn();
 
-    // Process Memory
-    App_Memory_Process();
-
     switch(s_TreatMgr.eState)
     {
         case E_TREATMGR_STATE_IDLE:

@@ -13,8 +13,8 @@
 extern "C" {
 #endif
 
-void Drv_TIM4_SetESW_P(bool state);   /* PB8 GPIO: ESW+ */
-void Drv_TIM4_SetESW_N(bool state);   /* PB9 GPIO: ESW- */
+void Drv_GPIO_SetESW_P(bool state);   /* PB8 GPIO: ESW+ */
+void Drv_GPIO_SetESW_N(bool state);   /* PB9 GPIO: ESW- */
 
 #ifdef __cplusplus
 }

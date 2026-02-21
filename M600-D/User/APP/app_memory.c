@@ -442,12 +442,12 @@ const US_TreatParams_t *App_Memory_GetUSParams(void)
     return &s_USParams;
 }
 
-void App_Memory_Process(void)
+/**
+ * @brief Process Ultrasound configuration
+ */
+static void App_Memory_ProcessUSConfig(void)
 {
     UltraSound_TransData_t *pUS = App_Comm_GetUSTransData();
-    RF_TransData_t *pRF = App_Comm_GetRFTransData();
-    SW_TransData_t *pSW = App_Comm_GetSWTransData();
-    Heat_TransData_t *pHeat = App_Comm_GetHeatTransData();
 
     if (pUS != NULL && pUS->flag.bits.Process_Config == 1)
     {
@@ -494,6 +494,14 @@ void App_Memory_Process(void)
         pUS->flag.bits.Rely_Config  = 1;
         pUS->flag.bits.Process_Config = 0;
     }
+}
+
+/**
+ * @brief Process Radio Frequency configuration
+ */
+static void App_Memory_ProcessRFConfig(void)
+{
+    RF_TransData_t *pRF = App_Comm_GetRFTransData();
 
     if (pRF != NULL && pRF->flag.bits.Process_Config == 1)
     {
@@ -526,6 +534,14 @@ void App_Memory_Process(void)
         pRF->flag.bits.Rely_Config  = 1;
         pRF->flag.bits.Process_Config = 0;
     }
+}
+
+/**
+ * @brief Process Heat configuration
+ */
+static void App_Memory_ProcessHeatConfig(void)
+{
+    Heat_TransData_t *pHeat = App_Comm_GetHeatTransData();
 
     if (pHeat != NULL && pHeat->flag.bits.Process_Config == 1)
     {
@@ -574,6 +590,28 @@ void App_Memory_Process(void)
         pHeat->flag.bits.Rely_Config  = 1;
         pHeat->flag.bits.Process_Config = 0;
     }
+}
+
+/**
+ * @brief Process Shock Wave configuration
+ */
+static void App_Memory_ProcessSWConfig(void)
+{
+    SW_TransData_t *pSW = App_Comm_GetSWTransData();
+
+    /* SW configuration processing - to be implemented */
+    (void)pSW;
+}
+
+/**
+ * @brief Process all treatment parameter configurations
+ */
+void App_Memory_Process(void)
+{
+    App_Memory_ProcessUSConfig();
+    App_Memory_ProcessRFConfig();
+    App_Memory_ProcessHeatConfig();
+    App_Memory_ProcessSWConfig();
 }
 
 /**************************End of file********************************/

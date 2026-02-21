@@ -14,6 +14,7 @@
 #include "app_handcomm.h"
 #include "drv_adc.h"
 #include "drv_si5351.h"
+#include "app_memory.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
@@ -86,8 +87,10 @@ void SystemManager(void)
             // Handle unexpected mode
             break;
     }
-    App_Comm_Process();
-    App_HandComm_Process();
+
+    App_Memory_Process();       // Process memory configuration for all treatment modules
+    App_Comm_Process();         // Process communication with external devices
+    App_HandComm_Process();     // Process handle communication
     Log_Process(10);
 }
 

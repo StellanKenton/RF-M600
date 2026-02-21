@@ -247,8 +247,8 @@ void App_Shockwave_SetWorkParams(void)
 	// Init PWM state
 	s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
 	s_SWCtrlInfo.cycleStartTime = 0;  // Will be set on first cycle
-	Drv_TIM4_SetESW_P(false);
-	Drv_TIM4_SetESW_N(false);
+	Drv_GPIO_SetESW_P(false);
+	Drv_GPIO_SetESW_N(false);
 
     LOG_I("SW: Work params set - level=%d, freq=%d, points=%d, period=%d ms, ESW_N_high=%d ms",
           s_SWCtrlInfo.WorkLevel, s_SWCtrlInfo.FreqLevel, s_SWCtrlInfo.RemainPoints,
@@ -357,8 +357,8 @@ void App_Shockwave_ProcessPWM(void)
                 s_SWCtrlInfo.cycleStartTime = currentTime;
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
-                Drv_TIM4_SetESW_P(true);
-                Drv_TIM4_SetESW_N(false);
+                Drv_GPIO_SetESW_P(true);
+                Drv_GPIO_SetESW_N(false);
             }
             else
             {
@@ -370,8 +370,8 @@ void App_Shockwave_ProcessPWM(void)
                     s_SWCtrlInfo.cycleStartTime = currentTime;
                     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_P_HIGH;
                     s_SWCtrlInfo.pwmStateStartTime = currentTime;
-                    Drv_TIM4_SetESW_P(true);
-                    Drv_TIM4_SetESW_N(false);
+                    Drv_GPIO_SetESW_P(true);
+                    Drv_GPIO_SetESW_N(false);
                     s_SWCtrlInfo.RemainPoints--;  // One point per cycle
                 }
                 // Else remain idle until next cycle
@@ -383,7 +383,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= SW_PWM_ESW_P_HIGH_TIME_MS)
             {
                 // PWM_ESW+ high 5ms done, turn off and enter wait
-                Drv_TIM4_SetESW_P(false);
+                Drv_GPIO_SetESW_P(false);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_WAIT;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
             }
@@ -394,7 +394,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= SW_PWM_ESW_P_WAIT_TIME_MS)
             {
                 // After 17ms wait, turn on PWM_ESW-N
-                Drv_TIM4_SetESW_N(true);
+                Drv_GPIO_SetESW_N(true);
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_ESW_N_HIGH;
                 s_SWCtrlInfo.pwmStateStartTime = currentTime;
             }
@@ -405,7 +405,7 @@ void App_Shockwave_ProcessPWM(void)
             if(elapsedTime >= s_SWCtrlInfo.pwmESW_NHighTimeMs)
             {
                 // PWM_ESW-N high time elapsed, turn off
-                Drv_TIM4_SetESW_N(false);
+                Drv_GPIO_SetESW_N(false);
                 // Back to IDLE for next cycle
                 s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             }
@@ -490,8 +490,8 @@ void App_Shockwave_Process(void)
 
         case E_SW_RUN_STOP:
             // Stop PWM output
-            Drv_TIM4_SetESW_P(false);
-            Drv_TIM4_SetESW_N(false);
+            Drv_GPIO_SetESW_P(false);
+            Drv_GPIO_SetESW_N(false);
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
@@ -523,8 +523,8 @@ void App_Shockwave_Init(void)
     s_SWCtrlInfo.RemainPoints = 0;
     s_SWCtrlInfo.TreatCounts = 0;
     /* ESW_P/ESW_N (PB8/PB9) init in BSP_Init -> BSP_GPIO_Init */
-    Drv_TIM4_SetESW_P(false);
-    Drv_TIM4_SetESW_N(false);
+    Drv_GPIO_SetESW_P(false);
+    Drv_GPIO_SetESW_N(false);
 
     LOG_I("Shockwave module initialized");
 }

@@ -2,12 +2,12 @@
 *
 * -------------------------------------Company Information-------------------------------------
 * Company    : Nanjing Medlander Medical Technology Co. Ltd..
-* 
+*
 * URL		 : http://www.medlander.com/
-* 
+*
 * -------------------------------------C File Descriptions-------------------------------------
 * File    	 : main.c
-* Version    : Ver 1.1      // 
+* Version    : Ver 1.1      //
 * Department : Medlander@Hardware
 * Author	 : Daisy
 * Data		 : 2020.11.03
@@ -41,4 +41,3 @@ int main(void)
 /*************************************************************************************************
 *									END OF FILE
 *************************************************************************************************/
-

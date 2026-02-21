@@ -31,7 +31,7 @@ typedef enum
     E_TREATMGR_STATE_RADIO_FREQUENCY,
     E_TREATMGR_STATE_SHOCK_WAVE,
     E_TREATMGR_STATE_NEGATIVE_PRESSURE_HEAT,
-    E_TREATMGR_STATE_ULTRASOUND,   
+    E_TREATMGR_STATE_ULTRASOUND,
     E_TREATMGR_STATE_ERROR,
     E_TREATMGR_STATE_MAX,
 } TreatMgr_State_EnumDef;
@@ -45,7 +45,7 @@ typedef struct
     bool eFootSwitchClosed;       ///< true=foot switch closed(pressed), false=foot switch open
 } TreatMgr_t;
 
-typedef enum 
+typedef enum
 {
     E_TREAT_TIMES_POWER_ON = 0,
     E_TREAT_TIMES_WORKING,

@@ -107,7 +107,7 @@ void App_TreatMgr_Init(void)
  //   Drv_SI5351_Init();
 
     // Initialize Memory
-    Drv_Memory_Init();
+    App_Memory_Init();
 }
 
 IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)

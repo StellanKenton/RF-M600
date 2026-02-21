@@ -1,7 +1,7 @@
 /***********************************************************************************
 * @file     : app_radiofreq.c
 * @brief    : Radio Frequency treatment module implementation
-* @details  : 
+* @details  :
 * @author   : \.rumi
 * @date     : 2025-01-23
 * @version  : V1.0.0
@@ -30,7 +30,7 @@ static uint16_t App_RadioFreq_CalculateVoltage(uint8_t level)
 {
     uint16_t voltage = 0;
     if(level == 0) {
-        return RF_VOLTAGE_INIT_MV;  
+        return RF_VOLTAGE_INIT_MV;
     }
     if(level > RF_WORK_LEVEL_MAX) {
         level = RF_WORK_LEVEL_MAX;
@@ -56,7 +56,7 @@ void App_RadioFreq_UpdateStatus(void)
     s_RFCtrlInfo.Trans.TxStatus.remain_time = s_RFCtrlInfo.TreatCounts / 1000;  /* ms -> s */
     s_RFCtrlInfo.Trans.TxStatus.work_level = s_RFCtrlInfo.WorkLevel;
     s_RFCtrlInfo.Trans.TxStatus.head_temp = s_RFCtrlInfo.HeadTemp;
-    
+
     /* Get connection state from treat mgr (probe + foot switch) */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY);
     bool footClosed = App_TreatMgr_GetFootSwitchClosed();
@@ -76,8 +76,8 @@ void App_RadioFreq_RxDataHandle(void)
 {
     RF_TransData_t *pTransData = App_Comm_GetRFTransData();
     /* Copy RxWorkState and RxConfig to local Trans (align with US process) */
-    
-    
+
+
 
     if(pTransData->flag.bits.Rely_Config)
     {
@@ -186,31 +186,31 @@ bool App_RadioFreq_StartCheck()
         s_RFCtrlInfo.LastStartState = 0x00;
         return false;
     }
-    
+
     if(s_RFCtrlInfo.Trans.RxWorkState.work_time == 0 || s_RFCtrlInfo.Trans.RxWorkState.work_time > 3600) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         s_RFCtrlInfo.LastStartState = 0x01;
         return false;
     }
-    
+
     if(s_RFCtrlInfo.Trans.RxWorkState.work_level == 0 || s_RFCtrlInfo.Trans.RxWorkState.work_level > RF_WORK_LEVEL_MAX) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         s_RFCtrlInfo.LastStartState = 0x02;
         return false;
     }
-    
+
     if(!App_TreatMgr_GetFootSwitchClosed()) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         s_RFCtrlInfo.LastStartState = 0x03;
         return false;
     }
-    
+
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_RADIO_FREQUENCY) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_PROBE_NOT_CONNECTED;
         s_RFCtrlInfo.LastStartState = 0x04;
         return false;
     }
-    
+
     if(s_RFCtrlInfo.TreatCounts == 0) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         s_RFCtrlInfo.LastStartState = 0x05;
@@ -222,7 +222,7 @@ bool App_RadioFreq_StartCheck()
         s_RFCtrlInfo.LastStartState = 0x06;
         return false;
     }
-		
+
     return true;
 }
 
@@ -243,7 +243,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
     uint16_t newVoltage = currentVoltage;
     bool isNormal = true;
-    
+
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
@@ -262,7 +262,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
             newVoltage = s_RFCtrlInfo.VoltageTarget;
             Drv_DAC_SetVoltage(newVoltage);
             s_RFCtrlInfo.Voltage = newVoltage;
-            LOG_I("RF: Current normal (%d mV), voltage set to %d mV (level %d)", 
+            LOG_I("RF: Current normal (%d mV), voltage set to %d mV (level %d)",
                   current, newVoltage, s_RFCtrlInfo.WorkLevel);
         }
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
@@ -278,7 +278,7 @@ bool App_RadioFreq_IsCurrentNormal(void)
         }
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_CURRENT_TOO_LOW;
     }
-    
+
     return isNormal;
 }
 
@@ -297,7 +297,7 @@ bool App_RadioFreq_IsHeadTempNormal(void)
     if(s_RFCtrlInfo.HeadTemp > s_RFCtrlInfo.TempLimit)
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
-        LOG_W("RF: Head temperature too high: %d (limit: %d)", 
+        LOG_W("RF: Head temperature too high: %d (limit: %d)",
               s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
         isNormal = false;
     }
@@ -305,7 +305,7 @@ bool App_RadioFreq_IsHeadTempNormal(void)
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
     }
-    
+
     return isNormal;
 }
 
@@ -338,23 +338,17 @@ void App_RadioFreq_Process(void)
     {
         case E_RF_RUN_INIT:
             s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
-            if(App_Memory_LoadRFParams(&s_RFCtrlInfo.TreatParams)) {
-                s_RFCtrlInfo.TempLimit = s_RFCtrlInfo.TreatParams.TempLimit;
-                s_RFCtrlInfo.TreatRemainTimes = s_RFCtrlInfo.TreatParams.TreatRemainTimes;
-                s_RFCtrlInfo.CurrentHigh = s_RFCtrlInfo.TreatParams.CurrentHigh;
-                s_RFCtrlInfo.CurrentLow = s_RFCtrlInfo.TreatParams.CurrentLow;
-                s_RFCtrlInfo.Trans.RxConfig.temp_limit = s_RFCtrlInfo.TempLimit;
+            {
+                const RF_TreatParams_t *pParams = App_Memory_GetRFParams();
+                s_RFCtrlInfo.TreatParams = *pParams;
+                s_RFCtrlInfo.TempLimit = pParams->TempLimit;
+                s_RFCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+                s_RFCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+                s_RFCtrlInfo.CurrentLow = pParams->CurrentLow;
+                s_RFCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
                 LOG_I("RF: Parameters loaded - temp_limit=%d, remain_times=%d, current_range=[%d, %d]",
                       s_RFCtrlInfo.TempLimit, s_RFCtrlInfo.TreatRemainTimes,
                       s_RFCtrlInfo.CurrentLow, s_RFCtrlInfo.CurrentHigh);
-            } else {
-                LOG_E("RF: Failed to load parameters, use defaults");
-                s_RFCtrlInfo.ErrorCode = E_RF_ERROR_READ_PARAMS_FAILED;
-                s_RFCtrlInfo.TempLimit = 400;          /* 40℃ */
-                s_RFCtrlInfo.TreatRemainTimes = 0;
-                s_RFCtrlInfo.CurrentHigh = 1000;
-                s_RFCtrlInfo.CurrentLow = 500;
-                s_RFCtrlInfo.Trans.RxConfig.temp_limit = 400;
             }
             s_RFCtrlInfo.Voltage = 700;     // 7.00V
             s_RFCtrlInfo.VoltageTarget = 700;
@@ -397,7 +391,7 @@ void App_RadioFreq_Process(void)
 
         case E_RF_RUN_WAIT_RETURN:
             break;
-            
+
         default:
             break;
     }
@@ -409,14 +403,14 @@ void App_RadioFreq_Process(void)
 void App_RadioFreq_Init(void)
 {
     memset(&s_RFCtrlInfo, 0, sizeof(RF_CtrlInfo_t));
-    
+
     s_RFCtrlInfo.runState = E_RF_RUN_INIT;
     s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
     s_RFCtrlInfo.WorkLevel = 0;
     s_RFCtrlInfo.TreatRemainTimes = 0;
     s_RFCtrlInfo.TreatCounts = 0;
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
-    
+
     LOG_I("Radio Frequency module initialized");
 }
 

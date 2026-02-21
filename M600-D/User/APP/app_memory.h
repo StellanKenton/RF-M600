@@ -19,6 +19,9 @@
 extern "C" {
 #endif
 
+
+
+
 /**
  * @brief Radio Frequency treatment parameters structure
  */
@@ -28,7 +31,8 @@ typedef struct
     uint16_t TreatRemainTimes;  ///< Remaining treatment times
     uint16_t CurrentHigh;       ///< Current high limit in mV (sampled voltage)
     uint16_t CurrentLow;        ///< Current low limit in mV (sampled voltage)
-    uint16_t CrcCode;           ///< CRC checksum
+    uint8_t Reserved[6];       ///< Reserved for future use
+    uint16_t CrcCode;           ///< CRC checksum totall 16 bytes
 } RF_TreatParams_t;
 
 /**
@@ -42,7 +46,8 @@ typedef struct
     uint16_t CurrentLow_ESW_P;  ///< PWM_ESW+ work current low limit in mV
     uint16_t CurrentHigh_ESW_N; ///< PWM_ESW- work current high limit in mV
     uint16_t CurrentLow_ESW_N;  ///< PWM_ESW- work current low limit in mV
-    uint16_t CrcCode;           ///< CRC checksum
+    uint8_t Reserved[2];       ///< Reserved for future use
+    uint16_t CrcCode;           ///< CRC checksum totall 16 bytes
 } SW_TreatParams_t;
 
 /**
@@ -52,10 +57,11 @@ typedef struct
 {
     uint16_t TempLimit;         ///< Temperature limit in 0.1C (35-48C)
     uint16_t TreatRemainTimes;  ///< Remaining treatment times
-    uint8_t PreheatEnable;      ///< Preheat enable (0=off, 1=on)
     uint16_t PreheatTempLimit;  ///< Preheat temperature limit in 0.1C (35-48C)
     uint16_t PreheatTime;       ///< Preheat time in seconds
-    uint16_t CrcCode;           ///< CRC checksum
+    uint8_t PreheatEnable;      ///< Preheat enable (0=off, 1=on)
+    uint8_t Reserved[5];        ///< Reserved for future use
+    uint16_t CrcCode;           ///< CRC checksum totall 16 bytes
 } NPH_TreatParams_t;
 
 /**
@@ -69,20 +75,9 @@ typedef struct
     uint16_t CurrentHigh;       ///< Current high limit in mA
     uint16_t CurrentLow;        ///< Current low limit in mA
     uint16_t TreatRemainTimes;  ///< Remaining treatment times
-    uint16_t CrcCode;           ///< CRC checksum
+    uint8_t Reserved[2];       ///< Reserved for future use
+    uint16_t CrcCode;           ///< CRC checksum totall 16 bytes
 } US_TreatParams_t;
-
-/**
- * @brief All treatment parameters union
- */
-typedef union
-{
-    RF_TreatParams_t rfParams;      ///< Radio Frequency parameters
-    SW_TreatParams_t swParams;      ///< Shock Wave parameters
-    NPH_TreatParams_t nphParams;    ///< Negative Pressure Heat parameters
-    US_TreatParams_t usParams;      ///< Ultrasound parameters
-    uint8_t rawData[16];            ///< Raw data buffer
-} TreatParams_Union_t;
 
 /**
  * @brief Initialize memory module
@@ -144,6 +139,30 @@ bool App_Memory_SaveUSParams(const US_TreatParams_t *params);
  * @retval true if success, false if failed
  */
 bool App_Memory_LoadUSParams(US_TreatParams_t *params);
+
+/**
+ * @brief Get RF treatment parameters (static, loaded at init)
+ * @retval Pointer to RF params
+ */
+const RF_TreatParams_t *App_Memory_GetRFParams(void);
+
+/**
+ * @brief Get SW treatment parameters (static, loaded at init)
+ * @retval Pointer to SW params
+ */
+const SW_TreatParams_t *App_Memory_GetSWParams(void);
+
+/**
+ * @brief Get NPH treatment parameters (static, loaded at init)
+ * @retval Pointer to NPH params
+ */
+const NPH_TreatParams_t *App_Memory_GetNPHParams(void);
+
+/**
+ * @brief Get US treatment parameters (static, loaded at init)
+ * @retval Pointer to US params
+ */
+const US_TreatParams_t *App_Memory_GetUSParams(void);
 
 #ifdef __cplusplus
 }

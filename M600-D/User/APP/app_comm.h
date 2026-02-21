@@ -127,11 +127,12 @@ typedef struct
 } US_SetConfig_Reply_t;
 
 typedef union {
-    uint16_t byte;  
+    uint16_t byte;
     struct {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
-        uint16_t Reserved : 14;
+        uint16_t Process_Config : 1;
+        uint16_t Reserved : 13;
     } bits;
 } UltraSound_ByteUnion;
 
@@ -142,7 +143,7 @@ typedef struct
     US_SetConfig_Reply_t TxConfig;
 
     US_SetWorkState_Send_t RxWorkState;
-    US_SetConfig_Send_t RxConfig; 
+    US_SetConfig_Send_t RxConfig;
     bool RxValidFlag[3];
 
 } UltraSound_TransData_t;
@@ -192,11 +193,12 @@ typedef struct
 } RF_SetConfig_Reply_t;
 
 typedef union {
-    uint16_t byte;  
+    uint16_t byte;
     struct {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
-        uint16_t Reserved : 14;
+        uint16_t Process_Config : 1;
+        uint16_t Reserved : 13;
     } bits;
 } RF_ByteUnion;
 
@@ -242,10 +244,11 @@ typedef struct
 } SW_SetWorkState_Send_t;
 
 typedef union {
-    uint16_t byte;  
+    uint16_t byte;
     struct {
         uint16_t Rely_Status : 1;
-        uint16_t Reserved : 15;
+        uint16_t Process_Config : 1;
+        uint16_t Reserved : 14;
     } bits;
 } SW_ByteUnion;
 
@@ -305,11 +308,12 @@ typedef struct
 
 
 typedef union {
-    uint16_t byte;  
+    uint16_t byte;
     struct {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
-        uint16_t Reserved : 14;
+        uint16_t Process_Config : 1;
+        uint16_t Reserved : 13;
     } bits;
 } Heat_ByteUnion;
 
@@ -328,7 +332,7 @@ typedef struct
     uint8_t RxData[128];
     uint8_t TxData[128];
     UltraSound_TransData_t US;
-    RF_TransData_t RF; 
+    RF_TransData_t RF;
     SW_TransData_t SW;
     Heat_TransData_t Heat;
 } App_Comm_Info_t;

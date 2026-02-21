@@ -361,28 +361,16 @@ void App_Ultrasound_Process(void)
     switch(s_USCtrlInfo.runState)
     {
         case E_US_RUN_INIT:
-            if(App_Memory_LoadUSParams(&s_USCtrlInfo.TreatParams)) {
-                // Load treatment parameters
-                s_USCtrlInfo.Trans.RxConfig.frequency = s_USCtrlInfo.TreatParams.Frequency;
-                s_USCtrlInfo.Trans.RxConfig.temp_limit = s_USCtrlInfo.TreatParams.TempLimit;
-                s_USCtrlInfo.Trans.RxConfig.voltage = s_USCtrlInfo.TreatParams.Voltage;
-
-                s_USCtrlInfo.TreatRemainTimes = s_USCtrlInfo.TreatParams.TreatRemainTimes;
-                s_USCtrlInfo.CurrentHigh = s_USCtrlInfo.TreatParams.CurrentHigh;
-                s_USCtrlInfo.CurrentLow = s_USCtrlInfo.TreatParams.CurrentLow;
-                s_USCtrlInfo.VoltageBase = s_USCtrlInfo.TreatParams.Voltage;
-
-            } else {
-                LOG_E("Failed to load ultrasound parameters");
-                s_USCtrlInfo.ErrorCode = E_US_ERROR_READ_PARAMS_FAILED;
-                s_USCtrlInfo.Trans.RxConfig.frequency = 1200;
-                s_USCtrlInfo.Trans.RxConfig.temp_limit = 40;
-                s_USCtrlInfo.Trans.RxConfig.voltage = 1500;
-                s_USCtrlInfo.TreatRemainTimes = 0;
-
-                s_USCtrlInfo.CurrentHigh = 1000;    // default value
-                s_USCtrlInfo.CurrentLow = 500;
-                s_USCtrlInfo.VoltageBase = 1000;
+            {
+                const US_TreatParams_t *pParams = App_Memory_GetUSParams();
+                s_USCtrlInfo.TreatParams = *pParams;
+                s_USCtrlInfo.Trans.RxConfig.frequency = pParams->Frequency;
+                s_USCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
+                s_USCtrlInfo.Trans.RxConfig.voltage = pParams->Voltage;
+                s_USCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+                s_USCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+                s_USCtrlInfo.CurrentLow = pParams->CurrentLow;
+                s_USCtrlInfo.VoltageBase = pParams->Voltage;
             }
 			// Switch relay pwr_control1 to ultrasound channel
             Drv_IODevice_ChangeChannel(CHANNEL_US);

@@ -561,25 +561,19 @@ void App_NegPrsHeat_Process(void)
     switch(s_NPHCtrlInfo.runState)
     {
         case E_NPH_RUN_INIT:
-            /* Load params and go to IDLE */
             s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
-            if(App_Memory_LoadNPHParams(&s_NPHCtrlInfo.TreatParams)) {
-                s_NPHCtrlInfo.TempLimit = s_NPHCtrlInfo.TreatParams.TempLimit;
-                s_NPHCtrlInfo.TreatRemainTimes = s_NPHCtrlInfo.TreatParams.TreatRemainTimes;
-                s_NPHCtrlInfo.PreheatEnable = (s_NPHCtrlInfo.TreatParams.PreheatEnable == 1);
-                s_NPHCtrlInfo.PreheatTempLimit = s_NPHCtrlInfo.TreatParams.PreheatTempLimit;
-                s_NPHCtrlInfo.PreheatTime = s_NPHCtrlInfo.TreatParams.PreheatTime;
+            {
+                const NPH_TreatParams_t *pParams = App_Memory_GetNPHParams();
+                s_NPHCtrlInfo.TreatParams = *pParams;
+                s_NPHCtrlInfo.TempLimit = pParams->TempLimit;
+                s_NPHCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+                s_NPHCtrlInfo.PreheatEnable = (pParams->PreheatEnable == 1);
+                s_NPHCtrlInfo.PreheatTempLimit = pParams->PreheatTempLimit;
+                s_NPHCtrlInfo.PreheatTime = pParams->PreheatTime;
 
                 LOG_I("NPH: Parameters loaded - temp_limit=%d, remain_times=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d",
                       s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatRemainTimes,
                       s_NPHCtrlInfo.PreheatEnable, s_NPHCtrlInfo.PreheatTempLimit, s_NPHCtrlInfo.PreheatTime);
-            } else {
-                LOG_E("NPH: Failed to load parameters");
-                s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_READ_PARAMS_FAILED;
-                s_NPHCtrlInfo.TreatParams.TempLimit = 400;
-                s_NPHCtrlInfo.TreatParams.PreheatEnable = 0;
-                s_NPHCtrlInfo.TempLimit = s_NPHCtrlInfo.TreatParams.TempLimit;
-                s_NPHCtrlInfo.PreheatEnable = (s_NPHCtrlInfo.TreatParams.PreheatEnable == 1);
             }
             Drv_IODevice_ChangeChannel(CHANNEL_NH);
             App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);

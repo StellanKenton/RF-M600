@@ -445,28 +445,21 @@ void App_Shockwave_Process(void)
     switch(s_SWCtrlInfo.runState)
     {
         case E_SW_RUN_INIT:
-            // Load params and init treat counts state
             s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
-            if(App_Memory_LoadSWParams(&s_SWCtrlInfo.TreatParams)) {
-                s_SWCtrlInfo.TempLimit = s_SWCtrlInfo.TreatParams.TempLimit;
-                s_SWCtrlInfo.TreatCounts = s_SWCtrlInfo.TreatParams.TreatRemainTimes;
-                s_SWCtrlInfo.CurrentHigh_ESW_P = s_SWCtrlInfo.TreatParams.CurrentHigh_ESW_P;
-                s_SWCtrlInfo.CurrentLow_ESW_P = s_SWCtrlInfo.TreatParams.CurrentLow_ESW_P;
-                s_SWCtrlInfo.CurrentHigh_ESW_N = s_SWCtrlInfo.TreatParams.CurrentHigh_ESW_N;
-                s_SWCtrlInfo.CurrentLow_ESW_N = s_SWCtrlInfo.TreatParams.CurrentLow_ESW_N;
+            {
+                const SW_TreatParams_t *pParams = App_Memory_GetSWParams();
+                s_SWCtrlInfo.TreatParams = *pParams;
+                s_SWCtrlInfo.TempLimit = pParams->TempLimit;
+                s_SWCtrlInfo.TreatCounts = pParams->TreatRemainTimes;
+                s_SWCtrlInfo.CurrentHigh_ESW_P = pParams->CurrentHigh_ESW_P;
+                s_SWCtrlInfo.CurrentLow_ESW_P = pParams->CurrentLow_ESW_P;
+                s_SWCtrlInfo.CurrentHigh_ESW_N = pParams->CurrentHigh_ESW_N;
+                s_SWCtrlInfo.CurrentLow_ESW_N = pParams->CurrentLow_ESW_N;
 
                 LOG_I("SW: Parameters loaded - temp_limit=%d, remain_times=%d, ESW_P=[%d, %d], ESW_N=[%d, %d]",
                       s_SWCtrlInfo.TempLimit, s_SWCtrlInfo.TreatCounts,
                       s_SWCtrlInfo.CurrentLow_ESW_P, s_SWCtrlInfo.CurrentHigh_ESW_P,
                       s_SWCtrlInfo.CurrentLow_ESW_N, s_SWCtrlInfo.CurrentHigh_ESW_N);
-            } else {
-                LOG_E("SW: Failed to load parameters");
-                s_SWCtrlInfo.ErrorCode = E_SW_ERROR_READ_PARAMS_FAILED;
-                s_SWCtrlInfo.CurrentHigh_ESW_P = 1000;
-                s_SWCtrlInfo.CurrentLow_ESW_P = 500;
-                s_SWCtrlInfo.CurrentHigh_ESW_N = 1000;
-                s_SWCtrlInfo.CurrentLow_ESW_N = 50;
-                s_SWCtrlInfo.TempLimit = 400;
             }
             // Switch to SW channel (pwr_control3/4 etc.)
             Drv_IODevice_ChangeChannel(CHANNEL_SW);

@@ -100,6 +100,7 @@ typedef struct
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } US_GetStatus_Reply_t;
 
 /* Ultrasound - Set Work State (0x01) - Send */
@@ -116,6 +117,9 @@ typedef struct
     uint16_t frequency;          ///< 1000-1400 (kHz)
     uint16_t voltage;            ///< 1000-2000 (10-20V)
     uint16_t temp_limit;         ///< 350-480 (35-48℃)
+    uint16_t Current_HighLimit;    ///< 
+    uint16_t Current_LowLimit;     ///<
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } US_SetConfig_Send_t;
 
 /* Ultrasound - Set Config (0x02) - Reply */
@@ -124,6 +128,9 @@ typedef struct
     uint8_t freq_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
     uint8_t voltage_result;      ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
     uint8_t temp_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t current_highlimit_result;      ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t current_lowlimit_result;       ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t remain_treatment_count_result;  ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
 } US_SetConfig_Reply_t;
 
 typedef union {
@@ -170,6 +177,7 @@ typedef struct
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } RF_GetStatus_Reply_t;
 
 /* RF - Set Work State (0x01) - Send */
@@ -184,12 +192,18 @@ typedef struct
 typedef struct
 {
     uint16_t temp_limit;         ///< 350-480 (35-48℃)
+    uint16_t Current_HighLimit;    ///<
+    uint16_t Current_LowLimit;     ///<
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } RF_SetConfig_Send_t;
 
 /* RF - Set Config (0x02) - Reply */
 typedef struct
 {
     uint8_t temp_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t current_highlimit_result;      ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t current_lowlimit_result;       ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t remain_treatment_count_result;  ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
 } RF_SetConfig_Reply_t;
 
 typedef union {
@@ -232,6 +246,7 @@ typedef struct
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } SW_GetStatus_Reply_t;
 
 /* Shockwave - Set Work State (0x01) - Send */
@@ -243,12 +258,34 @@ typedef struct
     uint8_t frequency;           ///< Frequency: 0-16
 } SW_SetWorkState_Send_t;
 
+/* Shockwave - Set Config (0x02) - Reply */
+typedef struct
+{
+    uint16_t temp_limit;         ///< 350-480 (35-48℃)
+    uint16_t ESW_P_Current_HighLimit;    ///< ESW-P Current High Limit
+    uint16_t ESW_P_Current_LowLimit;     ///< ESW-P Current Low Limit
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
+    uint16_t ESW_N_Current_HighLimit;    ///< ESW-N Current High Limit
+    uint16_t ESW_N_Current_LowLimit;     ///< ESW-N Current Low Limit
+ } SW_SetConfig_Send_t;
+
+typedef struct
+{
+    uint8_t temp_result;    // 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t ESW_P_current_highlimit_result;  // 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t ESW_P_current_lowlimit_result;   // 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t remain_treatment_count_result;  // 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t ESW_N_current_highlimit_result;  // 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t ESW_N_current_lowlimit_result;   // 0x00: Success, 0x01: Fail, 0x02: Over limit
+} SW_SetConfig_Reply_t;
+
 typedef union {
     uint16_t byte;
     struct {
         uint16_t Rely_Status : 1;
         uint16_t Process_Config : 1;
-        uint16_t Reserved : 14;
+        uint16_t Rely_Config : 1;
+        uint16_t Reserved : 13;
     } bits;
 } SW_ByteUnion;
 
@@ -257,6 +294,8 @@ typedef struct
     SW_ByteUnion flag;
     SW_GetStatus_Reply_t TxStatus;
     SW_SetWorkState_Send_t RxWorkState;
+    SW_SetConfig_Send_t RxConfig;
+    SW_SetConfig_Reply_t TxConfig;
 } SW_TransData_t;
 
 SW_TransData_t *App_Comm_GetSWTransData(void);
@@ -285,6 +324,7 @@ typedef struct
     uint16_t remain_preheat_time; ///< Remaining preheat time (seconds), max 3600
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } Heat_GetStatus_Reply_t;
 
 /* Heat - Set Work State (0x01) - Send */
@@ -304,12 +344,18 @@ typedef struct
     uint8_t preheat_state;       ///< 0x01: Start, 0x00: Stop (only when heat therapy stopped)
     uint16_t work_time;          ///< Work time (seconds), max 3600
     uint16_t temp_limit;          ///< 350-480 (35-48℃)
+    uint16_t preheat_temp_limit;         ///< 350-480 (35-48℃)
+    uint16_t remain_treatment_count;  ///< Remaining treatment count
 } Heat_SetPreheat_Send_t;
 
 /* Heat - Set Config/Preheat (0x02) - Reply */
 typedef struct
 {
-    uint8_t result;              ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t preheat_state_result;              ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t work_time_result;                   ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t temp_limit_result;                 ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t preheat_temp_limit_result;         ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
+    uint8_t remain_treatment_count_result;      ///< 0x00: Success, 0x01: Fail, 0x02: Over limit
 } Heat_SetConfig_Reply_t;
 
 typedef union {

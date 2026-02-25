@@ -148,12 +148,15 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_WORK_STATE] = true;
                     break;
                 case PROTOCOL_CMD_SET_CONFIG:
-                    if(pRxFrame->data_len < 6){
+                    if(pRxFrame->data_len < 12){
                         break;
                     }
                     s_AppCommInfo.US.RxConfig.frequency = pData[0] | (uint16_t)pData[1] << 8;
                     s_AppCommInfo.US.RxConfig.voltage = pData[2] | (uint16_t)pData[3] << 8;
                     s_AppCommInfo.US.RxConfig.temp_limit = pData[4] | (uint16_t)pData[5] << 8;
+                    s_AppCommInfo.US.RxConfig.Current_HighLimit = pData[6] | (uint16_t)pData[7] << 8;
+                    s_AppCommInfo.US.RxConfig.Current_LowLimit = pData[8] | (uint16_t)pData[9] << 8;
+                    s_AppCommInfo.US.RxConfig.remain_treatment_count = pData[10] | (uint16_t)pData[11] << 8;
                     s_AppCommInfo.US.flag.bits.Process_Config = 1;
                     s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_CONFIG] = true;
                     break;
@@ -174,10 +177,13 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     s_AppCommInfo.RF.RxWorkState.work_level = pData[3];
                     break;
                 case PROTOCOL_CMD_SET_CONFIG:
-                    if(pRxFrame->data_len < 2){
+                    if(pRxFrame->data_len < 8){
                         break;
                     }
                     s_AppCommInfo.RF.RxConfig.temp_limit = pData[0] | (uint16_t)pData[1] << 8;
+                    s_AppCommInfo.RF.RxConfig.Current_HighLimit = pData[2] | (uint16_t)pData[3] << 8;
+                    s_AppCommInfo.RF.RxConfig.Current_LowLimit = pData[4] | (uint16_t)pData[5] << 8;
+                    s_AppCommInfo.RF.RxConfig.remain_treatment_count = pData[6] | (uint16_t)pData[7] << 8;
                     s_AppCommInfo.RF.flag.bits.Process_Config = 1;
                     break;
             }
@@ -196,6 +202,18 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     s_AppCommInfo.SW.RxWorkState.work_time = pData[1] | (uint16_t)pData[2] << 8;
                     s_AppCommInfo.SW.RxWorkState.work_level = pData[3];
                     s_AppCommInfo.SW.RxWorkState.frequency = pData[4];
+                    break;
+                case PROTOCOL_CMD_SET_CONFIG:
+                    if(pRxFrame->data_len < 12){
+                        break;
+                    }
+                    s_AppCommInfo.SW.RxConfig.temp_limit = pData[0] | (uint16_t)pData[1] << 8;
+                    s_AppCommInfo.SW.RxConfig.ESW_P_Current_HighLimit = pData[2] | (uint16_t)pData[3] << 8;
+                    s_AppCommInfo.SW.RxConfig.ESW_P_Current_LowLimit = pData[4] | (uint16_t)pData[5] << 8;
+                    s_AppCommInfo.SW.RxConfig.remain_treatment_count = pData[6] | (uint16_t)pData[7] << 8;
+                    s_AppCommInfo.SW.RxConfig.ESW_N_Current_HighLimit = pData[8] | (uint16_t)pData[9] << 8;
+                    s_AppCommInfo.SW.RxConfig.ESW_N_Current_LowLimit = pData[10] | (uint16_t)pData[11] << 8;
+                    s_AppCommInfo.SW.flag.bits.Process_Config = 1;
                     break;
             }
             break;
@@ -217,12 +235,14 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
                     s_AppCommInfo.Heat.RxWorkState.temp_limit = pData[8] | (uint16_t)pData[9] << 8;
                     break;
                 case PROTOCOL_CMD_SET_CONFIG:
-                    if(pRxFrame->data_len < 5){
+                    if(pRxFrame->data_len < 9){
                         break;
                     }
                     s_AppCommInfo.Heat.RxConfig.preheat_state = pData[0];
                     s_AppCommInfo.Heat.RxConfig.work_time = pData[1] | (uint16_t)pData[2] << 8;
                     s_AppCommInfo.Heat.RxConfig.temp_limit = pData[3] | (uint16_t)pData[4] << 8;
+                    s_AppCommInfo.Heat.RxConfig.preheat_temp_limit = pData[5] | (uint16_t)pData[6] << 8;
+                    s_AppCommInfo.Heat.RxConfig.remain_treatment_count = pData[7] | (uint16_t)pData[8] << 8;
                     s_AppCommInfo.Heat.flag.bits.Process_Config = 1;
                     break;
             }
@@ -291,6 +311,8 @@ static void App_Comm_ReplyUSStatus(void)
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.head_temp >> 8;
     TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_ULTRASOUND);
     TxData[DataLen++] = s_AppCommInfo.US.TxStatus.error_code;
+    TxData[DataLen++] = s_AppCommInfo.US.TxStatus.remain_treatment_count & 0xFF;
+    TxData[DataLen++] = s_AppCommInfo.US.TxStatus.remain_treatment_count >> 8;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_ULTRASOUND, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 
@@ -301,6 +323,9 @@ static void App_Comm_ReplyUSConfig(void)
     TxData[DataLen++] = s_AppCommInfo.US.TxConfig.freq_result;
     TxData[DataLen++] = s_AppCommInfo.US.TxConfig.voltage_result;
     TxData[DataLen++] = s_AppCommInfo.US.TxConfig.temp_result;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.current_highlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.current_lowlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.US.TxConfig.remain_treatment_count_result;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_ULTRASOUND, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
 }
 
@@ -323,6 +348,8 @@ static void App_Comm_ReplyRFStatus(void)
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.head_temp >> 8;
     TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_RADIO_FREQUENCY);
     TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.error_code;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.remain_treatment_count & 0xFF;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxStatus.remain_treatment_count >> 8;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_RADIO_FREQ, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 
@@ -331,6 +358,9 @@ static void App_Comm_ReplyRFConfig(void)
     uint8_t TxData[8];
     uint8_t DataLen = 0;
     TxData[DataLen++] = s_AppCommInfo.RF.TxConfig.temp_result;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxConfig.current_highlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxConfig.current_lowlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.RF.TxConfig.remain_treatment_count_result;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_RADIO_FREQ, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
 }
 
@@ -352,7 +382,22 @@ static void App_Comm_ReplySWStatus(void)
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.head_temp >> 8;
     TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_SHOCKWAVE);
     TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.error_code;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.remain_treatment_count & 0xFF;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxStatus.remain_treatment_count >> 8;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_SHOCKWAVE, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
+}
+
+static void App_Comm_ReplySWConfig(void)
+{
+    uint8_t TxData[8];
+    uint8_t DataLen = 0;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.temp_result;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.ESW_P_current_highlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.ESW_P_current_lowlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.remain_treatment_count_result;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.ESW_N_current_highlimit_result;
+    TxData[DataLen++] = s_AppCommInfo.SW.TxConfig.ESW_N_current_lowlimit_result;
+    App_Comm_CreateAndSend(PROTOCOL_MODULE_SHOCKWAVE, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
 }
 
 static void App_Comm_ReplyHeatStatus(void)
@@ -383,6 +428,8 @@ static void App_Comm_ReplyHeatStatus(void)
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_preheat_time >> 8;
     TxData[DataLen++] = App_Comm_GetConnStateFromMgr(E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.error_code;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_treatment_count & 0xFF;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_treatment_count >> 8;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 
@@ -390,7 +437,11 @@ static void App_Comm_ReplyHeatConfig(void)
 {
     uint8_t TxData[8];
     uint8_t DataLen = 0;
-    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.result;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.preheat_state_result;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.work_time_result;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.temp_limit_result;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.preheat_temp_limit_result;
+    TxData[DataLen++] = s_AppCommInfo.Heat.TxConfig.remain_treatment_count_result;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_SET_CONFIG, TxData, DataLen);
 }
 
@@ -428,6 +479,11 @@ void App_Comm_SendData(void)
     if(s_AppCommInfo.RF.flag.bits.Rely_Config){
         s_AppCommInfo.RF.flag.bits.Rely_Config = 0;
         App_Comm_ReplyRFConfig();
+    }
+
+    if(s_AppCommInfo.SW.flag.bits.Rely_Config){
+        s_AppCommInfo.SW.flag.bits.Rely_Config = 0;
+        App_Comm_ReplySWConfig();
     }
 
     if(s_AppCommInfo.Heat.flag.bits.Rely_Config){

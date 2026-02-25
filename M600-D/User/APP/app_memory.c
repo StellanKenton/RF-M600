@@ -454,6 +454,9 @@ static void App_Memory_ProcessUSConfig(void)
         uint8_t freq_result   = CONFIG_RESULT_SUCCESS;
         uint8_t voltage_result = CONFIG_RESULT_SUCCESS;
         uint8_t temp_result   = CONFIG_RESULT_SUCCESS;
+        uint8_t current_high_result = CONFIG_RESULT_SUCCESS;
+        uint8_t current_low_result = CONFIG_RESULT_SUCCESS;
+        uint8_t remain_count_result = CONFIG_RESULT_SUCCESS;
 
         /* Check over limit */
         if (pUS->RxConfig.frequency < PARAM_US_FREQ_MIN || pUS->RxConfig.frequency > PARAM_US_FREQ_MAX)
@@ -469,28 +472,38 @@ static void App_Memory_ProcessUSConfig(void)
             temp_result = CONFIG_RESULT_OVER_LIMIT;
         }
 
-        if (freq_result == CONFIG_RESULT_SUCCESS && voltage_result == CONFIG_RESULT_SUCCESS && temp_result == CONFIG_RESULT_SUCCESS)
+        if (freq_result == CONFIG_RESULT_SUCCESS && voltage_result == CONFIG_RESULT_SUCCESS && 
+            temp_result == CONFIG_RESULT_SUCCESS && current_high_result == CONFIG_RESULT_SUCCESS &&
+            current_low_result == CONFIG_RESULT_SUCCESS && remain_count_result == CONFIG_RESULT_SUCCESS)
         {
             US_TreatParams_t readback;
             s_USParams.Frequency = pUS->RxConfig.frequency;
             s_USParams.TempLimit = pUS->RxConfig.temp_limit;
             s_USParams.Voltage   = pUS->RxConfig.voltage;
+            s_USParams.CurrentHigh = pUS->RxConfig.Current_HighLimit;
+            s_USParams.CurrentLow = pUS->RxConfig.Current_LowLimit;
+            s_USParams.TreatRemainTimes = pUS->RxConfig.remain_treatment_count;
 
             if (App_Memory_SaveUSParams(&s_USParams) == true)
             {
                 if (!App_Memory_LoadUSParams(&readback) || memcmp(&readback, &s_USParams, sizeof(US_TreatParams_t)) != 0)
                 {
                     freq_result = voltage_result = temp_result = CONFIG_RESULT_FAIL;
+                    current_high_result = current_low_result = remain_count_result = CONFIG_RESULT_FAIL;
                 }
             }
             else {
                 freq_result = voltage_result = temp_result = CONFIG_RESULT_FAIL;
+                current_high_result = current_low_result = remain_count_result = CONFIG_RESULT_FAIL;
             }
         }
 
         pUS->TxConfig.freq_result    = freq_result;
         pUS->TxConfig.voltage_result = voltage_result;
         pUS->TxConfig.temp_result   = temp_result;
+        pUS->TxConfig.current_highlimit_result = current_high_result;
+        pUS->TxConfig.current_lowlimit_result = current_low_result;
+        pUS->TxConfig.remain_treatment_count_result = remain_count_result;
         pUS->flag.bits.Rely_Config  = 1;
         pUS->flag.bits.Process_Config = 0;
     }
@@ -506,31 +519,43 @@ static void App_Memory_ProcessRFConfig(void)
     if (pRF != NULL && pRF->flag.bits.Process_Config == 1)
     {
         uint8_t temp_result = CONFIG_RESULT_SUCCESS;
+        uint8_t current_high_result = CONFIG_RESULT_SUCCESS;
+        uint8_t current_low_result = CONFIG_RESULT_SUCCESS;
+        uint8_t remain_count_result = CONFIG_RESULT_SUCCESS;
 
         if (pRF->RxConfig.temp_limit < PARAM_TEMP_MIN || pRF->RxConfig.temp_limit > PARAM_TEMP_MAX)
         {
             temp_result = CONFIG_RESULT_OVER_LIMIT;
         }
 
-        if (temp_result == CONFIG_RESULT_SUCCESS)
+        if (temp_result == CONFIG_RESULT_SUCCESS && current_high_result == CONFIG_RESULT_SUCCESS &&
+            current_low_result == CONFIG_RESULT_SUCCESS && remain_count_result == CONFIG_RESULT_SUCCESS)
         {
             RF_TreatParams_t readback;
             s_RFParams.TempLimit = pRF->RxConfig.temp_limit;
+            s_RFParams.CurrentHigh = pRF->RxConfig.Current_HighLimit;
+            s_RFParams.CurrentLow = pRF->RxConfig.Current_LowLimit;
+            s_RFParams.TreatRemainTimes = pRF->RxConfig.remain_treatment_count;
 
             if (App_Memory_SaveRFParams(&s_RFParams) == true)
             {
                 if (!App_Memory_LoadRFParams(&readback) || memcmp(&readback, &s_RFParams, sizeof(RF_TreatParams_t)) != 0)
                 {
                     temp_result = CONFIG_RESULT_FAIL;
+                    current_high_result = current_low_result = remain_count_result = CONFIG_RESULT_FAIL;
                 }
             }
             else
             {
                 temp_result = CONFIG_RESULT_FAIL;
+                current_high_result = current_low_result = remain_count_result = CONFIG_RESULT_FAIL;
             }
         }
 
         pRF->TxConfig.temp_result   = temp_result;
+        pRF->TxConfig.current_highlimit_result = current_high_result;
+        pRF->TxConfig.current_lowlimit_result = current_low_result;
+        pRF->TxConfig.remain_treatment_count_result = remain_count_result;
         pRF->flag.bits.Rely_Config  = 1;
         pRF->flag.bits.Process_Config = 0;
     }
@@ -545,48 +570,69 @@ static void App_Memory_ProcessHeatConfig(void)
 
     if (pHeat != NULL && pHeat->flag.bits.Process_Config == 1)
     {
-        uint8_t result = CONFIG_RESULT_SUCCESS;
+        uint8_t preheat_state_result = CONFIG_RESULT_SUCCESS;
+        uint8_t work_time_result = CONFIG_RESULT_SUCCESS;
+        uint8_t temp_limit_result = CONFIG_RESULT_SUCCESS;
+        uint8_t preheat_temp_result = CONFIG_RESULT_SUCCESS;
+        uint8_t remain_count_result = CONFIG_RESULT_SUCCESS;
 
-        if (pHeat->RxConfig.preheat_state == 0x01)
+        /* Validate temp_limit */
+        if (pHeat->RxConfig.temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.temp_limit > PARAM_TEMP_MAX)
         {
-            if (pHeat->RxConfig.temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.temp_limit > PARAM_TEMP_MAX)
-            {
-                result = CONFIG_RESULT_OVER_LIMIT;
-            }
-            if (result == CONFIG_RESULT_SUCCESS && pHeat->RxConfig.work_time > PARAM_WORK_TIME_MAX)
-            {
-                result = CONFIG_RESULT_OVER_LIMIT;
-            }
+            temp_limit_result = CONFIG_RESULT_OVER_LIMIT;
         }
 
-        if (result == CONFIG_RESULT_SUCCESS)
+        /* Validate preheat_temp_limit */
+        if (pHeat->RxConfig.preheat_temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.preheat_temp_limit > PARAM_TEMP_MAX)
+        {
+            preheat_temp_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+
+        /* Validate work_time */
+        if (pHeat->RxConfig.work_time > PARAM_WORK_TIME_MAX)
+        {
+            work_time_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+
+        if (preheat_state_result == CONFIG_RESULT_SUCCESS && work_time_result == CONFIG_RESULT_SUCCESS &&
+            temp_limit_result == CONFIG_RESULT_SUCCESS && preheat_temp_result == CONFIG_RESULT_SUCCESS &&
+            remain_count_result == CONFIG_RESULT_SUCCESS)
         {
             if (pHeat->RxConfig.preheat_state == 0x01)
             {
                 s_NPHParams.PreheatEnable    = 1;
-                s_NPHParams.PreheatTempLimit = pHeat->RxConfig.temp_limit;
+                s_NPHParams.PreheatTempLimit = pHeat->RxConfig.preheat_temp_limit;
                 s_NPHParams.PreheatTime      = pHeat->RxConfig.work_time;
             }
             else
             {
                 s_NPHParams.PreheatEnable = 0;
             }
+            
+            s_NPHParams.TempLimit = pHeat->RxConfig.temp_limit;
+            s_NPHParams.TreatRemainTimes = pHeat->RxConfig.remain_treatment_count;
 
             NPH_TreatParams_t readback;
             if (App_Memory_SaveNPHParams(&s_NPHParams) == true)
             {
                 if (!App_Memory_LoadNPHParams(&readback) || memcmp(&readback, &s_NPHParams, sizeof(NPH_TreatParams_t)) != 0)
                 {
-                    result = CONFIG_RESULT_FAIL;
+                    preheat_state_result = work_time_result = temp_limit_result = CONFIG_RESULT_FAIL;
+                    preheat_temp_result = remain_count_result = CONFIG_RESULT_FAIL;
                 }
             }
             else
             {
-                result = CONFIG_RESULT_FAIL;
+                preheat_state_result = work_time_result = temp_limit_result = CONFIG_RESULT_FAIL;
+                preheat_temp_result = remain_count_result = CONFIG_RESULT_FAIL;
             }
         }
 
-        pHeat->TxConfig.result        = result;
+        pHeat->TxConfig.preheat_state_result = preheat_state_result;
+        pHeat->TxConfig.work_time_result = work_time_result;
+        pHeat->TxConfig.temp_limit_result = temp_limit_result;
+        pHeat->TxConfig.preheat_temp_limit_result = preheat_temp_result;
+        pHeat->TxConfig.remain_treatment_count_result = remain_count_result;
         pHeat->flag.bits.Rely_Config  = 1;
         pHeat->flag.bits.Process_Config = 0;
     }
@@ -599,8 +645,57 @@ static void App_Memory_ProcessSWConfig(void)
 {
     SW_TransData_t *pSW = App_Comm_GetSWTransData();
 
-    /* SW configuration processing - to be implemented */
-    (void)pSW;
+    if (pSW != NULL && pSW->flag.bits.Process_Config == 1)
+    {
+        uint8_t temp_result = CONFIG_RESULT_SUCCESS;
+        uint8_t esw_p_high_result = CONFIG_RESULT_SUCCESS;
+        uint8_t esw_p_low_result = CONFIG_RESULT_SUCCESS;
+        uint8_t remain_count_result = CONFIG_RESULT_SUCCESS;
+        uint8_t esw_n_high_result = CONFIG_RESULT_SUCCESS;
+        uint8_t esw_n_low_result = CONFIG_RESULT_SUCCESS;
+
+        /* Validate temp_limit */
+        if (pSW->RxConfig.temp_limit < PARAM_TEMP_MIN || pSW->RxConfig.temp_limit > PARAM_TEMP_MAX)
+        {
+            temp_result = CONFIG_RESULT_OVER_LIMIT;
+        }
+
+        if (temp_result == CONFIG_RESULT_SUCCESS && esw_p_high_result == CONFIG_RESULT_SUCCESS &&
+            esw_p_low_result == CONFIG_RESULT_SUCCESS && remain_count_result == CONFIG_RESULT_SUCCESS &&
+            esw_n_high_result == CONFIG_RESULT_SUCCESS && esw_n_low_result == CONFIG_RESULT_SUCCESS)
+        {
+            SW_TreatParams_t readback;
+            s_SWParams.TempLimit = pSW->RxConfig.temp_limit;
+            s_SWParams.CurrentHigh_ESW_P = pSW->RxConfig.ESW_P_Current_HighLimit;
+            s_SWParams.CurrentLow_ESW_P = pSW->RxConfig.ESW_P_Current_LowLimit;
+            s_SWParams.TreatRemainTimes = pSW->RxConfig.remain_treatment_count;
+            s_SWParams.CurrentHigh_ESW_N = pSW->RxConfig.ESW_N_Current_HighLimit;
+            s_SWParams.CurrentLow_ESW_N = pSW->RxConfig.ESW_N_Current_LowLimit;
+
+            if (App_Memory_SaveSWParams(&s_SWParams) == true)
+            {
+                if (!App_Memory_LoadSWParams(&readback) || memcmp(&readback, &s_SWParams, sizeof(SW_TreatParams_t)) != 0)
+                {
+                    temp_result = esw_p_high_result = esw_p_low_result = CONFIG_RESULT_FAIL;
+                    remain_count_result = esw_n_high_result = esw_n_low_result = CONFIG_RESULT_FAIL;
+                }
+            }
+            else
+            {
+                temp_result = esw_p_high_result = esw_p_low_result = CONFIG_RESULT_FAIL;
+                remain_count_result = esw_n_high_result = esw_n_low_result = CONFIG_RESULT_FAIL;
+            }
+        }
+
+        pSW->TxConfig.temp_result = temp_result;
+        pSW->TxConfig.ESW_P_current_highlimit_result = esw_p_high_result;
+        pSW->TxConfig.ESW_P_current_lowlimit_result = esw_p_low_result;
+        pSW->TxConfig.remain_treatment_count_result = remain_count_result;
+        pSW->TxConfig.ESW_N_current_highlimit_result = esw_n_high_result;
+        pSW->TxConfig.ESW_N_current_lowlimit_result = esw_n_low_result;
+        pSW->flag.bits.Rely_Config = 1;
+        pSW->flag.bits.Process_Config = 0;
+    }
 }
 
 /**

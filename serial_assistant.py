@@ -290,12 +290,27 @@ class SerialAssistant:
                 self.add_param_input("频率(kHz)", "frequency", "1000-1400", "1200", "uint16")
                 self.add_param_input("电压(10mV)", "voltage", "1000-2000 (10-20V)", "1500", "uint16")
                 self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("电流上限", "current_high_limit", "电流上限值", "1000", "uint16")
+                self.add_param_input("电流下限", "current_low_limit", "电流下限值", "100", "uint16")
+                self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
                 self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("电流上限", "current_high_limit", "电流上限值", "1000", "uint16")
+                self.add_param_input("电流下限", "current_low_limit", "电流下限值", "100", "uint16")
+                self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
+            elif module == PROTOCOL_MODULE_SHOCKWAVE:
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("ESW-P电流上限", "esw_p_current_high_limit", "ESW-P电流上限", "1000", "uint16")
+                self.add_param_input("ESW-P电流下限", "esw_p_current_low_limit", "ESW-P电流下限", "100", "uint16")
+                self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
+                self.add_param_input("ESW-N电流上限", "esw_n_current_high_limit", "ESW-N电流上限", "1000", "uint16")
+                self.add_param_input("ESW-N电流下限", "esw_n_current_low_limit", "ESW-N电流下限", "100", "uint16")
             elif module == PROTOCOL_MODULE_HEAT:
                 self.add_param_input("预热状态", "preheat_state", "0-停止, 1-开始", "1", "uint8")
                 self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "300", "uint16")
                 self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("预热温度限制", "preheat_temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
 
     def add_param_input(self, label, key, desc, default, data_type):
         """添加参数输入控件"""
@@ -415,26 +430,69 @@ class SerialAssistant:
                 frequency = self.get_param_value('frequency') or 1200
                 voltage = self.get_param_value('voltage') or 1500
                 temp_limit = self.get_param_value('temp_limit') or 400
+                current_high_limit = self.get_param_value('current_high_limit') or 1000
+                current_low_limit = self.get_param_value('current_low_limit') or 100
+                remain_treatment_count = self.get_param_value('remain_treatment_count') or 100
                 data_bytes.append(frequency & 0xFF)
                 data_bytes.append((frequency >> 8) & 0xFF)
                 data_bytes.append(voltage & 0xFF)
                 data_bytes.append((voltage >> 8) & 0xFF)
                 data_bytes.append(temp_limit & 0xFF)
                 data_bytes.append((temp_limit >> 8) & 0xFF)
+                data_bytes.append(current_high_limit & 0xFF)
+                data_bytes.append((current_high_limit >> 8) & 0xFF)
+                data_bytes.append(current_low_limit & 0xFF)
+                data_bytes.append((current_low_limit >> 8) & 0xFF)
+                data_bytes.append(remain_treatment_count & 0xFF)
+                data_bytes.append((remain_treatment_count >> 8) & 0xFF)
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
                 temp_limit = self.get_param_value('temp_limit') or 400
+                current_high_limit = self.get_param_value('current_high_limit') or 1000
+                current_low_limit = self.get_param_value('current_low_limit') or 100
+                remain_treatment_count = self.get_param_value('remain_treatment_count') or 100
                 data_bytes.append(temp_limit & 0xFF)
                 data_bytes.append((temp_limit >> 8) & 0xFF)
+                data_bytes.append(current_high_limit & 0xFF)
+                data_bytes.append((current_high_limit >> 8) & 0xFF)
+                data_bytes.append(current_low_limit & 0xFF)
+                data_bytes.append((current_low_limit >> 8) & 0xFF)
+                data_bytes.append(remain_treatment_count & 0xFF)
+                data_bytes.append((remain_treatment_count >> 8) & 0xFF)
+            elif module == PROTOCOL_MODULE_SHOCKWAVE:
+                temp_limit = self.get_param_value('temp_limit') or 400
+                esw_p_current_high_limit = self.get_param_value('esw_p_current_high_limit') or 1000
+                esw_p_current_low_limit = self.get_param_value('esw_p_current_low_limit') or 100
+                remain_treatment_count = self.get_param_value('remain_treatment_count') or 100
+                esw_n_current_high_limit = self.get_param_value('esw_n_current_high_limit') or 1000
+                esw_n_current_low_limit = self.get_param_value('esw_n_current_low_limit') or 100
+                data_bytes.append(temp_limit & 0xFF)
+                data_bytes.append((temp_limit >> 8) & 0xFF)
+                data_bytes.append(esw_p_current_high_limit & 0xFF)
+                data_bytes.append((esw_p_current_high_limit >> 8) & 0xFF)
+                data_bytes.append(esw_p_current_low_limit & 0xFF)
+                data_bytes.append((esw_p_current_low_limit >> 8) & 0xFF)
+                data_bytes.append(remain_treatment_count & 0xFF)
+                data_bytes.append((remain_treatment_count >> 8) & 0xFF)
+                data_bytes.append(esw_n_current_high_limit & 0xFF)
+                data_bytes.append((esw_n_current_high_limit >> 8) & 0xFF)
+                data_bytes.append(esw_n_current_low_limit & 0xFF)
+                data_bytes.append((esw_n_current_low_limit >> 8) & 0xFF)
             elif module == PROTOCOL_MODULE_HEAT:
                 pv = self.get_param_value('preheat_state')
                 preheat_state = pv if pv is not None else 1
                 work_time = self.get_param_value('work_time') or 300
                 temp_limit = self.get_param_value('temp_limit') or 400
+                preheat_temp_limit = self.get_param_value('preheat_temp_limit') or 400
+                remain_treatment_count = self.get_param_value('remain_treatment_count') or 100
                 data_bytes.append(preheat_state)
                 data_bytes.append(work_time & 0xFF)
                 data_bytes.append((work_time >> 8) & 0xFF)
                 data_bytes.append(temp_limit & 0xFF)
                 data_bytes.append((temp_limit >> 8) & 0xFF)
+                data_bytes.append(preheat_temp_limit & 0xFF)
+                data_bytes.append((preheat_temp_limit >> 8) & 0xFF)
+                data_bytes.append(remain_treatment_count & 0xFF)
+                data_bytes.append((remain_treatment_count >> 8) & 0xFF)
 
         return bytes(data_bytes)
 
@@ -508,12 +566,27 @@ class SerialAssistant:
                 params.append(f"频率={data_bytes[idx] | (data_bytes[idx+1] << 8)}kHz")
                 params.append(f"电压={data_bytes[idx+2] | (data_bytes[idx+3] << 8)}*10mV")
                 params.append(f"温度限制={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}")
+                params.append(f"电流上限={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}")
+                params.append(f"电流下限={data_bytes[idx+8] | (data_bytes[idx+9] << 8)}")
+                params.append(f"剩余治疗次数={data_bytes[idx+10] | (data_bytes[idx+11] << 8)}")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
                 params.append(f"温度限制={data_bytes[idx] | (data_bytes[idx+1] << 8)}")
+                params.append(f"电流上限={data_bytes[idx+2] | (data_bytes[idx+3] << 8)}")
+                params.append(f"电流下限={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}")
+                params.append(f"剩余治疗次数={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}")
+            elif module == PROTOCOL_MODULE_SHOCKWAVE:
+                params.append(f"温度限制={data_bytes[idx] | (data_bytes[idx+1] << 8)}")
+                params.append(f"ESW-P电流上限={data_bytes[idx+2] | (data_bytes[idx+3] << 8)}")
+                params.append(f"ESW-P电流下限={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}")
+                params.append(f"剩余治疗次数={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}")
+                params.append(f"ESW-N电流上限={data_bytes[idx+8] | (data_bytes[idx+9] << 8)}")
+                params.append(f"ESW-N电流下限={data_bytes[idx+10] | (data_bytes[idx+11] << 8)}")
             elif module == PROTOCOL_MODULE_HEAT:
                 params.append(f"预热状态={data_bytes[idx]}")
                 params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"温度限制={data_bytes[idx+3] | (data_bytes[idx+4] << 8)}")
+                params.append(f"预热温度限制={data_bytes[idx+5] | (data_bytes[idx+6] << 8)}")
+                params.append(f"剩余治疗次数={data_bytes[idx+7] | (data_bytes[idx+8] << 8)}")
 
         return ", ".join(params)
 
@@ -531,7 +604,7 @@ class SerialAssistant:
 
         if cmd == PROTOCOL_CMD_GET_STATUS:
             if module == PROTOCOL_MODULE_ULTRASOUND:
-                if len(payload) >= 12:
+                if len(payload) >= 14:
                     work_state = payload[0]
                     frequency = payload[1] | (payload[2] << 8)
                     temp_limit = payload[3] | (payload[4] << 8)
@@ -540,6 +613,7 @@ class SerialAssistant:
                     head_temp = payload[8] | (payload[9] << 8)
                     conn_state = payload[10]
                     error_code = payload[11]
+                    remain_treatment_count = payload[12] | (payload[13] << 8)
 
                     result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"频率: {frequency} kHz")
@@ -549,8 +623,9 @@ class SerialAssistant:
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
                     result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
                     result.append(f"错误码: 0x{error_code:02X}")
+                    result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                if len(payload) >= 10:
+                if len(payload) >= 12:
                     work_state = payload[0]
                     temp_limit = payload[1] | (payload[2] << 8)
                     remain_time = payload[3] | (payload[4] << 8)
@@ -558,6 +633,7 @@ class SerialAssistant:
                     head_temp = payload[6] | (payload[7] << 8)
                     conn_state = payload[8]
                     error_code = payload[9]
+                    remain_treatment_count = payload[10] | (payload[11] << 8)
 
                     result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"温度限制: {self.format_temp(temp_limit)}")
@@ -566,8 +642,9 @@ class SerialAssistant:
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
                     result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
                     result.append(f"错误码: 0x{error_code:02X}")
+                    result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
-                if len(payload) >= 10:
+                if len(payload) >= 11:
                     work_state = payload[0]
                     frequency = payload[1]
                     remain_time = payload[2] | (payload[3] << 8)
@@ -575,6 +652,7 @@ class SerialAssistant:
                     head_temp = payload[5] | (payload[6] << 8)
                     conn_state = payload[7]
                     error_code = payload[8]
+                    remain_treatment_count = payload[9] | (payload[10] << 8)
 
                     result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"频率: {frequency} 级")
@@ -583,8 +661,9 @@ class SerialAssistant:
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
                     result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
                     result.append(f"错误码: 0x{error_code:02X}")
+                    result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_HEAT:
-                if len(payload) >= 19:
+                if len(payload) >= 21:
                     work_state = payload[0]
                     temp_limit = payload[1] | (payload[2] << 8)
                     remain_heat_time = payload[3] | (payload[4] << 8)
@@ -597,6 +676,7 @@ class SerialAssistant:
                     remain_preheat_time = payload[15] | (payload[16] << 8)
                     conn_state = payload[17]
                     error_code = payload[18]
+                    remain_treatment_count = payload[19] | (payload[20] << 8)
 
                     result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"温度限制: {self.format_temp(temp_limit)}")
@@ -610,19 +690,58 @@ class SerialAssistant:
                     result.append(f"剩余预热时间: {remain_preheat_time} 秒")
                     result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
                     result.append(f"错误码: 0x{error_code:02X}")
+                    result.append(f"剩余治疗次数: {remain_treatment_count}")
         elif cmd == PROTOCOL_CMD_SET_CONFIG:
             if module == PROTOCOL_MODULE_ULTRASOUND:
-                if len(payload) >= 3:
+                if len(payload) >= 6:
                     freq_result = payload[0]
                     voltage_result = payload[1]
                     temp_result = payload[2]
+                    current_high_result = payload[3]
+                    current_low_result = payload[4]
+                    remain_treatment_count_result = payload[5]
                     result.append(f"频率配置结果: {self.get_config_result_name(freq_result)}")
                     result.append(f"电压配置结果: {self.get_config_result_name(voltage_result)}")
                     result.append(f"温度配置结果: {self.get_config_result_name(temp_result)}")
+                    result.append(f"电流上限配置结果: {self.get_config_result_name(current_high_result)}")
+                    result.append(f"电流下限配置结果: {self.get_config_result_name(current_low_result)}")
+                    result.append(f"剩余治疗次数配置结果: {self.get_config_result_name(remain_treatment_count_result)}")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                if len(payload) >= 1:
+                if len(payload) >= 4:
                     temp_result = payload[0]
+                    current_high_result = payload[1]
+                    current_low_result = payload[2]
+                    remain_treatment_count_result = payload[3]
                     result.append(f"温度配置结果: {self.get_config_result_name(temp_result)}")
+                    result.append(f"电流上限配置结果: {self.get_config_result_name(current_high_result)}")
+                    result.append(f"电流下限配置结果: {self.get_config_result_name(current_low_result)}")
+                    result.append(f"剩余治疗次数配置结果: {self.get_config_result_name(remain_treatment_count_result)}")
+            elif module == PROTOCOL_MODULE_SHOCKWAVE:
+                if len(payload) >= 6:
+                    temp_result = payload[0]
+                    esw_p_current_high_result = payload[1]
+                    esw_p_current_low_result = payload[2]
+                    remain_treatment_count_result = payload[3]
+                    esw_n_current_high_result = payload[4]
+                    esw_n_current_low_result = payload[5]
+                    result.append(f"温度配置结果: {self.get_config_result_name(temp_result)}")
+                    result.append(f"ESW-P电流上限配置结果: {self.get_config_result_name(esw_p_current_high_result)}")
+                    result.append(f"ESW-P电流下限配置结果: {self.get_config_result_name(esw_p_current_low_result)}")
+                    result.append(f"剩余治疗次数配置结果: {self.get_config_result_name(remain_treatment_count_result)}")
+                    result.append(f"ESW-N电流上限配置结果: {self.get_config_result_name(esw_n_current_high_result)}")
+                    result.append(f"ESW-N电流下限配置结果: {self.get_config_result_name(esw_n_current_low_result)}")
+            elif module == PROTOCOL_MODULE_HEAT:
+                if len(payload) >= 5:
+                    preheat_state_result = payload[0]
+                    work_time_result = payload[1]
+                    temp_limit_result = payload[2]
+                    preheat_temp_limit_result = payload[3]
+                    remain_treatment_count_result = payload[4]
+                    result.append(f"预热状态配置结果: {self.get_config_result_name(preheat_state_result)}")
+                    result.append(f"工作时间配置结果: {self.get_config_result_name(work_time_result)}")
+                    result.append(f"温度限制配置结果: {self.get_config_result_name(temp_limit_result)}")
+                    result.append(f"预热温度限制配置结果: {self.get_config_result_name(preheat_temp_limit_result)}")
+                    result.append(f"剩余治疗次数配置结果: {self.get_config_result_name(remain_treatment_count_result)}")
 
         return "\n".join(result)
 

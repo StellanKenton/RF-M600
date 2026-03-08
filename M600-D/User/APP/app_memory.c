@@ -13,7 +13,7 @@
 #include "app_comm.h"
 #include <string.h>
 #include "log.h"
-
+#include "drv_delay.h"
 /* CRC16 polynomial: CRC-16-IBM (0x8005) */
 #define CRC16_POLYNOMIAL 0x8005
 #define CRC16_INIT_VALUE 0xFFFF
@@ -153,7 +153,7 @@ bool App_Memory_SaveRFParams(const RF_TreatParams_t *params)
     crc = Calculate_CRC16((const uint8_t *)&tempParams, sizeof(RF_TreatParams_t) - sizeof(uint16_t));
     tempParams.CrcCode = crc;
 
-    s_RFParams = *params;
+    s_RFParams = tempParams;
     return Drv_Memory_Write(MEM_ADDR_RF_PARAMS, (const uint8_t *)&tempParams, sizeof(RF_TreatParams_t));
 }
 
@@ -222,7 +222,7 @@ bool App_Memory_SaveSWParams(const SW_TreatParams_t *params)
     crc = Calculate_CRC16((const uint8_t *)&tempParams, sizeof(SW_TreatParams_t) - sizeof(uint16_t));
     tempParams.CrcCode = crc;
 
-    s_SWParams = *params;
+    s_SWParams = tempParams;
     return Drv_Memory_Write(MEM_ADDR_SW_PARAMS, (const uint8_t *)&tempParams, sizeof(SW_TreatParams_t));
 }
 
@@ -291,7 +291,7 @@ bool App_Memory_SaveNPHParams(const NPH_TreatParams_t *params)
     crc = Calculate_CRC16((const uint8_t *)&tempParams, sizeof(NPH_TreatParams_t) - sizeof(uint16_t));
     tempParams.CrcCode = crc;
 
-    s_NPHParams = *params;
+    s_NPHParams = tempParams;
     return Drv_Memory_Write(MEM_ADDR_NPH_PARAMS, (const uint8_t *)&tempParams, sizeof(NPH_TreatParams_t));
 }
 
@@ -360,7 +360,7 @@ bool App_Memory_SaveUSParams(const US_TreatParams_t *params)
     crc = Calculate_CRC16((const uint8_t *)&tempParams, sizeof(US_TreatParams_t) - sizeof(uint16_t));
     tempParams.CrcCode = crc;
 
-    s_USParams = *params;
+    s_USParams = tempParams;
     return Drv_Memory_Write(MEM_ADDR_US_PARAMS, (const uint8_t *)&tempParams, sizeof(US_TreatParams_t));
 }
 
@@ -703,6 +703,10 @@ static void App_Memory_ProcessSWConfig(void)
  */
 void App_Memory_Process(void)
 {
+	static Drv_Timer_t CommTimer;
+    if(Drv_Timer_Tick(&CommTimer, MEM_TASK_TIME) == false){
+        return;
+    }
     App_Memory_ProcessUSConfig();
     App_Memory_ProcessRFConfig();
     App_Memory_ProcessHeatConfig();

@@ -58,6 +58,7 @@
 ".\objects\app_system.o"
 ".\objects\app_treatmgr.o"
 ".\objects\app_ultrasound.o"
+".\objects\app_led.o"
 ".\objects\log.o"
 ".\objects\segger_rtt.o"
 ".\objects\segger_rtt_printf.o"

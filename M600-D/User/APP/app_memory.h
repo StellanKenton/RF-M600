@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#define MEM_TASK_TIME 50 // 50ms
 /* Parameter range limits (from protocol) */
 #define PARAM_TEMP_MIN        350U
 #define PARAM_TEMP_MAX        480U

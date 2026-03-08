@@ -42,6 +42,10 @@ extern "C" {
 #define ESW_N_Pin            GPIO_Pin_9   /* PB9, shockwave ESW- (was TIM4_CH4) */
 #define ESW_N_Port           GPIOB
 
+/* LED Output */
+#define MCU_LED_Pin          GPIO_Pin_15
+#define MCU_LED_Port         GPIOC
+
 /* Inputs */
 #define MCU_FOOT_Pin         GPIO_Pin_0
 #define MCU_FOOT_Port        GPIOC
@@ -59,6 +63,8 @@ extern "C" {
 #define MCU_Buzzer_OFF()     GPIO_SetBits(MCU_Buzzer_Port, MCU_Buzzer_Pin)
 #define CTR_FAN_ON()         GPIO_SetBits(CTR_FAN_Port, CTR_FAN_Pin)
 #define CTR_FAN_OFF()        GPIO_ResetBits(CTR_FAN_Port, CTR_FAN_Pin)
+#define MCU_LED_ON()         GPIO_SetBits(MCU_LED_Port, MCU_LED_Pin)
+#define MCU_LED_OFF()        GPIO_ResetBits(MCU_LED_Port, MCU_LED_Pin)
 
 /* BSP GPIO pin enums for ReadPin/WritePin (DAL maps DRV enums to these) */
 typedef enum {
@@ -84,6 +90,7 @@ typedef enum {
     BSP_GPIO_OUT_CTR_HEAT_HP,
     BSP_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
     BSP_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
+    BSP_GPIO_OUT_LED,     /* PC15, status LED */
     BSP_GPIO_OUT_MAX
 } BSP_GPIO_Output_t;
 

@@ -52,6 +52,9 @@ typedef struct
 
 void System_Init(void);
 void SystemProcess(void);
+System_Mode_EnumDef System_GetMode(void);
+uint32_t System_GetTick(void);
+
 #ifdef __cplusplus
 }
 #endif

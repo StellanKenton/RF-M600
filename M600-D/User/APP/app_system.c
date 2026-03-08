@@ -15,10 +15,20 @@
 #include "drv_adc.h"
 #include "drv_si5351.h"
 #include "app_memory.h"
+#include "app_led.h"
+#include "bsp_delay.h"
 
 static System_Mgr_t s_SystemMgr = {E_SYSTEM_STANDBY_MODE, 0};
 
+System_Mode_EnumDef System_GetMode(void)
+{
+    return s_SystemMgr.eMode;
+}
 
+uint32_t System_GetTick(void)
+{
+    return s_SystemMgr.sysTick;
+}
 
 void System_ChangeMode(System_Mode_EnumDef newMode)
 {
@@ -59,6 +69,10 @@ void System_Init(void)
     LOG_I("Communication initialized.");
     App_HandComm_Init();
     LOG_I("Handle communication initialized.");
+    App_LED_Init();
+    LOG_I("LED module initialized.");
+    App_Memory_Init();
+    LOG_I("Memory module initialized.");
 
     // output pwm test - 1MHz complementary PWM on TIM1
 //    Drv_SI5351_Init();                      // Initialize Si5351
@@ -87,7 +101,8 @@ void SystemManager(void)
             // Handle unexpected mode
             break;
     }
-
+	
+	App_LED_Process();
     App_Memory_Process();       // Process memory configuration for all treatment modules
     App_Comm_Process();         // Process communication with external devices
     App_HandComm_Process();     // Process handle communication
@@ -100,6 +115,9 @@ void SystemManager(void)
 **/
 void SystemProcess(void)
 {
+    /* Update system tick */
+    s_SystemMgr.sysTick = BSP_GetTick_ms();
+    
     SystemManager();
     Drv_WatchDogFeed();
 }

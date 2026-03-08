@@ -23,14 +23,14 @@ void BSP_GPIO_Init(void)
 
     /* Output level: all LOW */
     GPIO_ResetBits(GPIOC, MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
-                          pwr_control2_Pin | pwr_control1_Pin);
+                          pwr_control2_Pin | pwr_control1_Pin | MCU_LED_Pin);
     GPIO_ResetBits(GPIOB, MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
                           CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin);
     GPIO_ResetBits(CTR_FAN_Port, CTR_FAN_Pin);
 
-    /* GPIOC outputs: Buzzer, pwr_control1~4 */
+    /* GPIOC outputs: Buzzer, pwr_control1~4, LED */
     GPIO_InitStructure.GPIO_Pin   = MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
-                                    pwr_control2_Pin | pwr_control1_Pin;
+                                    pwr_control2_Pin | pwr_control1_Pin | MCU_LED_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
@@ -92,6 +92,7 @@ void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state)
         case BSP_GPIO_OUT_CTR_HEAT_HP: port = CTR_HEAT_HP_Port;    gpio_pin = CTR_HEAT_HP_Pin;    break;
         case BSP_GPIO_OUT_ESW_P:       port = ESW_P_Port;          gpio_pin = ESW_P_Pin;         break;
         case BSP_GPIO_OUT_ESW_N:       port = ESW_N_Port;          gpio_pin = ESW_N_Pin;         break;
+        case BSP_GPIO_OUT_LED:         port = MCU_LED_Port;        gpio_pin = MCU_LED_Pin;       break;
         default: return;
     }
     if (state)

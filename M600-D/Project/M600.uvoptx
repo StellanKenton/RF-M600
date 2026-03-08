@@ -152,27 +152,37 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_USParams,0x0A</ItemText>
+          <ItemText>s_RFParams</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_AppCommInfo</ItemText>
+          <ItemText>readback</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_RFParams,0x0A</ItemText>
+          <ItemText>s_LEDMgr</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_SWParams,0x0A</ItemText>
+          <ItemText>sysTick,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_NPHParams,0x0A</ItemText>
+          <ItemText>elapsed,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>LED_BREATHING_PERIOD_MS,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_SystemMgr,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -538,7 +548,7 @@
 
   <Group>
     <GroupName>BSP</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -870,7 +880,7 @@
 
   <Group>
     <GroupName>APP</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -982,6 +992,18 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>7</GroupNumber>
+      <FileNumber>60</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\APP\app_led.c</PathWithFileName>
+      <FilenameWithoutPath>app_led.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -992,7 +1014,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>60</FileNumber>
+      <FileNumber>61</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1004,7 +1026,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>61</FileNumber>
+      <FileNumber>62</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1016,7 +1038,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>62</FileNumber>
+      <FileNumber>63</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1028,7 +1050,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>63</FileNumber>
+      <FileNumber>64</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1040,7 +1062,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>64</FileNumber>
+      <FileNumber>65</FileNumber>
       <FileType>2</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1052,7 +1074,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>65</FileNumber>
+      <FileNumber>66</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1064,7 +1086,7 @@
     </File>
     <File>
       <GroupNumber>8</GroupNumber>
-      <FileNumber>66</FileNumber>
+      <FileNumber>67</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>

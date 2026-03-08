@@ -26,6 +26,7 @@ typedef enum {
     E_GPIO_OUT_CTR_HP_MOTOR,
     E_GPIO_OUT_CTR_HP_LOSE,
     E_GPIO_OUT_CTR_HEAT_HP,
+    E_GPIO_OUT_LED,
     E_GPIO_OUT_MAX
 } GPIO_Output_EnumDef;
 

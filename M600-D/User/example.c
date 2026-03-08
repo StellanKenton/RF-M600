@@ -10,14 +10,9 @@
 #include "example.h"
 
 
-void example_init(void)
+void example(void)
 {
     // Initialize the example module
-}
-
-void example_process(void)
-{
-    // Process the example module
 }
 
 /**************************End of file********************************/

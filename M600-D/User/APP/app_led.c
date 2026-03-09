@@ -176,7 +176,7 @@ void App_LED_Init(void)
 {
     /* Initialize LED manager structure */
     s_LEDMgr.pattern = E_LED_PATTERN_OFF;
-    s_LEDMgr.lastUpdateTick = 0;
+    s_LEDMgr.lastUpdateTick = BSP_GetTick_ms();
     s_LEDMgr.cycleCounter = 0;
     s_LEDMgr.brightness = 0;
     
@@ -189,8 +189,8 @@ void App_LED_Init(void)
  */
 void App_LED_Process(void)
 {
-    static Drv_Timer_t CommTimer;
-    if(Drv_Timer_Tick(&CommTimer, LED_TASK_TIME) == false){
+    static Drv_Timer_t LedTimer;
+    if(Drv_Timer_Tick(&LedTimer, LED_TASK_TIME) == false){
         return;
     }
     /* Update pattern based on system mode */

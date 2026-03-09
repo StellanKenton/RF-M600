@@ -231,12 +231,12 @@ void App_TreatMgr_Process(void)
 {
     static Drv_Timer_t TreatMgrTimer;
     static Drv_Timer_t BoardTempMonitorTimer;
-
+    static uint16_t VoutADC;
 
     if(Drv_Timer_Tick(&TreatMgrTimer, TREAT_TASK_TIME) == false){
         return;
     }
-
+    VoutADC = Drv_GetADCVout();
     // Process buzzer control (every loop for timely response)
     Drv_IODevice_ProcessBuzzer();
     // Process treatment manager: refresh probe and foot switch status

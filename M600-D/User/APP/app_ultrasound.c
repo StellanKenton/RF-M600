@@ -189,7 +189,7 @@ bool App_UltraSound_StartCheck()
     }
 
     // 4. Check if foot switch is closed
-    if(!App_TreatMgr_GetFootSwitchClosed()) {
+    if(App_TreatMgr_GetFootSwitchClosed()) {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_INVALID_PARAMS;
         s_USCtrlInfo.StartCheckStep = 4;
         return false;

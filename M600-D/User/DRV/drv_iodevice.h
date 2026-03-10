@@ -26,7 +26,9 @@ typedef enum {
     E_GPIO_OUT_CTR_HP_MOTOR,
     E_GPIO_OUT_CTR_HP_LOSE,
     E_GPIO_OUT_CTR_HEAT_HP,
-    E_GPIO_OUT_LED,
+    E_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
+    E_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
+    E_GPIO_OUT_LED,     /* PC15, status LED */
     E_GPIO_OUT_MAX
 } GPIO_Output_EnumDef;
 

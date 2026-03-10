@@ -200,7 +200,7 @@ bool App_Shockwave_StartCheck()
         return false;
     }
 
-    if(!App_TreatMgr_GetFootSwitchClosed()) {
+    if(App_TreatMgr_GetFootSwitchClosed()) {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_INVALID_PARAMS;
         s_SWCtrlInfo.LastStartState = 0x04;
         return false;

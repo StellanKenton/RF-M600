@@ -282,7 +282,7 @@ bool App_NegPrsHeat_StartCheck()
         return false;
     }
 
-    if(!App_TreatMgr_GetFootSwitchClosed()) {
+    if(App_TreatMgr_GetFootSwitchClosed()) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }

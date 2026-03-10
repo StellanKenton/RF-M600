@@ -199,7 +199,7 @@ bool App_RadioFreq_StartCheck()
         return false;
     }
 
-    if(!App_TreatMgr_GetFootSwitchClosed()) {
+    if(App_TreatMgr_GetFootSwitchClosed()) {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_INVALID_PARAMS;
         s_RFCtrlInfo.LastStartState = 0x03;
         return false;

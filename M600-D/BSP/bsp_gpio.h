@@ -17,37 +17,37 @@ extern "C" {
 /* Outputs */
 #define MCU_Buzzer_Pin       GPIO_Pin_13
 #define MCU_Buzzer_Port      GPIOC
-#define pwr_control4_Pin     GPIO_Pin_6
-#define pwr_control4_Port    GPIOC
-#define pwr_control3_Pin     GPIO_Pin_7
-#define pwr_control3_Port    GPIOC
-#define pwr_control2_Pin     GPIO_Pin_8
-#define pwr_control2_Port    GPIOC
-#define pwr_control1_Pin     GPIO_Pin_9
-#define pwr_control1_Port    GPIOC
-#define MCU_CTR_OUT_Pin      GPIO_Pin_12
+#define pwr_control5_Pin     GPIO_Pin_12
+#define pwr_control5_Port    GPIOC
+#define pwr_control4_Pin     GPIO_Pin_2
+#define pwr_control4_Port    GPIOD
+#define pwr_control3_Pin     GPIO_Pin_3
+#define pwr_control3_Port    GPIOB
+#define pwr_control2_Pin     GPIO_Pin_4
+#define pwr_control2_Port    GPIOB
+#define pwr_control1_Pin     GPIO_Pin_5
+#define pwr_control1_Port    GPIOB
+#define MCU_CTR_OUT_Pin      GPIO_Pin_14
 #define MCU_CTR_OUT_Port     GPIOB
-#define MCU_CTR_US_RF_Pin    GPIO_Pin_14
+#define MCU_CTR_US_RF_Pin    GPIO_Pin_12
 #define MCU_CTR_US_RF_Port   GPIOB
-#define CTR_HP_motor_Pin     GPIO_Pin_3
-#define CTR_HP_motor_Port    GPIOB
-#define CTR_HP_lose_Pin      GPIO_Pin_4
-#define CTR_HP_lose_Port     GPIOB
+#define CTR_HP_motor_Pin     GPIO_Pin_7
+#define CTR_HP_motor_Port    GPIOC
+#define CTR_HP_lose_Pin      GPIO_Pin_8
+#define CTR_HP_lose_Port     GPIOC
 #define CTR_HEAT_HP_Pin      GPIO_Pin_5
 #define CTR_HEAT_HP_Port     GPIOB
-#define CTR_FAN_Pin          GPIO_Pin_2
-#define CTR_FAN_Port         GPIOD
+#define CTR_FAN_Pin          GPIO_Pin_6
+#define CTR_FAN_Port         GPIOC
 #define ESW_P_Pin            GPIO_Pin_8   /* PB8, shockwave ESW+ (was TIM4_CH3) */
 #define ESW_P_Port           GPIOB
 #define ESW_N_Pin            GPIO_Pin_9   /* PB9, shockwave ESW- (was TIM4_CH4) */
 #define ESW_N_Port           GPIOB
-
-/* LED Output */
-#define MCU_LED_Pin          GPIO_Pin_15
-#define MCU_LED_Port         GPIOC
+#define LED_PIN              GPIO_Pin_15
+#define LED_PORT             GPIOC
 
 /* Inputs */
-#define MCU_FOOT_Pin         GPIO_Pin_0
+#define MCU_FOOT_Pin         GPIO_Pin_14
 #define MCU_FOOT_Port        GPIOC
 #define IO_SYN_US_Pin        GPIO_Pin_10
 #define IO_SYN_US_Port       GPIOC
@@ -55,8 +55,8 @@ extern "C" {
 #define IO_SYN_RF_Port       GPIOC
 #define IO_SYN_ESW_Pin       GPIO_Pin_12
 #define IO_SYN_ESW_Port      GPIOC
-#define MCU_I_O_Pin          GPIO_Pin_15
-#define MCU_I_O_Port         GPIOB
+#define MCU_I_O_Pin          GPIO_Pin_1
+#define MCU_I_O_Port         GPIOC
 
 /* Helper macros */
 #define MCU_Buzzer_ON()      GPIO_ResetBits(MCU_Buzzer_Port, MCU_Buzzer_Pin)

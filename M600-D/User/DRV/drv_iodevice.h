@@ -8,37 +8,11 @@
 #include "stm32f10x.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include "bsp_gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    E_GPIO_OUT_BUZZER = 0,
-    E_GPIO_OUT_CTR_US_RF,
-    E_GPIO_OUT_CTR_OUT,
-    E_GPIO_OUT_MCU_IO,
-    E_GPIO_OUT_PWR_CTRL1,
-    E_GPIO_OUT_PWR_CTRL2,
-    E_GPIO_OUT_PWR_CTRL3,
-    E_GPIO_OUT_PWR_CTRL4,
-    E_GPIO_OUT_CTR_FAN,
-    E_GPIO_OUT_CTR_HP_MOTOR,
-    E_GPIO_OUT_CTR_HP_LOSE,
-    E_GPIO_OUT_CTR_HEAT_HP,
-    E_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
-    E_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
-    E_GPIO_OUT_LED,     /* PC15, status LED */
-    E_GPIO_OUT_MAX
-} GPIO_Output_EnumDef;
-
-typedef enum {
-    E_GPIO_IN_FOOT = 0,
-    E_GPIO_IN_SYN_US,
-    E_GPIO_IN_SYN_RF,
-    E_GPIO_IN_SYN_ESW,
-    E_GPIO_IN_MAX
-} GPIO_Input_EnumDef;
 
 typedef enum {
     E_IODEVICE_MODE_ULTRASOUND = 0,

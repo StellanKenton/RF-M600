@@ -68,35 +68,36 @@ extern "C" {
 
 /* BSP GPIO pin enums for ReadPin/WritePin (DAL maps DRV enums to these) */
 typedef enum {
-    BSP_GPIO_IN_FOOT = 0,
-    BSP_GPIO_IN_SYN_US,
-    BSP_GPIO_IN_SYN_RF,
-    BSP_GPIO_IN_SYN_ESW,
-    BSP_GPIO_IN_MAX
-} BSP_GPIO_Input_t;
+    E_GPIO_IN_FOOT = 0,
+    E_GPIO_IN_SYN_US,
+    E_GPIO_IN_SYN_RF,
+    E_GPIO_IN_SYN_ESW,
+    E_GPIO_IN_MAX
+} GPIO_Input_EnumDef;
 
 typedef enum {
-    BSP_GPIO_OUT_BUZZER = 0,
-    BSP_GPIO_OUT_CTR_US_RF,
-    BSP_GPIO_OUT_CTR_OUT,
-    BSP_GPIO_OUT_MCU_IO,
-    BSP_GPIO_OUT_PWR_CTRL1,
-    BSP_GPIO_OUT_PWR_CTRL2,
-    BSP_GPIO_OUT_PWR_CTRL3,
-    BSP_GPIO_OUT_PWR_CTRL4,
-    BSP_GPIO_OUT_CTR_FAN,
-    BSP_GPIO_OUT_CTR_HP_MOTOR,
-    BSP_GPIO_OUT_CTR_HP_LOSE,
-    BSP_GPIO_OUT_CTR_HEAT_HP,
-    BSP_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
-    BSP_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
-    BSP_GPIO_OUT_LED,     /* PC15, status LED */
-    BSP_GPIO_OUT_MAX
-} BSP_GPIO_Output_t;
+    E_GPIO_OUT_BUZZER = 0,
+    E_GPIO_OUT_CTR_US_RF,
+    E_GPIO_OUT_CTR_OUT,
+    E_GPIO_OUT_MCU_IO,
+    E_GPIO_OUT_PWR_CTRL1,
+    E_GPIO_OUT_PWR_CTRL2,
+    E_GPIO_OUT_PWR_CTRL3,
+    E_GPIO_OUT_PWR_CTRL4,
+    E_GPIO_OUT_PWR_CTRL5,
+    E_GPIO_OUT_CTR_FAN,
+    E_GPIO_OUT_CTR_HP_MOTOR,
+    E_GPIO_OUT_CTR_HP_LOSE,
+    E_GPIO_OUT_CTR_HEAT_HP,
+    E_GPIO_OUT_ESW_P,   /* PB8, shockwave ESW+ */
+    E_GPIO_OUT_ESW_N,   /* PB9, shockwave ESW- */
+    E_GPIO_OUT_LED,     /* PC15, status LED */
+    E_GPIO_OUT_MAX
+} GPIO_Output_EnumDef;
 
 void BSP_GPIO_Init(void);
-uint8_t BSP_GPIO_ReadPin(BSP_GPIO_Input_t pin);   /* 0=low, 1=high */
-void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state);  /* 0=low, 1=high */
+uint8_t BSP_GPIO_ReadPin(GPIO_Input_EnumDef pin);   /* 0=low, 1=high */
+void BSP_GPIO_WritePin(GPIO_Output_EnumDef pin, uint8_t state);  /* 0=low, 1=high */
 
 /** Call all M600 BSP inits: GPIO, ADC, TIM1, TIM2, USART1(115200), USART2(115200). PB8/PB9 as GPIO (ESW_P/ESW_N). */
 void BSP_Init(void);

@@ -39,7 +39,7 @@ void BSP_GPIO_Init(void)
     GPIO_InitStructure.GPIO_Pin   = MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
                                     pwr_control2_Pin | pwr_control1_Pin | LED_PIN;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     /* GPIOC inputs: MCU_FOOT, IO_SYN_US, IO_SYN_RF, IO_SYN_ESW */
@@ -51,7 +51,7 @@ void BSP_GPIO_Init(void)
     GPIO_InitStructure.GPIO_Pin   = MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
                                     CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     /* GPIOB input: MCU_I_O */
@@ -66,40 +66,41 @@ void BSP_GPIO_Init(void)
     GPIO_Init(CTR_FAN_Port, &GPIO_InitStructure);
 }
 
-uint8_t BSP_GPIO_ReadPin(BSP_GPIO_Input_t pin)
+uint8_t BSP_GPIO_ReadPin(GPIO_Input_EnumDef pin)
 {
     GPIO_TypeDef *port;
     uint16_t gpio_pin;
     switch (pin) {
-        case BSP_GPIO_IN_FOOT:    port = MCU_FOOT_Port;    gpio_pin = MCU_FOOT_Pin;    break;
-        case BSP_GPIO_IN_SYN_US:  port = IO_SYN_US_Port;   gpio_pin = IO_SYN_US_Pin;   break;
-        case BSP_GPIO_IN_SYN_RF:  port = IO_SYN_RF_Port;   gpio_pin = IO_SYN_RF_Pin;   break;
-        case BSP_GPIO_IN_SYN_ESW: port = IO_SYN_ESW_Port;  gpio_pin = IO_SYN_ESW_Pin;  break;
+        case E_GPIO_IN_FOOT:    port = MCU_FOOT_Port;    gpio_pin = MCU_FOOT_Pin;    break;
+        case E_GPIO_IN_SYN_US:  port = IO_SYN_US_Port;   gpio_pin = IO_SYN_US_Pin;   break;
+        case E_GPIO_IN_SYN_RF:  port = IO_SYN_RF_Port;   gpio_pin = IO_SYN_RF_Pin;   break;
+        case E_GPIO_IN_SYN_ESW: port = IO_SYN_ESW_Port;  gpio_pin = IO_SYN_ESW_Pin;  break;
         default: return 0;
     }
     return GPIO_ReadInputDataBit(port, gpio_pin) ? 1 : 0;
 }
 
-void BSP_GPIO_WritePin(BSP_GPIO_Output_t pin, uint8_t state)
+void BSP_GPIO_WritePin(GPIO_Output_EnumDef pin, uint8_t state)
 {
     GPIO_TypeDef *port;
     uint16_t gpio_pin;
     switch (pin) {
-        case BSP_GPIO_OUT_BUZZER:      port = MCU_Buzzer_Port;     gpio_pin = MCU_Buzzer_Pin;     break;
-        case BSP_GPIO_OUT_CTR_US_RF:   port = MCU_CTR_US_RF_Port;  gpio_pin = MCU_CTR_US_RF_Pin;  break;
-        case BSP_GPIO_OUT_CTR_OUT:     port = MCU_CTR_OUT_Port;    gpio_pin = MCU_CTR_OUT_Pin;    break;
-        case BSP_GPIO_OUT_MCU_IO:      port = MCU_I_O_Port;        gpio_pin = MCU_I_O_Pin;        break;
-        case BSP_GPIO_OUT_PWR_CTRL1:   port = pwr_control1_Port;   gpio_pin = pwr_control1_Pin;   break;
-        case BSP_GPIO_OUT_PWR_CTRL2:   port = pwr_control2_Port;   gpio_pin = pwr_control2_Pin;   break;
-        case BSP_GPIO_OUT_PWR_CTRL3:   port = pwr_control3_Port;   gpio_pin = pwr_control3_Pin;   break;
-        case BSP_GPIO_OUT_PWR_CTRL4:   port = pwr_control4_Port;   gpio_pin = pwr_control4_Pin;   break;
-        case BSP_GPIO_OUT_CTR_FAN:     port = CTR_FAN_Port;        gpio_pin = CTR_FAN_Pin;        break;
-        case BSP_GPIO_OUT_CTR_HP_MOTOR: port = CTR_HP_motor_Port;  gpio_pin = CTR_HP_motor_Pin;   break;
-        case BSP_GPIO_OUT_CTR_HP_LOSE: port = CTR_HP_lose_Port;    gpio_pin = CTR_HP_lose_Pin;    break;
-        case BSP_GPIO_OUT_CTR_HEAT_HP: port = CTR_HEAT_HP_Port;    gpio_pin = CTR_HEAT_HP_Pin;    break;
-        case BSP_GPIO_OUT_ESW_P:       port = ESW_P_Port;          gpio_pin = ESW_P_Pin;         break;
-        case BSP_GPIO_OUT_ESW_N:       port = ESW_N_Port;          gpio_pin = ESW_N_Pin;         break;
-        case BSP_GPIO_OUT_LED:         port = LED_PORT;        		 gpio_pin = LED_PIN;       break;
+        case E_GPIO_OUT_BUZZER:      port = MCU_Buzzer_Port;     gpio_pin = MCU_Buzzer_Pin;     break;
+        case E_GPIO_OUT_CTR_US_RF:   port = MCU_CTR_US_RF_Port;  gpio_pin = MCU_CTR_US_RF_Pin;  break;
+        case E_GPIO_OUT_CTR_OUT:     port = MCU_CTR_OUT_Port;    gpio_pin = MCU_CTR_OUT_Pin;    break;
+        case E_GPIO_OUT_MCU_IO:      port = MCU_I_O_Port;        gpio_pin = MCU_I_O_Pin;        break;
+        case E_GPIO_OUT_PWR_CTRL1:   port = pwr_control1_Port;   gpio_pin = pwr_control1_Pin;   break;
+        case E_GPIO_OUT_PWR_CTRL2:   port = pwr_control2_Port;   gpio_pin = pwr_control2_Pin;   break;
+        case E_GPIO_OUT_PWR_CTRL3:   port = pwr_control3_Port;   gpio_pin = pwr_control3_Pin;   break;
+        case E_GPIO_OUT_PWR_CTRL4:   port = pwr_control4_Port;   gpio_pin = pwr_control4_Pin;   break;
+        case E_GPIO_OUT_PWR_CTRL5:   port = pwr_control5_Port;   gpio_pin = pwr_control5_Pin;   break;
+        case E_GPIO_OUT_CTR_FAN:     port = CTR_FAN_Port;        gpio_pin = CTR_FAN_Pin;        break;
+        case E_GPIO_OUT_CTR_HP_MOTOR: port = CTR_HP_motor_Port;  gpio_pin = CTR_HP_motor_Pin;   break;
+        case E_GPIO_OUT_CTR_HP_LOSE: port = CTR_HP_lose_Port;    gpio_pin = CTR_HP_lose_Pin;    break;
+        case E_GPIO_OUT_CTR_HEAT_HP: port = CTR_HEAT_HP_Port;    gpio_pin = CTR_HEAT_HP_Pin;    break;
+        case E_GPIO_OUT_ESW_P:       port = ESW_P_Port;          gpio_pin = ESW_P_Pin;         break;
+        case E_GPIO_OUT_ESW_N:       port = ESW_N_Port;          gpio_pin = ESW_N_Pin;         break;
+        case E_GPIO_OUT_LED:         port = LED_PORT;        		 gpio_pin = LED_PIN;       break;
         default: return;
     }
     if (state)

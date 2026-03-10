@@ -26,14 +26,14 @@ static bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
 {
     if (pin >= E_GPIO_IN_MAX)
         return false;
-    return BSP_GPIO_ReadPin((BSP_GPIO_Input_t)pin) ? true : false;
+    return BSP_GPIO_ReadPin(pin) ? true : false;
 }
 
 static void Dal_Write_Pin(GPIO_Output_EnumDef pin, uint8_t state)
 {
     if (pin >= E_GPIO_OUT_MAX)
         return;
-    BSP_GPIO_WritePin((BSP_GPIO_Output_t)pin, state ? 1 : 0);
+    BSP_GPIO_WritePin(pin, state ? 1 : 0);
 }
 
 void Drv_IODevice_WritePin(GPIO_Output_EnumDef pin, uint8_t state)

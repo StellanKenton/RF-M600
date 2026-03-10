@@ -7,10 +7,10 @@
 
 void Drv_GPIO_SetESW_P(bool state)
 {
-    BSP_GPIO_WritePin(BSP_GPIO_OUT_ESW_P, state ? 1 : 0);
+    BSP_GPIO_WritePin(E_GPIO_OUT_ESW_P, state ? 1 : 0);
 }
 
 void Drv_GPIO_SetESW_N(bool state)
 {
-    BSP_GPIO_WritePin(BSP_GPIO_OUT_ESW_N, state ? 1 : 0);
+    BSP_GPIO_WritePin(E_GPIO_OUT_ESW_N, state ? 1 : 0);
 }

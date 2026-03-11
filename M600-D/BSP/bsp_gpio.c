@@ -42,7 +42,7 @@ void BSP_GPIO_Init(void)
                       MCU_CTR_US_RF(PB12), MCU_CTR_OUT(PB14),
                       ESW_P(PB8), ESW_N(PB9) */
     GPIO_ResetBits(GPIOB, pwr_control1_Pin | pwr_control2_Pin | pwr_control3_Pin |
-                          CTR_HEAT_HP_Pin | MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin |
+                          CTR_FAN_HP_Pin | MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin |
                           ESW_P_Pin | ESW_N_Pin);
     /* GPIOD output: pwr_control4(PD2) */
     GPIO_ResetBits(GPIOD, pwr_control4_Pin);
@@ -80,7 +80,7 @@ void BSP_GPIO_Init(void)
        PB12 : MCU_CTR_US_RF
        PB14 : MCU_CTR_OUT */
     GPIO_InitStructure.GPIO_Pin   = pwr_control3_Pin | pwr_control2_Pin | pwr_control1_Pin |
-                                    CTR_HEAT_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
+                                    CTR_FAN_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
                                     MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
@@ -97,7 +97,7 @@ void BSP_GPIO_Init(void)
     GPIO_ResetBits(GPIOC, CTR_FAN_Pin | CTR_HP_motor_Pin | CTR_HP_lose_Pin |
                           pwr_control5_Pin | MCU_Buzzer_Pin | LED_PIN);
     GPIO_ResetBits(GPIOB, pwr_control3_Pin | pwr_control2_Pin | pwr_control1_Pin |
-                          CTR_HEAT_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
+                          CTR_FAN_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
                           MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin);
     GPIO_ResetBits(GPIOD, pwr_control4_Pin);
 }
@@ -133,7 +133,7 @@ void BSP_GPIO_WritePin(GPIO_Output_EnumDef pin, uint8_t state)
         case E_GPIO_OUT_CTR_FAN:     port = CTR_FAN_Port;        gpio_pin = CTR_FAN_Pin;        break;
         case E_GPIO_OUT_CTR_HP_MOTOR: port = CTR_HP_motor_Port;  gpio_pin = CTR_HP_motor_Pin;   break;
         case E_GPIO_OUT_CTR_HP_LOSE: port = CTR_HP_lose_Port;    gpio_pin = CTR_HP_lose_Pin;    break;
-        case E_GPIO_OUT_CTR_HEAT_HP: port = CTR_HEAT_HP_Port;    gpio_pin = CTR_HEAT_HP_Pin;    break;
+        case E_GPIO_OUT_CTR_HEAT_HP: port = CTR_FAN_HP_Port;    gpio_pin = CTR_FAN_HP_Pin;    break;
         case E_GPIO_OUT_ESW_P:       port = ESW_P_Port;          gpio_pin = ESW_P_Pin;         break;
         case E_GPIO_OUT_ESW_N:       port = ESW_N_Port;          gpio_pin = ESW_N_Pin;         break;
         case E_GPIO_OUT_LED:         port = LED_PORT;        		 gpio_pin = LED_PIN;       break;

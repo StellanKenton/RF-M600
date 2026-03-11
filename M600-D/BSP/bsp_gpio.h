@@ -35,8 +35,8 @@ extern "C" {
 #define CTR_HP_motor_Port    GPIOC
 #define CTR_HP_lose_Pin      GPIO_Pin_8
 #define CTR_HP_lose_Port     GPIOC
-#define CTR_HEAT_HP_Pin      GPIO_Pin_5
-#define CTR_HEAT_HP_Port     GPIOB
+#define CTR_FAN_HP_Pin       GPIO_Pin_9
+#define CTR_FAN_HP_Port      GPIOC
 #define CTR_FAN_Pin          GPIO_Pin_6
 #define CTR_FAN_Port         GPIOC
 #define ESW_P_Pin            GPIO_Pin_8   /* PB8, shockwave ESW+ (was TIM4_CH3) */

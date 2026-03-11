@@ -25,45 +25,81 @@ void BSP_GPIO_Init(void)
     RCC_LSEConfig(RCC_LSE_OFF);
 
     /* GPIO clocks */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
-                           RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC |
+                           RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
 
-    /* Output level: all LOW */
-    GPIO_ResetBits(GPIOC, MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
-                          pwr_control2_Pin | pwr_control1_Pin | LED_PIN);
-    GPIO_ResetBits(GPIOB, MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
-                          CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin);
-    GPIO_ResetBits(CTR_FAN_Port, CTR_FAN_Pin);
+    /* PB4 is JNTRST by default - remap SWJ to release PB4 as normal GPIO */
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 
-    /* GPIOC outputs: Buzzer, pwr_control1~4, LED */
-    GPIO_InitStructure.GPIO_Pin   = MCU_Buzzer_Pin | pwr_control4_Pin | pwr_control3_Pin |
-                                    pwr_control2_Pin | pwr_control1_Pin | LED_PIN;
+    /* --- Set initial output levels LOW before configuring as outputs --- */
+    /* GPIOC outputs: Buzzer(PC13), pwr_control5(PC12), CTR_HP_motor(PC7),
+                      CTR_HP_lose(PC8), CTR_FAN(PC6), LED(PC15) */
+    GPIO_ResetBits(GPIOC, MCU_Buzzer_Pin | pwr_control5_Pin |
+                          CTR_HP_motor_Pin | CTR_HP_lose_Pin |
+                          CTR_FAN_Pin | LED_PIN);
+    /* GPIOB outputs: pwr_control1(PB5), pwr_control2(PB4), pwr_control3(PB3),
+                      CTR_HEAT_HP(PB5-note: same pin as pwr_control1 per .h),
+                      MCU_CTR_US_RF(PB12), MCU_CTR_OUT(PB14),
+                      ESW_P(PB8), ESW_N(PB9) */
+    GPIO_ResetBits(GPIOB, pwr_control1_Pin | pwr_control2_Pin | pwr_control3_Pin |
+                          CTR_HEAT_HP_Pin | MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin |
+                          ESW_P_Pin | ESW_N_Pin);
+    /* GPIOD output: pwr_control4(PD2) */
+    GPIO_ResetBits(GPIOD, pwr_control4_Pin);
+
+    /* --- GPIOC outputs ---
+       PC6  : CTR_FAN
+       PC7  : CTR_HP_motor
+       PC8  : CTR_HP_lose
+       PC12 : pwr_control5
+       PC13 : MCU_Buzzer
+       PC15 : LED */
+    GPIO_InitStructure.GPIO_Pin   = CTR_FAN_Pin | CTR_HP_motor_Pin | CTR_HP_lose_Pin |
+                                    pwr_control5_Pin | MCU_Buzzer_Pin | LED_PIN;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* GPIOC inputs: MCU_FOOT, IO_SYN_US, IO_SYN_RF, IO_SYN_ESW */
-    GPIO_InitStructure.GPIO_Pin  = MCU_FOOT_Pin | IO_SYN_US_Pin | IO_SYN_RF_Pin | IO_SYN_ESW_Pin;
+    /* --- GPIOC inputs ---
+       PC1  : MCU_I_O
+       PC10 : IO_SYN_US
+       PC11 : IO_SYN_RF
+       PC12 : IO_SYN_ESW  (shares pin with pwr_control5 - per .h definition)
+       PC14 : MCU_FOOT */
+    GPIO_InitStructure.GPIO_Pin  = MCU_I_O_Pin | IO_SYN_US_Pin | IO_SYN_RF_Pin |
+                                   IO_SYN_ESW_Pin | MCU_FOOT_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* GPIOB outputs: MCU_CTR_OUT, MCU_CTR_US_RF, CTR_HP_motor, CTR_HP_lose, CTR_HEAT_HP, ESW_P(PB8), ESW_N(PB9) */
-    GPIO_InitStructure.GPIO_Pin   = MCU_CTR_OUT_Pin | MCU_CTR_US_RF_Pin | CTR_HP_motor_Pin |
-                                    CTR_HP_lose_Pin | CTR_HEAT_HP_Pin | ESW_P_Pin | ESW_N_Pin;
+    /* --- GPIOB outputs ---
+       PB3  : pwr_control3
+       PB4  : pwr_control2
+       PB5  : pwr_control1 / CTR_HEAT_HP (same pin per .h)
+       PB8  : ESW_P
+       PB9  : ESW_N
+       PB12 : MCU_CTR_US_RF
+       PB14 : MCU_CTR_OUT */
+    GPIO_InitStructure.GPIO_Pin   = pwr_control3_Pin | pwr_control2_Pin | pwr_control1_Pin |
+                                    CTR_HEAT_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
+                                    MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    /* GPIOB input: MCU_I_O */
-    GPIO_InitStructure.GPIO_Pin  = MCU_I_O_Pin;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(MCU_I_O_Port, &GPIO_InitStructure);
-
-    /* GPIOD output: CTR_FAN */
-    GPIO_InitStructure.GPIO_Pin   = CTR_FAN_Pin;
+    /* --- GPIOD output ---
+       PD2 : pwr_control4 */
+    GPIO_InitStructure.GPIO_Pin   = pwr_control4_Pin;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_Init(CTR_FAN_Port, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+    /* --- Pull all output pins LOW after init --- */
+    GPIO_ResetBits(GPIOC, CTR_FAN_Pin | CTR_HP_motor_Pin | CTR_HP_lose_Pin |
+                          pwr_control5_Pin | MCU_Buzzer_Pin | LED_PIN);
+    GPIO_ResetBits(GPIOB, pwr_control3_Pin | pwr_control2_Pin | pwr_control1_Pin |
+                          CTR_HEAT_HP_Pin  | ESW_P_Pin | ESW_N_Pin |
+                          MCU_CTR_US_RF_Pin | MCU_CTR_OUT_Pin);
+    GPIO_ResetBits(GPIOD, pwr_control4_Pin);
 }
 
 uint8_t BSP_GPIO_ReadPin(GPIO_Input_EnumDef pin)

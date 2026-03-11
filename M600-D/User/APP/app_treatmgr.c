@@ -95,6 +95,7 @@ void App_TreatMgr_Init(void)
     // Initialize the treatment manager module
     s_TreatMgr.eState = E_TREATMGR_STATE_IDLE;
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
+    Log_RegisterFunction("setfoot",Drv_IODevice_SetFootSwitch);
     s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
     s_TreatMgr.eFootSwitchClosed = false;
     // Initialize DAC

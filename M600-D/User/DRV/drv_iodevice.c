@@ -7,7 +7,7 @@
 #include "bsp_gpio.h"
 #include <stddef.h>
 #include <string.h>
-
+#include "SEGGER_RTT.h"
 #define IODEVICE_DEBOUNCE_TIME_MS  50u
 #define BUZZER_DEFAULT_DURATION_MS 2000u
 
@@ -20,6 +20,7 @@ static uint32_t s_buzzerStartTime = 0;
 static uint32_t s_buzzerDuration = 0;
 static bool s_probeStatusOverridden = false;
 static IODevice_WorkingMode_EnumDef s_overrideProbeMode = E_IODEVICE_MODE_NOT_CONNECTED;
+static int8_t s_footSwitchOverride = -1; /* -1: use pin, 0: force open, 1: force closed */
 
 /* DAL: only called from DRV; calls BSP */
 static bool Dal_Read_Pin(GPIO_Input_EnumDef pin)
@@ -110,12 +111,14 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 1);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
+            Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL5, 1);
             Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 0);
             break;
         case CHANNEL_SW:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 1);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 1);
+            Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL5, 0);
             break;
         case CHANNEL_NH:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL2, 0);
@@ -135,7 +138,29 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
 
 bool Drv_IODevice_GetFootSwitchState(void)
 {
+    if (s_footSwitchOverride == 1)
+        return true;
+    if (s_footSwitchOverride == 0)
+        return false;
     return Dal_Read_Pin(E_GPIO_IN_FOOT);
+}
+
+void Drv_IODevice_SetFootSwitch(char *data)
+{
+    if (data == NULL)
+        return;
+    if (strcmp(data, "1") == 0){
+        s_footSwitchOverride = 1;  /* force closed (activated) */
+        SEGGER_RTT_printf(0, "Foot switch overridden to CLOSED 1\n");
+	}
+    else if (strcmp(data, "0") == 0){
+        s_footSwitchOverride = 0;  /* force open (deactivated) */
+        SEGGER_RTT_printf(0, "Foot switch overridden to OPEN 0\n");
+	}
+    else if (strcmp(data, "3") == 0){
+        s_footSwitchOverride = -1; /* revert to pin reading */
+        SEGGER_RTT_printf(0, "Foot switch override CLEARED,3\n");
+	}
 }
 
 void Drv_IODevice_StartBuzzer(uint32_t duration_ms)

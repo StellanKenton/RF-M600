@@ -49,11 +49,11 @@ extern "C" {
 /* Inputs */
 #define MCU_FOOT_Pin         GPIO_Pin_14
 #define MCU_FOOT_Port        GPIOC
-#define IO_SYN_US_Pin        GPIO_Pin_10
-#define IO_SYN_US_Port       GPIOC
-#define IO_SYN_RF_Pin        GPIO_Pin_11
+#define IO_SYN_US_Pin        GPIO_Pin_15
+#define IO_SYN_US_Port       GPIOA
+#define IO_SYN_RF_Pin        GPIO_Pin_10
 #define IO_SYN_RF_Port       GPIOC
-#define IO_SYN_ESW_Pin       GPIO_Pin_12
+#define IO_SYN_ESW_Pin       GPIO_Pin_11
 #define IO_SYN_ESW_Port      GPIOC
 #define MCU_I_O_Pin          GPIO_Pin_1
 #define MCU_I_O_Port         GPIOC

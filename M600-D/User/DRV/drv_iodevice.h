@@ -53,7 +53,7 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel);
 void Drv_IODevice_StartBuzzer(uint32_t duration_ms);
 void Drv_IODevice_ProcessBuzzer(void);
 void Drv_IODevice_SetProbeStatus(char *data);
-void Drv_IODevice_SetProbeStatus(char *data);
+void Drv_IODevice_SetFootSwitch(char *data);
 void Drv_IO_HighFreqPowerOutput(bool enable);
 #ifdef __cplusplus
 }

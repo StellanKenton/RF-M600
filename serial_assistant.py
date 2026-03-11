@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-串口调试助手 - RF-M600 通信协议
-支持超声、射频、冲击波、热疗模块的通信调试
-"""
+
 
 import serial
 import serial.tools.list_ports
@@ -55,11 +52,9 @@ CONFIG_RESULT_OVER_LIMIT = 0x02
 
 
 class ProtocolHelper:
-    """协议辅助类"""
 
     @staticmethod
     def crc16_compute(data):
-        """计算CRC16校验"""
         crc = 0x0000
         for byte in data:
             # 输入反转
@@ -89,7 +84,6 @@ class ProtocolHelper:
 
     @staticmethod
     def build_packet(direction, module, cmd, data_bytes):
-        """构建数据包"""
         packet = bytearray()
         packet.append(PROTOCOL_HEADER_0)
         packet.append(PROTOCOL_HEADER_1)
@@ -108,7 +102,6 @@ class ProtocolHelper:
 
     @staticmethod
     def parse_packet(data):
-        """解析数据包"""
         if len(data) < 8:
             return None
 
@@ -140,7 +133,6 @@ class ProtocolHelper:
 
 
 class SerialAssistant:
-    """串口助手主类"""
 
     def __init__(self, root):
         self.root = root
@@ -156,7 +148,7 @@ class SerialAssistant:
         self.refresh_ports()
 
     def setup_ui(self):
-        """设置UI界面"""
+
         # 顶部串口配置区域
         config_frame = ttk.Frame(self.root, padding="10")
         config_frame.pack(fill=tk.X)
@@ -251,7 +243,6 @@ class SerialAssistant:
         ttk.Button(clear_frame, text="清空发送", command=lambda: self.send_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
 
     def setup_param_inputs(self):
-        """设置参数输入界面"""
         # 清除现有控件
         for widget in self.param_frame.winfo_children():
             widget.destroy()
@@ -313,7 +304,6 @@ class SerialAssistant:
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
 
     def add_param_input(self, label, key, desc, default, data_type):
-        """添加参数输入控件"""
         frame = ttk.Frame(self.param_frame)
         frame.pack(fill=tk.X, pady=2)
 
@@ -336,19 +326,15 @@ class SerialAssistant:
         }
 
     def on_module_change(self, *args):
-        """模块改变时的回调"""
         self.setup_param_inputs()
 
     def on_cmd_change(self, *args):
-        """命令改变时的回调"""
         self.setup_param_inputs()
 
     def clear_params(self):
-        """清空参数，恢复默认值"""
         self.setup_param_inputs()
 
     def get_param_value(self, key):
-        """获取参数值"""
         if key not in self.param_widgets:
             return None
 
@@ -369,7 +355,6 @@ class SerialAssistant:
             return None
 
     def build_command_data(self):
-        """构建命令数据"""
         module = self.module_var.get()
         cmd = self.cmd_var.get()
         data_bytes = bytearray()
@@ -497,7 +482,6 @@ class SerialAssistant:
         return bytes(data_bytes)
 
     def send_command(self):
-        """发送命令"""
         if not self.is_connected:
             messagebox.showwarning("警告", "请先打开串口！")
             return
@@ -533,7 +517,6 @@ class SerialAssistant:
             messagebox.showerror("错误", f"发送失败: {str(e)}")
 
     def format_send_params(self, module, cmd, data_bytes):
-        """格式化发送参数说明"""
         if cmd == PROTOCOL_CMD_GET_STATUS:
             return "无参数"
 
@@ -591,7 +574,6 @@ class SerialAssistant:
         return ", ".join(params)
 
     def parse_received_data(self, packet_info):
-        """解析接收到的数据"""
         module = packet_info['module']
         cmd = packet_info['cmd']
         payload = packet_info['payload']
@@ -746,7 +728,6 @@ class SerialAssistant:
         return "\n".join(result)
 
     def get_module_name(self, module):
-        """获取模块名称"""
         names = {
             PROTOCOL_MODULE_ULTRASOUND: "超声",
             PROTOCOL_MODULE_RADIO_FREQ: "射频",
@@ -756,7 +737,6 @@ class SerialAssistant:
         return names.get(module, f"未知模块(0x{module:02X})")
 
     def get_cmd_name(self, cmd):
-        """获取命令名称"""
         names = {
             PROTOCOL_CMD_GET_STATUS: "获取状态",
             PROTOCOL_CMD_SET_WORK_STATE: "设置工作状态",
@@ -765,7 +745,6 @@ class SerialAssistant:
         return names.get(cmd, f"未知命令(0x{cmd:02X})")
 
     def get_work_state_name(self, state):
-        """获取工作状态名称"""
         names = {
             WORK_STATE_STOP: "停止",
             WORK_STATE_START: "工作",
@@ -774,7 +753,6 @@ class SerialAssistant:
         return names.get(state, f"未知(0x{state:02X})")
 
     def get_conn_state_name(self, state):
-        """获取连接状态名称"""
         names = {
             CONN_STATE_CONNECTED_FOOT_CLOSED: "头部连接，脚部关闭",
             CONN_STATE_DISCONNECTED_FOOT_CLOSED: "头部断开，脚部关闭",
@@ -784,7 +762,6 @@ class SerialAssistant:
         return names.get(state, f"未知(0x{state:02X})")
 
     def get_config_result_name(self, result):
-        """获取配置结果名称"""
         names = {
             CONFIG_RESULT_SUCCESS: "成功",
             CONFIG_RESULT_FAIL: "失败",
@@ -793,13 +770,11 @@ class SerialAssistant:
         return names.get(result, f"未知(0x{result:02X})")
 
     def format_temp(self, value):
-        """格式化温度限制值"""
         if value == TEMP_ERROR_OVER_LIMIT:
             return "超限"
         return f"{value/10:.1f}℃"
 
     def format_temp_value(self, value):
-        """格式化温度值"""
         if value == TEMP_ERROR_NTC_OPEN:
             return "NTC开路"
         elif value == TEMP_ERROR_NTC_SHORT:
@@ -808,7 +783,6 @@ class SerialAssistant:
             return f"{value/10:.1f}℃"
 
     def refresh_ports(self):
-        """刷新串口列表"""
         ports = serial.tools.list_ports.comports()
         port_list = [port.device for port in ports]
         self.port_combo['values'] = port_list
@@ -816,14 +790,12 @@ class SerialAssistant:
             self.port_var.set(port_list[0])
 
     def toggle_connection(self):
-        """切换串口连接状态"""
         if not self.is_connected:
             self.open_port()
         else:
             self.close_port()
 
     def open_port(self):
-        """打开串口"""
         try:
             port = self.port_var.get()
             if not port:
@@ -848,7 +820,6 @@ class SerialAssistant:
             messagebox.showerror("错误", f"打开串口失败: {str(e)}")
 
     def close_port(self):
-        """关闭串口"""
         try:
             self.stop_receive = True
             if self.serial_port:
@@ -865,7 +836,6 @@ class SerialAssistant:
             messagebox.showerror("错误", f"关闭串口失败: {str(e)}")
 
     def receive_data(self):
-        """接收数据线程"""
         buffer = bytearray()
 
         while not self.stop_receive and self.is_connected:
@@ -929,7 +899,6 @@ class SerialAssistant:
                 break
 
     def display_received_data(self, packet_data, packet_info):
-        """显示接收到的数据"""
         timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
         hex_str = ' '.join([f'{b:02X}' for b in packet_data])
 

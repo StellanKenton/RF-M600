@@ -4,7 +4,7 @@
   "C_Cpp.intelliSenseEngineFallback": "enabled",
   "C_Cpp.autocomplete": "default",
   "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false,
-  "C_Cpp.workspaceSymbols": "all",
+  "C_Cpp.workspaceSymbols": "All",
   "C_Cpp.enhancedColorization": "enabled",
   "files.associations": {
     "*.h": "c",
@@ -75,5 +75,9 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "code-runner.respectShebang": false,
+  "code-runner.executorMap": {
+    "python": "py -3"
+  }
 }

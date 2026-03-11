@@ -297,18 +297,33 @@ bool App_Shockwave_IsCurrentNormal(void)
 
 bool App_Shockwave_IsVoltageNormal(void)
 {
+    static uint32_t s_voltageLowStartTime = 0;
+    static bool s_voltageLowPending = false;
+
     uint16_t voltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_U);
+    uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
 
-    // Voltage threshold 3V (3000mV)
+    // Voltage must remain below threshold for 100 ms before it is treated as abnormal.
     if(voltage < SW_VOLTAGE_THRESHOLD_MV)
     {
-        s_SWCtrlInfo.ErrorCode = E_SW_ERROR_VOLTAGE_LOW;
-        LOG_W("SW: Voltage too low: %d mV (threshold: %d mV)", voltage, SW_VOLTAGE_THRESHOLD_MV);
-        isNormal = false;
+        if(!s_voltageLowPending)
+        {
+            s_voltageLowPending = true;
+            s_voltageLowStartTime = currentTime;
+        }
+        else if((currentTime - s_voltageLowStartTime) >= 100U)
+        {
+            s_SWCtrlInfo.ErrorCode = E_SW_ERROR_VOLTAGE_LOW;
+            LOG_W("SW: Voltage too low: %d mV (threshold: %d mV)", voltage, SW_VOLTAGE_THRESHOLD_MV);
+            isNormal = false;
+        }
     }
     else
     {
+        s_voltageLowPending = false;
+        s_voltageLowStartTime = 0;
+
         if(s_SWCtrlInfo.ErrorCode == E_SW_ERROR_VOLTAGE_LOW)
         {
             s_SWCtrlInfo.ErrorCode = E_SW_ERROR_NONE;

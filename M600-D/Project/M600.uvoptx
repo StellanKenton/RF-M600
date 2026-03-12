@@ -120,6 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>+</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -152,62 +153,62 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_RFParams</ItemText>
+          <ItemText>s_adc_dma_buffer,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>readback</ItemText>
+          <ItemText>s_RFCtrlInfo,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_LEDMgr</ItemText>
+          <ItemText>NTC_RAW_SHORT,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>sysTick,0x0A</ItemText>
+          <ItemText>tempMv,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>elapsed,0x0A</ItemText>
+          <ItemText>ADC_REF_MV,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LED_BREATHING_PERIOD_MS,0x0A</ItemText>
+          <ItemText>vDiff,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_SystemMgr,0x0A</ItemText>
+          <ItemText>NTC_SERIES_R,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>E_GPIO_OUT_LED</ItemText>
+          <ItemText>r10,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pin</ItemText>
+          <ItemText>i,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pin</ItemText>
+          <ItemText>rOhm,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pin</ItemText>
+          <ItemText>rHigh,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_USCtrlInfo,0x0A</ItemText>
+          <ItemText>rLow,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
@@ -217,17 +218,47 @@
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_footSwitchOverride</ItemText>
+          <ItemText>brightness</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_adc_dma_buffer,0x0A</ItemText>
+          <ItemText>elapsed,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>s_SWCtrlInfo,0x0A</ItemText>
+          <ItemText>sysTick,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pin</ItemText>
+        </Ww>
+        <Ww>
+          <count>17</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pin</ItemText>
+        </Ww>
+        <Ww>
+          <count>18</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>port</ItemText>
+        </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>gpio_pin</ItemText>
+        </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>LED_PIN</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>LED_PORT</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

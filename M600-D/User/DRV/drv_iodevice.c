@@ -192,7 +192,7 @@ void Drv_IODevice_SetProbeStatus(char *data)
         s_probeStatusOverridden = true;
         s_overrideProbeMode = E_IODEVICE_MODE_ULTRASOUND;
     }
-    else if (strcmp(data, "esw") == 0) {
+    else if (strcmp(data, "sw") == 0) {
         s_probeStatusOverridden = true;
         s_overrideProbeMode = E_IODEVICE_MODE_SHOCKWAVE;
     }

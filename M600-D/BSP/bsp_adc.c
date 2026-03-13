@@ -108,15 +108,21 @@ void BSP_ADC_Init(void)
     ADC_Init(ADC1, &ADC_InitStructure);
 
     /* Configure regular channel sequence */
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_RF_I],        1, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_US_I],        2, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF01], 3, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF02], 4, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_U],      5, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_I],      6, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, ADC_SampleTime_28Cycles5);
+    /* ADC clock = PCLK2 / 6. With STM32F103 PCLK2 typically at 72 MHz,
+     * ADCCLK = 12 MHz, so 1 cycle = 1 / 12 MHz = 83.3 ns.
+     * ADC_SampleTime_71Cycles5 means 71.5 sampling cycles, about 5.96 us.
+     * Including the fixed 12.5 conversion cycles, one full conversion is
+     * 84 cycles total, about 7.00 us per channel.
+     */
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_RF_I],       1, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_US_I],       2, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF01], 3, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF02], 4, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_U],      5, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_I],      6, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, ADC_SampleTime_71Cycles5);
 
     /* Enable ADC DMA before enabling ADC */
     ADC_DMACmd(ADC1, ENABLE);

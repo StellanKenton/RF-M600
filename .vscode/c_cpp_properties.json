@@ -1,21 +1,19 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-x64",
+      "name": "GD32F103RC",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/M600-D/**"
       ],
       "defines": [
         "STM32F10X_HD",
         "USE_STDPERIPH_DRIVER",
+        "__CC_ARM",
         "__weak=__attribute__((weak))",
         "__packed=__attribute__((__packed__))"
       ],
-      "compilerPath": "gcc",
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "intelliSenseMode": "windows-gcc-x64",
-      "compilerArgs": [],
+      "cStandard": "c11",
+      "compileCommands": "${workspaceFolder}/compile_commands.json",
       "browse": {
         "path": [
           "${workspaceFolder}/M600-D/User/**",

@@ -63,7 +63,9 @@ void System_Init(void)
     LOG_I("Firmware: %s, Version: %s, Hardware: %s", FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);
 
     // Initialize the treatment manager
+    LOG_I("Startup trace: entering App_TreatMgr_Init()");
     App_TreatMgr_Init();
+    LOG_I("Startup trace: App_TreatMgr_Init() returned");
     LOG_I("Treatment manager initialized.");
     App_Comm_Init();
     LOG_I("Communication initialized.");

@@ -9,10 +9,13 @@
 **********************************************************************************/
 #include "drv_memory.h"
 #include "drv_24c02.h"
+#include "drv_delay.h"
 #include <string.h>
 #include "log.h"
 
 #define MEMORY_BOOT_CHECK_LEN      16U
+#define MEMORY_BOOT_READ_RETRY_COUNT  3U
+#define MEMORY_BOOT_READ_RETRY_DELAY_MS  5U
 #define MEMORY_SN_PREFIX           "M600-SN"
 #define MEMORY_SN_PREFIX_LEN       7U
 #define MEMORY_SN_DEFAULT_STR      "M600-SN000000007"
@@ -33,10 +36,26 @@ bool Drv_Memory_Init(void)
     uint8_t boot_data[MEMORY_BOOT_CHECK_LEN] = {0};
     static uint8_t default_sn[] = MEMORY_SN_DEFAULT_STR;
     bool need_default_sn = false;  /* 需要写入默认序列号 */
+    bool read_ok = false;
     uint16_t i;
+    uint16_t retry;
 
-    if (!Drv_24C02_Read(boot_data, MEMORY_BOOT_CHECK_LEN, 0))
+    for (retry = 0; retry < MEMORY_BOOT_READ_RETRY_COUNT; retry++)
     {
+        if (Drv_24C02_Read(boot_data, MEMORY_BOOT_CHECK_LEN, 0))
+        {
+            read_ok = true;
+            break;
+        }
+
+        /* Recover the software I2C bus and give the EEPROM a short settle time. */
+        Drv_24C02_Init();
+        Drv_Delay_ms(MEMORY_BOOT_READ_RETRY_DELAY_MS);
+    }
+
+    if (!read_ok)
+    {
+        LOG_E("24C02 boot read failed after %u retries", MEMORY_BOOT_READ_RETRY_COUNT);
         return false;
     }
 

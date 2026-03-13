@@ -20,7 +20,6 @@
 #include "drv_dac.h"
 #include "drv_24c02.h"
 #include "drv_memory.h"
-#include "app_memory.h"
 TreatMgr_t s_TreatMgr;
 
 /* Board temperature monitoring parameters */
@@ -93,22 +92,27 @@ static void App_TreatMgr_ControlFan(void)
 void App_TreatMgr_Init(void)
 {
     // Initialize the treatment manager module
+    LOG_I("TreatMgr init trace: begin");
     s_TreatMgr.eState = E_TREATMGR_STATE_IDLE;
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
     Log_RegisterFunction("setfoot",Drv_IODevice_SetFootSwitch);
     s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
     s_TreatMgr.eFootSwitchClosed = false;
     // Initialize DAC
+    LOG_I("TreatMgr init trace: Drv_DAC_Init() begin");
     Drv_DAC_Init();
+    LOG_I("TreatMgr init trace: Drv_DAC_Init() done");
 
 	// Initialize 24C02 EEPROM
+    LOG_I("TreatMgr init trace: Drv_24C02_Init() begin");
     Drv_24C02_Init();
+    LOG_I("TreatMgr init trace: Drv_24C02_Init() done");
 
     // Initialize SI5351
+    LOG_I("TreatMgr init trace: Drv_SI5351_Init() begin");
     Drv_SI5351_Init();
-
-    // Initialize Memory
-    App_Memory_Init();
+    LOG_I("TreatMgr init trace: Drv_SI5351_Init() done");
+    LOG_I("TreatMgr init trace: complete");
 }
 
 IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)

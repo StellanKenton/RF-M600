@@ -66,18 +66,22 @@ static void Aiic_Init(void)
  */
 static bool Aiic_ReadByte(uint8_t *pBuffer, uint16_t length, uint16_t ReadAddress, uint8_t DeviceAddress)
 {
-    uint8_t chunk;
-    /* lib_aiic Drv_IIC_ReadByte uses uint8_t for size, split if length > 255 */
-    while (length > 0)
+    /* AT24C02 capacity is 256 bytes, so software I2C read needs at most two chunks. */
+    if (length <= 255U)
     {
-        chunk = (length > 255) ? 255 : (uint8_t)length;
-        if (Drv_IIC_ReadByte(&s_24c02_iic, DeviceAddress, ReadAddress, pBuffer, chunk) == 0)
-            return false;
-        pBuffer += chunk;
-        ReadAddress += chunk;
-        length -= chunk;
+        return (Drv_IIC_ReadByte(&s_24c02_iic, DeviceAddress, ReadAddress, pBuffer, (uint8_t)length) != 0);
     }
-    return true;
+
+    if (Drv_IIC_ReadByte(&s_24c02_iic, DeviceAddress, ReadAddress, pBuffer, 255U) == 0)
+    {
+        return false;
+    }
+
+    return (Drv_IIC_ReadByte(&s_24c02_iic,
+                             DeviceAddress,
+                             ReadAddress + 255U,
+                             pBuffer + 255U,
+                             (uint8_t)(length - 255U)) != 0);
 }
 
 /**

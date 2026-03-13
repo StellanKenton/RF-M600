@@ -118,6 +118,27 @@ RF-M600/
    Flash → Download (F8)
    ```
 
+### 2.1 VS Code 编译与调试
+
+仓库已包含 VS Code 的 STM32 配置，适用于当前这份 Keil 工程。
+
+前置要求:
+- 安装 Keil MDK-ARM v5.x
+- 安装 J-Link Software and Documentation Pack
+- 安装 ARM GNU Toolchain，并确保 `arm-none-eabi-gdb.exe` 在 `PATH` 中
+- 在 VS Code 安装 `Cortex-Debug` 和 `C/C++`
+
+已配置内容:
+- `Ctrl+Shift+B` 触发 `Keil: Build`，直接调用 `UV4.exe` 编译 `Development` 目标
+- `STM32: J-Link Launch` 使用 `M600-D/Project/Objects/M600.axf` 启动 J-Link 调试
+- `STM32: J-Link Attach` 连接已运行目标进行附加调试
+- `Clangd: Regenerate compile_commands.json` 用于刷新补全数据库
+
+说明:
+- 构建脚本会优先读取环境变量 `KEIL_UV4`，否则使用默认路径 `C:\Keil_v5\UV4\UV4.exe`
+- 调试默认使用 `JLinkGDBServerCL.exe` 和 `arm-none-eabi-gdb.exe` 的系统 `PATH`
+- 如果你的工具不在 `PATH` 中，建议把它们加入系统环境变量后再启动 VS Code
+
 ### 3. 使用调试工具
 
 安装 Python 依赖:

@@ -2,23 +2,73 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
+      "name": "STM32: J-Link Launch",
+      "type": "cortex-debug",
       "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "d:/Space/Cosmos/RF-M600/M600-D/User/APP",
-      "program": "d:/Space/Cosmos/RF-M600/M600-D/User/APP/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
+      "cwd": "${workspaceFolder}",
+      "servertype": "jlink",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V918/JLinkGDBServerCL.exe",
+      "armToolchainPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin",
+      "gdbPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin/arm-none-eabi-gdb.exe",
+      "objdumpPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin/arm-none-eabi-objdump.exe",
+      "debuggerArgs": [
+        "--nx"
+      ],
+      "showDevDebugOutput": "raw",
+      "device": "GD32F103RC",
+      "interface": "swd",
+      "runToEntryPoint": "main",
+      "liveWatch": {
+        "enabled": true,
+        "samplesPerSecond": 4
+      },
+      "executable": "${workspaceFolder}/M600-D/Project/Objects/M600.axf",
+      "preLaunchTask": "Keil: Build",
+      "rttConfig": {
+        "enabled": true,
+        "address": "auto",
+        "decoders": [
+          {
+            "label": "RTT Console",
+            "port": 0,
+            "type": "console"
+          }
+        ]
+      }
+    },
+    {
+      "name": "STM32: J-Link Attach",
+      "type": "cortex-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "servertype": "jlink",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V918/JLinkGDBServerCL.exe",
+      "armToolchainPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin",
+      "gdbPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin/arm-none-eabi-gdb.exe",
+      "objdumpPath": "C:/PROGRA~2/Arm/GNUTOO~1/bin/arm-none-eabi-objdump.exe",
+      "debuggerArgs": [
+        "--nx"
+      ],
+      "showDevDebugOutput": "raw",
+      "device": "GD32F103RC",
+      "interface": "swd",
+      "runToEntryPoint": "main",
+      "liveWatch": {
+        "enabled": true,
+        "samplesPerSecond": 4
+      },
+      "executable": "${workspaceFolder}/M600-D/Project/Objects/M600.axf",
+      "rttConfig": {
+        "enabled": true,
+        "address": "auto",
+        "decoders": [
+          {
+            "label": "RTT Console",
+            "port": 0,
+            "type": "console"
+          }
+        ]
+      }
     }
   ]
 }

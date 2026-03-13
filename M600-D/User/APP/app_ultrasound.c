@@ -247,10 +247,14 @@ void App_UltraSound_SetWorkParams(void)
 bool App_UltraSound_IsCurrentNormal(void)
 {
     bool isNormal = true;
-    uint16_t current = Drv_ADC_GetRealValue(E_ADC_CHANNEL_US_I);
+    uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_US_I);
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
     int16_t voltageAdjust = 0;
     uint16_t newVoltage = currentVoltage;
+
+    if(TreatGetRunFlag()) {
+        return true;
+    }
 
     if(current > s_USCtrlInfo.CurrentHigh)
     {
@@ -311,8 +315,12 @@ bool App_UltraSound_IsCurrentNormal(void)
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
-    uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
+    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
     s_USCtrlInfo.HeadTemp = temp;
+
+    if(TreatGetRunFlag()) {
+        return true;
+    }
 
     if(temp > s_USCtrlInfo.TempLimit)
     {
@@ -350,6 +358,17 @@ void App_Ultrasound_CheckProbe(void)
     }
 }
 
+void App_Ultra_RunChangeLevel()
+{
+    if(s_USCtrlInfo.WorkLevel != s_USCtrlInfo.Trans.RxWorkState.work_level) 
+    {
+        if(s_USCtrlInfo.Trans.RxWorkState.work_level <= 40) {
+            s_USCtrlInfo.WorkLevel = s_USCtrlInfo.Trans.RxWorkState.work_level;
+        }
+    }
+}
+
+
 void App_Ultrasound_Process(void)
 {
     // Process the ultrasound module
@@ -381,7 +400,7 @@ void App_Ultrasound_Process(void)
             if(App_UltraSound_StartCheck()) {
                 // Set work params and start ultrasound transmit
                 App_UltraSound_SetWorkParams();
-
+                Drv_SI5351_SetComplementaryPWM(true);
                 // pwr_control2 switch to output enabled (normally disabled)
                 Drv_IODevice_ChangeChannel(CHANNEL_READY);
                 App_Ultrasound_ChangeState(E_US_RUN_WORKING);
@@ -392,14 +411,15 @@ void App_Ultrasound_Process(void)
             if(App_UltraSound_StartCheck() == false ||
             App_UltraSound_IsCurrentNormal() == false ||
             App_UltraSound_IsHeadTempNormal() == false ){
-                App_Ultrasound_ChangeState(E_US_RUN_STOP);
+              App_Ultrasound_ChangeState(E_US_RUN_STOP);
             }
+			App_Ultra_RunChangeLevel();
             break;
         case E_US_RUN_STOP:
+			s_USCtrlInfo.WorkLevel = 0;
+			s_USCtrlInfo.Trans.RxWorkState.work_state = 0;
             // Close output channel
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
-            // Stop DAC output
-            Drv_DAC_SetVoltage(0);
             App_Ultrasound_ChangeState(E_US_RUN_IDLE);
             if(s_USCtrlInfo.isWaitReturn) {
                 App_Ultrasound_ChangeState(E_US_RUN_WAIT_RETURN);

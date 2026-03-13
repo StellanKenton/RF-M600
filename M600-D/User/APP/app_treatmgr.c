@@ -22,6 +22,35 @@
 #include "drv_memory.h"
 TreatMgr_t s_TreatMgr;
 
+
+static void App_TreatMgr_SetForceRunEnabled(bool enable)
+{
+    s_TreatMgr.forceRunEnabled = enable;
+    LOG_I("TreatMgr force run flag set to %d", enable ? 1 : 0);
+}
+
+static void App_TreatMgr_RunCmd(char *data)
+{
+    if (data == NULL)
+    {
+        LOG_W("Usage: run 0|1");
+        return;
+    }
+
+    if (strcmp(data, "1") == 0)
+    {
+        App_TreatMgr_SetForceRunEnabled(true);
+    }
+    else if (strcmp(data, "0") == 0)
+    {
+        App_TreatMgr_SetForceRunEnabled(false);
+    }
+    else
+    {
+        LOG_W("Invalid run parameter: %s, use 0 or 1", data);
+    }
+}
+
 /* Board temperature monitoring parameters */
 #define BOARD_TEMP_FAN_ON_THRESHOLD     850     ///< Fan start temperature threshold (85C = 850 * 0.1C)
 #define BOARD_TEMP_FAN_OFF_THRESHOLD    800     ///< Fan stop temperature threshold (80C = 800 * 0.1C), hysteresis to avoid frequent switching
@@ -36,8 +65,8 @@ TreatMgr_t s_TreatMgr;
  */
 static uint16_t App_TreatMgr_ReadBoardTemp(void)
 {
-    uint16_t temp1 = Drv_ADC_GetRealValue(E_ADC_CHANNEL_Heat_REF01);
-    uint16_t temp2 = Drv_ADC_GetRealValue(E_ADC_CHANNEL_Heat_REF02);
+    uint16_t temp1 = Drv_ADC_GetRealValue(BSP_ADC_CH_Heat_REF01);
+    uint16_t temp2 = Drv_ADC_GetRealValue(BSP_ADC_CH_Heat_REF02);
     uint16_t board_temp = (temp1 + temp2) / 2;
 
     return board_temp;
@@ -82,8 +111,10 @@ void App_TreatMgr_Init(void)
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
     Log_RegisterFunction("setfoot",Drv_IODevice_SetFootSwitch);
     Log_RegisterFunction("settemp", Drv_ADC_SetTempOverride);
+    Log_RegisterFunction("run", App_TreatMgr_RunCmd);
     s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
     s_TreatMgr.eFootSwitchClosed = false;
+    s_TreatMgr.forceRunEnabled = true;
     // Initialize DAC
     LOG_I("TreatMgr init trace: Drv_DAC_Init() begin");
     Drv_DAC_Init();
@@ -109,6 +140,11 @@ IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void)
 bool App_TreatMgr_GetFootSwitchClosed(void)
 {
     return s_TreatMgr.eFootSwitchClosed;
+}
+
+bool TreatGetRunFlag(void)
+{
+    return s_TreatMgr.forceRunEnabled;
 }
 
 void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState)

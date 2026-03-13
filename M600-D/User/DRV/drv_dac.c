@@ -32,17 +32,18 @@ void Drv_DAC_SetVoltage(uint16_t centivolt)
 {
     if (centivolt < DRV_DAC_DCDC_CENTIVOLT_MIN || centivolt > DRV_DAC_DCDC_CENTIVOLT_MAX)
         centivolt = DRV_DAC_DCDC_CENTIVOLT_DEFAULT;
-
-    uint32_t code = (uint32_t)(centivolt - DCDC_CENTIVOLT_OFFSET) * (DAC_RESOLUTION - 1u) / DCDC_CENTIVOLT_SPAN;
+    float voltage = centivolt / 100.0f;
+    float dacVoltage = (45.6975f - voltage) / 12.1084f;  /* derived from actual voltage measurements */
+    uint32_t code = (uint32_t)(dacVoltage/3.3f * (DAC_RESOLUTION - 1u) + 0.5f);  /* round to nearest */
     if (code > DAC_RESOLUTION - 1u)
         code = DAC_RESOLUTION - 1u;
     BSP_DAC_SetValue((uint16_t)code);
-    s_currentVoltage = (uint16_t)((uint32_t)centivolt * DAC_REF_MV / 1000u);
+    s_currentVoltage = (uint16_t)((45.6975f - 12.1084f * dacVoltage)*100);
 }
 
 uint16_t Drv_DAC_GetVoltage(void)
 {
-    uint16_t raw = Drv_ADC_ReadChannel(E_ADC_CHANNEL_VOUT);
+    uint16_t raw = Drv_ADC_ReadVoutRaw();
     /* actual_voltage * 100 = (11 * 3.3V_ref * raw) / 4096 => (11*330*raw)/4096, 11:1 divider */
     return (uint16_t)((uint32_t)11u * 330u * raw / DAC_RESOLUTION);
 }

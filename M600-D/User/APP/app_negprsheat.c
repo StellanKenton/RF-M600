@@ -245,7 +245,7 @@ void App_NegPrsHeat_CheckProbe(void)
 void App_NegPrsHeat_Monitor(void)
 {
     /* Monitor logic (reserved for treatmgr integration) */
-    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
+    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
 }
 
 bool App_NegPrsHeat_StartCheck()
@@ -332,7 +332,7 @@ void App_NegPrsHeat_SetWorkParams(void)
 
 bool App_NegPrsHeat_IsHeadTempNormal(void)
 {
-    uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
+    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
 
@@ -450,7 +450,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
 	uint32_t releaseTimeMs;
 //	int16_t voltageDiff;
     uint32_t currentTime = Drv_Delay_GetTickMs();
-    uint16_t pressureVoltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HP_PRE);
+    uint16_t pressureVoltage = Drv_ADC_GetRealValue(BSP_ADC_CH_HP_PRE);
     s_NPHCtrlInfo.currentPressure = App_NegPrsHeat_VoltageToPressure(pressureVoltage);
 
     switch(s_NPHCtrlInfo.vacuumState)

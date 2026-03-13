@@ -257,7 +257,7 @@ void App_Shockwave_SetWorkParams(void)
 
 bool App_Shockwave_IsCurrentNormal(void)
 {
-    uint16_t current = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_I);
+    uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_ESW_I);
     bool isNormal = true;
 
     // Check current only when corresponding PWM is high
@@ -300,7 +300,7 @@ bool App_Shockwave_IsVoltageNormal(void)
     static uint32_t s_voltageLowStartTime = 0;
     static bool s_voltageLowPending = false;
 
-    uint16_t voltage = Drv_ADC_GetRealValue(E_ADC_CHANNEL_ESW_U);
+    uint16_t voltage = Drv_ADC_GetRealValue(BSP_ADC_CH_ESW_U);
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
 
@@ -335,7 +335,7 @@ bool App_Shockwave_IsVoltageNormal(void)
 
 bool App_Shockwave_IsHeadTempNormal(void)
 {
-    uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
+    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
     s_SWCtrlInfo.HeadTemp = temp;
     bool isNormal = true;
 

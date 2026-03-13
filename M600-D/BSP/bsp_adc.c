@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : bsp_adc.c
  * @brief    : M600 ADC1 init with DMA - ported from M600 HAL
- * @details  : DMA continuous conversion, scan mode. Channels PA0,1,5,6,7 / PB0,1 / PC3,4.
+ * @details  : DMA continuous conversion, scan mode. Channels PA0,1,5,6,7 / PB0,1 / PC3,4,5.
  ***********************************************************************************/
 #include "bsp_adc.h"
 
@@ -15,6 +15,7 @@ static const uint8_t s_adc_ch[] = {
     ADC_Channel_7,   /* HP_PRE    PA7 */
     ADC_Channel_13,  /* HAND_NTC  PC3 */
     ADC_Channel_14,  /* HARD_VER  PC4 */
+    ADC_Channel_15,  /* VOUT      PC5 */
 };
 
 /* Double buffer for ADC values
@@ -23,7 +24,7 @@ static const uint8_t s_adc_ch[] = {
  * Buffer organization: Each array element corresponds to one channel
  * [0] = RF_I (PA0), [1] = US_I (PA1), [2] = Heat_REF01 (PA5), [3] = Heat_REF02 (PA6)
  * [4] = ESW_U (PB0), [5] = ESW_I (PB1), [6] = HP_PRE (PA7), [7] = HAND_NTC (PC3)
- * [8] = HARD_VER (PC4)
+ * [8] = HARD_VER (PC4), [9] = VOUT (PC5)
  */
 static uint16_t s_adc_dma_buffer[BSP_ADC_CH_MAX];  /* DMA working buffer */
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
@@ -49,7 +50,7 @@ void BSP_ADC_Init(void)
                            RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
-    /* Analog pins: PA0,1,5,6,7 / PB0,1 / PC3,4 */
+    /* Analog pins: PA0,1,5,6,7 / PB0,1 / PC3,4,5 */
     GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -58,7 +59,7 @@ void BSP_ADC_Init(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3 | GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
@@ -122,6 +123,7 @@ void BSP_ADC_Init(void)
     ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, ADC_SampleTime_71Cycles5);
     ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, ADC_SampleTime_71Cycles5);
     ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_VOUT],      10, ADC_SampleTime_71Cycles5);
 
     /* Enable ADC DMA before enabling ADC */
     ADC_DMACmd(ADC1, ENABLE);

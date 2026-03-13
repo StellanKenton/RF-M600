@@ -15,7 +15,7 @@ extern "C" {
 
 /* DC-DC voltage control (centivolt: voltage * 100, e.g. 1500 = 15.00V) */
 #define DRV_DAC_DCDC_CENTIVOLT_MIN    600u   /* 6.00V */
-#define DRV_DAC_DCDC_CENTIVOLT_MAX  2000u   /* 20.00V */
+#define DRV_DAC_DCDC_CENTIVOLT_MAX  3600u   /* 36.00V */
 #define DRV_DAC_DCDC_CENTIVOLT_DEFAULT 1500u /* 15.00V */
 
 void Drv_DAC_SetVoltage(uint16_t centivolt);

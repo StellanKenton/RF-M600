@@ -25,6 +25,7 @@ typedef enum {
     BSP_ADC_CH_HP_PRE,         /* ADC1_IN7  PA7 */
     BSP_ADC_CH_HAND_NTC,       /* ADC1_IN13 PC3 */
     BSP_ADC_CH_HARD_VER,       /* ADC1_IN14 PC4 */
+    BSP_ADC_CH_VOUT,           /* ADC1_IN15 PC5 */
     BSP_ADC_CH_MAX
 } BSP_ADC_Channel_t;
 

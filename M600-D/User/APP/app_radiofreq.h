@@ -26,9 +26,9 @@ extern "C" {
 /* RF working frequency 1MHz */
 #define RF_FREQUENCY_KHZ           1000        ///< RF frequency (kHz)
 #define RF_WORK_LEVEL_MAX          20          ///< Work level (0-20)
-#define RF_VOLTAGE_MIN_MV          11000       ///< Min output voltage (11V = 11000mV)
-#define RF_VOLTAGE_MAX_MV          30000       ///< Max output voltage (30V = 30000mV)
-#define RF_VOLTAGE_INIT_MV         7000        ///< Init/standby voltage (7V = 7000mV)
+#define RF_VOLTAGE_MIN_MV          1100       ///< Min output voltage (11V = 11000mV)
+#define RF_VOLTAGE_MAX_MV          3000       ///< Max output voltage (30V = 30000mV)
+#define RF_VOLTAGE_INIT_MV         700        ///< Init/standby voltage (7V = 7000mV)
 #define RF_CURRENT_THRESHOLD_MV    500         ///< Current threshold (0.5V = 500mV)
 #define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< Current monitor period (10ms)
 #define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< Temp monitor period (1s)
@@ -66,7 +66,7 @@ typedef struct
     uint16_t CurrentHigh;        
     uint16_t CurrentLow;          
     uint16_t TempLimit;            
-    uint16_t TreatCounts;  
+    uint32_t TreatCounts;  
     uint8_t LastStartState;
     
     uint8_t WorkLevel;             

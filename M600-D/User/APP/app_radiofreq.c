@@ -102,7 +102,7 @@ void App_RadioFreq_WorkTimeHandle(void)
         case E_TREAT_TIMES_POWER_ON:
             if(s_RFCtrlInfo.Trans.RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatRemainTimes > 0)
             {
-                s_RFCtrlInfo.TreatCounts = s_RFCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> ms */
+                s_RFCtrlInfo.TreatCounts = (uint32_t)s_RFCtrlInfo.Trans.RxWorkState.work_time * 1000U;  /* s -> ms */
                 s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
                 s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatRemainTimes - 1;
@@ -114,7 +114,7 @@ void App_RadioFreq_WorkTimeHandle(void)
         case E_TREAT_TIMES_RESET:
             if(s_RFCtrlInfo.Trans.RxWorkState.work_time > 0 && s_RFCtrlInfo.TreatRemainTimes > 0)
             {
-                s_RFCtrlInfo.TreatCounts = s_RFCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> ms */
+                s_RFCtrlInfo.TreatCounts = (uint32_t)s_RFCtrlInfo.Trans.RxWorkState.work_time * 1000U;  /* s -> ms */
                 s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
                 s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_RFCtrlInfo.TreatParams.TreatRemainTimes = s_RFCtrlInfo.TreatRemainTimes - 1;
@@ -227,7 +227,7 @@ void App_RadioFreq_SetWorkParams(void)
     s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
     s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
-    Drv_DAC_SetVoltage(s_RFCtrlInfo.Voltage);
+    Drv_DAC_SetVoltage(s_RFCtrlInfo.VoltageTarget);
     Drv_Delay_ms(100);
     LOG_I("RF: Work params set - level=%d, time=%d, voltage_target=%d",
           s_RFCtrlInfo.WorkLevel, s_RFCtrlInfo.TreatRemainTimes, s_RFCtrlInfo.VoltageTarget);
@@ -235,10 +235,14 @@ void App_RadioFreq_SetWorkParams(void)
 
 bool App_RadioFreq_IsCurrentNormal(void)
 {
-    uint16_t current = Drv_ADC_GetRealValue(E_ADC_CHANNEL_RF_I);
+    uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_RF_I);
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
     uint16_t newVoltage = currentVoltage;
     bool isNormal = true;
+
+    if(TreatGetRunFlag()) {
+        return true;
+    }
 
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
@@ -290,6 +294,10 @@ bool App_RadioFreq_IsHeadTempNormal(void)
     uint16_t temp = App_RadioFreq_GetProbeTemp();
     s_RFCtrlInfo.HeadTemp = temp;
 
+    if(TreatGetRunFlag()) {
+        return true;
+    }
+    
     if(s_RFCtrlInfo.HeadTemp > s_RFCtrlInfo.TempLimit)
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
@@ -320,6 +328,19 @@ void App_RadioFreq_CheckProbe(void)
 
     if(s_RFCtrlInfo.isWaitReturn) {
         App_RadioFreq_ChangeState(E_RF_RUN_STOP);
+    }
+}
+
+void App_RaidoFreq_RunChangeLevel()
+{
+    if(s_RFCtrlInfo.WorkLevel != s_RFCtrlInfo.Trans.RxWorkState.work_level) 
+    {
+        if(s_RFCtrlInfo.Trans.RxWorkState.work_level <= 20) {
+            s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
+            s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
+            s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
+            Drv_DAC_SetVoltage(s_RFCtrlInfo.VoltageTarget);
+        }
     }
 }
 
@@ -370,12 +391,14 @@ void App_RadioFreq_Process(void)
                App_RadioFreq_IsHeadTempNormal() == false) {
                 App_RadioFreq_ChangeState(E_RF_RUN_STOP);
             }
+            App_RaidoFreq_RunChangeLevel();
             break;
 
         case E_RF_RUN_STOP:
+            s_RFCtrlInfo.WorkLevel = 0;
+			s_RFCtrlInfo.Trans.RxWorkState.work_state = 0;
             Drv_SI5351_SetComplementaryPWM(false);
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
-            Drv_DAC_SetVoltage(0);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
             if(s_RFCtrlInfo.isWaitReturn) {
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);

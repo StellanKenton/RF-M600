@@ -43,6 +43,7 @@ typedef struct
     IODevice_WorkingMode_EnumDef eProbeStatus;
     IODevice_WorkingMode_EnumDef preProbeStaus;
     bool eFootSwitchClosed;       ///< true=foot switch closed(pressed), false=foot switch open
+    bool forceRunEnabled;         ///< true=force treatment run enabled via log command
 } TreatMgr_t;
 
 typedef enum
@@ -57,6 +58,7 @@ typedef enum
 void App_TreatMgr_Init(void);
 IODevice_WorkingMode_EnumDef App_TreatMgr_GetProbeStatus(void);
 bool App_TreatMgr_GetFootSwitchClosed(void);
+bool TreatGetRunFlag(void);
 void App_TreatMgr_Process(void);
 void App_TreatMgr_ChangeState(TreatMgr_State_EnumDef newState);
 

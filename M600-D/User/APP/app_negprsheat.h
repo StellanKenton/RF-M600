@@ -74,7 +74,7 @@ typedef struct
     bool isWaitReturn;
 
     uint16_t TempLimit;           
-    uint16_t TreatCounts;           
+    uint32_t TreatCounts;           
     bool PreheatEnable;            
     uint16_t PreheatTempLimit;    
     uint16_t PreheatTime;        

@@ -5,32 +5,20 @@
 #ifndef DRV_ADC_H
 #define DRV_ADC_H
 
+#include "bsp_adc.h"
 #include "stm32f10x.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
-    E_NTC_HAND = 0,   /* 换能器/手柄NTC (transducer IGBT temp) - ADC13 */
+    E_NTC_HAND = 0,   /* 换能�?/手柄NTC (transducer IGBT temp) - ADC13 */
     E_NTC_MAIN,       /* 电路板NTC (circuit board temp) - ADC6 Heat_REF01 */
     E_NTC_MAX
 } NTC_Type_EnumDef;
-
-typedef enum {
-    E_ADC_CHANNEL_US_I = 0,
-    E_ADC_CHANNEL_RF_I,
-    E_ADC_CHANNEL_Heat_REF02,
-    E_ADC_CHANNEL_Heat_REF01,
-    E_ADC_CHANNEL_ESW_U,
-    E_ADC_CHANNEL_ESW_I,
-    E_ADC_CHANNEL_HP_PRE,
-    E_ADC_CHANNEL_HAND_NTC,
-    E_ADC_CHANNEL_VER_ID,   /* BSP has no; DAL returns 0 */
-    E_ADC_CHANNEL_VOUT,     /* BSP has no; DAL returns 0 */
-    E_ADC_CHANNEL_MAX
-} ADC_Channel_EnumDef;
 
 typedef struct {
     uint16_t usCurrent;
@@ -44,12 +32,15 @@ typedef struct {
     uint16_t verId;
     uint16_t vout;
     uint32_t updateTickMs;
+    bool  isContactSkin;
 } Drv_ADC_PhysicalValues_t;
 
 void Drv_ADC_Init(void);
 void Drv_ADC_Process(void);
-uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
-uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel);
+uint16_t Drv_ADC_ReadChannel(BSP_ADC_Channel_t channel);
+uint16_t Drv_ADC_GetRealValue(BSP_ADC_Channel_t channel);
+uint16_t Drv_ADC_ReadVoutRaw(void);
+uint16_t Drv_ADC_GetVoutRealValue(void);
 const Drv_ADC_PhysicalValues_t *Drv_ADC_GetPhysicalValues(void);
 void Drv_ADC_SetTempOverride(char *data);
 

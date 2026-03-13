@@ -75,7 +75,7 @@ typedef struct
     bool isWaitReturn;
 
     uint16_t TempLimit;            ///< Head temp limit (0.1 C)
-    uint16_t TreatCounts;          ///< Remaining treatment times
+    uint32_t TreatCounts;          ///< Remaining treatment times
     uint16_t CurrentHigh_ESW_P;    ///< PWM_ESW+ current high threshold (mV)
     uint16_t CurrentLow_ESW_P;     ///< PWM_ESW+ current low threshold (mV)
     uint16_t CurrentHigh_ESW_N;   ///< PWM_ESW-N current high threshold (mV)

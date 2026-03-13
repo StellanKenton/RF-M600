@@ -25,8 +25,9 @@ void BSP_GPIO_Init(void)
     RCC_LSEConfig(RCC_LSE_OFF);
 
     /* GPIO clocks */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC |
-                           RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
+                           RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
+                           RCC_APB2Periph_AFIO, ENABLE);
 
     /* PB4 is JNTRST by default - remap SWJ to release PB4 as normal GPIO */
     GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
@@ -60,16 +61,21 @@ void BSP_GPIO_Init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    /* --- GPIOC inputs ---
-       PC1  : MCU_I_O
-       PC10 : IO_SYN_US
-       PC11 : IO_SYN_RF
-       PC12 : IO_SYN_ESW  (shares pin with pwr_control5 - per .h definition)
-       PC14 : MCU_FOOT */
-    GPIO_InitStructure.GPIO_Pin  = MCU_I_O_Pin | IO_SYN_US_Pin | IO_SYN_RF_Pin |
-                                   IO_SYN_ESW_Pin | MCU_FOOT_Pin;
+     /* --- GPIOC inputs ---
+         PC1  : MCU_I_O
+         PC10 : IO_SYN_RF
+         PC11 : IO_SYN_ESW
+         PC14 : MCU_FOOT */
+     GPIO_InitStructure.GPIO_Pin  = MCU_I_O_Pin | IO_SYN_RF_Pin |
+                                              IO_SYN_ESW_Pin | MCU_FOOT_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+     /* --- GPIOA input ---
+         PA15 : IO_SYN_US */
+     GPIO_InitStructure.GPIO_Pin  = IO_SYN_US_Pin;
+     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+     GPIO_Init(IO_SYN_US_Port, &GPIO_InitStructure);
 
     /* --- GPIOB outputs ---
        PB3  : pwr_control3

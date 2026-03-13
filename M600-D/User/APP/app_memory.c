@@ -704,6 +704,7 @@ static void App_Memory_ProcessSWConfig(void)
 void App_Memory_Process(void)
 {
 	static Drv_Timer_t CommTimer;
+    // Memory task runs every 200ms; can be adjusted as needed
     if(Drv_Timer_Tick(&CommTimer, MEM_TASK_TIME) == false){
         return;
     }

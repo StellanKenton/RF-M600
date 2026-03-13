@@ -202,6 +202,7 @@ void App_HandComm_Init(void)
 void App_HandComm_Process(void)
 {
     static Drv_Timer_t HandCommTimer;
+    // Handle communication task runs every 100ms; can be adjusted as needed
     if (Drv_Timer_Tick(&HandCommTimer, HANDCOMM_TASK_TIME) == false) {
         return;
     }

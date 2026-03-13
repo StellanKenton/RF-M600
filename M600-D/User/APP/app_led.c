@@ -190,6 +190,7 @@ void App_LED_Init(void)
 void App_LED_Process(void)
 {
     static Drv_Timer_t CommTimer;
+    // LED task runs every 100ms; can be adjusted as needed
     if(Drv_Timer_Tick(&CommTimer, LED_TASK_TIME) == false){
         return;
     }

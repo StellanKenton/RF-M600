@@ -32,15 +32,26 @@ typedef enum {
     E_ADC_CHANNEL_MAX
 } ADC_Channel_EnumDef;
 
-uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
-uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel);
-uint16_t Drv_ADC_ReadVOUT(void);
-uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel);
+typedef struct {
+    uint16_t usCurrent;
+    uint16_t rfCurrent;
+    uint16_t heatRef02;
+    uint16_t heatRef01;
+    uint16_t eswVoltage;
+    uint16_t eswCurrent;
+    uint16_t hpPressure;
+    uint16_t handNTC;
+    uint16_t verId;
+    uint16_t vout;
+    uint32_t updateTickMs;
+} Drv_ADC_PhysicalValues_t;
 
-/* NTC temperature: returns (temp+40)*10, 0~1450 for -40~105C; fault: NTC_FAULT_OPEN/SHORT */
-#define NTC_FAULT_OPEN  0xFFFFu
-#define NTC_FAULT_SHORT 0xFFEEu
-uint16_t Drv_ADC_GetNTCValue(NTC_Type_EnumDef ntcType);
+void Drv_ADC_Init(void);
+void Drv_ADC_Process(void);
+uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel);
+uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel);
+const Drv_ADC_PhysicalValues_t *Drv_ADC_GetPhysicalValues(void);
+void Drv_ADC_SetTempOverride(char *data);
 
 #ifdef __cplusplus
 }

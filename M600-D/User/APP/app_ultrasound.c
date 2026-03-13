@@ -311,7 +311,7 @@ bool App_UltraSound_IsCurrentNormal(void)
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
-    uint16_t temp = Drv_ADC_GetNTCValue(E_NTC_HAND);
+    uint16_t temp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
     s_USCtrlInfo.HeadTemp = temp;
 
     if(temp > s_USCtrlInfo.TempLimit)

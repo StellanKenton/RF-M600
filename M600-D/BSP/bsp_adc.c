@@ -29,13 +29,12 @@ static uint16_t s_adc_dma_buffer[BSP_ADC_CH_MAX];  /* DMA working buffer */
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
 static volatile uint8_t s_adc_buffer_ready = 0;     /* Buffer ready flag */
 
-static uint16_t BSP_ADC_ConvertToVoltageMv(uint16_t raw)
+static float BSP_ADC_ConvertToVoltageV(uint16_t raw)
 {
     if (raw > (BSP_ADC_RESOLUTION - 1u))
         raw = (BSP_ADC_RESOLUTION - 1u);
 
-    return (uint16_t)((((uint32_t)raw * BSP_ADC_REF_MV) + (BSP_ADC_RESOLUTION / 2u)) /
-                      BSP_ADC_RESOLUTION);
+    return ((float)raw * 3.3f) / (float)BSP_ADC_RESOLUTION;
 }
 
 void BSP_ADC_Init(void)
@@ -140,7 +139,7 @@ void BSP_ADC_Init(void)
     ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
-uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch)
+uint16_t BSP_ADC_ReadRaw(BSP_ADC_Channel_t ch)
 {
     if (ch >= BSP_ADC_CH_MAX)
     {
@@ -151,10 +150,15 @@ uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch)
     return s_adc_read_buffer[ch];
 }
 
-uint16_t BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch)
+float BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch)
 {
-    uint16_t raw = BSP_ADC_ReadChannel(ch);
-    return BSP_ADC_ConvertToVoltageMv(raw);
+    uint16_t raw = BSP_ADC_ReadRaw(ch);
+    return BSP_ADC_ConvertToVoltageV(raw);
+}
+
+uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch)
+{
+    return BSP_ADC_ReadRaw(ch);
 }
 
 

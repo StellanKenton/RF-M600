@@ -32,10 +32,12 @@ typedef enum {
 #define BSP_ADC_RESOLUTION    4096u
 
 void BSP_ADC_Init(void);
-/* Return 12-bit ADC raw value: 0 ~ 4095 */
+/* Return 12-bit ADC raw value: 0 ~ 4095 (scale base is 4096). */
+uint16_t BSP_ADC_ReadRaw(BSP_ADC_Channel_t ch);
+/* Return channel voltage in volt, nominal range 0.0f ~ 3.3f. */
+float BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch);
+/* Backward compatibility wrapper for legacy callers. */
 uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch);
-/* Return channel voltage in mV, converted with 3.3V reference */
-uint16_t BSP_ADC_ReadVoltage(BSP_ADC_Channel_t ch);
 const uint16_t* BSP_ADC_GetDmaBuffer(void);
 void BSP_ADC_DMA_TC_Handler(void);  /* DMA transfer complete handler - called from interrupt */
 

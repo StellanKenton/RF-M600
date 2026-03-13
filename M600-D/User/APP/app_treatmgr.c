@@ -36,24 +36,9 @@ TreatMgr_t s_TreatMgr;
  */
 static uint16_t App_TreatMgr_ReadBoardTemp(void)
 {
-    uint16_t temp1_voltage = Drv_ADC_ReadVoltage(E_ADC_CHANNEL_Heat_REF01);
-    uint16_t temp2_voltage = Drv_ADC_ReadVoltage(E_ADC_CHANNEL_Heat_REF02);
-
-    // TODO: Convert voltage to temperature based on actual sensor characteristics
-    // Using simplified linear conversion as placeholder
-    // Calibration required per sensor datasheet:
-    // - NTC thermistor: use Steinhart-Hart equation or lookup table
-    // - Linear sensor: use linear conversion formula
-    // - Other sensors: convert based on characteristic curve
-
-    // Average of two sensors (if both valid)
-    uint16_t avg_voltage = (temp1_voltage + temp2_voltage) / 2;
-
-    // Simplified linear conversion (calibrate for actual hardware)
-    // Assumption: 0V = 0C, 3.3V = 100C = 1000 * 0.1C
-    // temp = (voltage_mv * 1000) / 3300
-    // Note: placeholder implementation, replace with actual sensor characteristics
-    uint16_t board_temp = (avg_voltage * 1000) / 3300;
+    uint16_t temp1 = Drv_ADC_GetRealValue(E_ADC_CHANNEL_Heat_REF01);
+    uint16_t temp2 = Drv_ADC_GetRealValue(E_ADC_CHANNEL_Heat_REF02);
+    uint16_t board_temp = (temp1 + temp2) / 2;
 
     return board_temp;
 }
@@ -96,6 +81,7 @@ void App_TreatMgr_Init(void)
     s_TreatMgr.eState = E_TREATMGR_STATE_IDLE;
     Log_RegisterFunction("setprobe", Drv_IODevice_SetProbeStatus);
     Log_RegisterFunction("setfoot",Drv_IODevice_SetFootSwitch);
+    Log_RegisterFunction("settemp", Drv_ADC_SetTempOverride);
     s_TreatMgr.eProbeStatus = E_IODEVICE_MODE_NOT_CONNECTED;
     s_TreatMgr.eFootSwitchClosed = false;
     // Initialize DAC

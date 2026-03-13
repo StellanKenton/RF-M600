@@ -504,6 +504,7 @@ void App_Comm_Init(void)
 void App_Comm_Process(void)
 {
     static Drv_Timer_t CommTimer;
+    // Communication task runs every 5ms; can be adjusted as needed
     if(Drv_Timer_Tick(&CommTimer, COMM_TASK_TIME) == false){
         return;
     }

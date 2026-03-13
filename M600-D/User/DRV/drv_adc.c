@@ -1,15 +1,17 @@
 /************************************************************************************
  * @file     : drv_adc.c
- * @brief    : ADC driver - DRV calls DAL, DAL calls BSP (Std lib)
+ * @brief    : ADC driver stubs
  ***********************************************************************************/
 #include "drv_adc.h"
 #include "bsp_adc.h"
+#include "drv_delay.h"
 
 #define ADC_REF_MV      3300u
 #define ADC_RESOLUTION  4096u
 #define NTC_SERIES_R    10000u  /* series R with NTC, ohm */
 #define NTC_RAW_OPEN    3900u   /* ADC raw > this: NTC open */
 #define NTC_RAW_SHORT   50u     /* ADC raw < this: NTC short */
+#define DRV_ADC_PROCESS_PERIOD_MS  50u
 
 /* NTC 10R table: -40~105C, per 1C, from spec (10R NTC) */
 static const uint32_t s_ntc_temp_table[] = {
@@ -31,145 +33,226 @@ static const uint32_t s_ntc_temp_table[] = {
 };
 #define NTC_TABLE_SIZE  (sizeof(s_ntc_temp_table) / sizeof(s_ntc_temp_table[0]))
 
+static Drv_ADC_PhysicalValues_t s_adcPhysicalValues;
+static Drv_Timer_t s_adcProcessTimer;
+
+static uint16_t Drv_ADC_ConvertChannel(ADC_Channel_EnumDef channel, uint16_t raw);
+static uint16_t Drv_ADC_GetCachedPhysicalValue(ADC_Channel_EnumDef channel);
+static void Drv_ADC_UpdatePhysicalValues(void);
+
 static ADC_Channel_EnumDef Dal_NTC_MapChannel(NTC_Type_EnumDef ntcType)
 {
     switch (ntcType) {
-        case E_NTC_HAND: return E_ADC_CHANNEL_HAND_NTC;
-        case E_NTC_MAIN: return E_ADC_CHANNEL_Heat_REF01;
-        default:         return E_ADC_CHANNEL_MAX;
+        case E_NTC_HAND:
+            return E_ADC_CHANNEL_HAND_NTC;
+        case E_NTC_MAIN:
+            return E_ADC_CHANNEL_Heat_REF01;
+        case E_NTC_MAX:
+        default:
+            return E_ADC_CHANNEL_MAX;
     }
 }
 
-/* Convert NTC ADC raw to temp: return (temp+40)*10, -40C=0, 0C=400, 105C=1450 */
-static uint16_t Dal_NTC_ADCToTemp(uint32_t adcRaw)
+static uint16_t Drv_ADC_GetUSCurrentValue(uint16_t raw)
 {
-    uint32_t tempMv = ((uint32_t)ADC_REF_MV * adcRaw) / ADC_RESOLUTION;
-    uint32_t vDiff = ADC_REF_MV - tempMv;
-    if (vDiff == 0u)
-        return (uint16_t)((NTC_TABLE_SIZE - 1) * 10u);
-    uint32_t rOhm = (tempMv * NTC_SERIES_R) / vDiff;
-    uint32_t r10 = rOhm / 10u;
-
-    uint16_t numN = 0, numP;
-    for (uint16_t i = 0; i < NTC_TABLE_SIZE; i++) {
-        if (r10 > s_ntc_temp_table[i]) {
-            numP = i;
-            if (numP == 0)
-                return 0u;
-            uint32_t d = s_ntc_temp_table[numN] - s_ntc_temp_table[numP];
-            if (d == 0u)
-                return (uint16_t)(numN * 10u);
-            uint32_t m = s_ntc_temp_table[numN] - r10;
-            uint16_t frac = (uint16_t)((10u * m) / d);
-            return (uint16_t)(frac + numN * 10u);
-        }
-        numN = i;
-    }
-    return (uint16_t)((NTC_TABLE_SIZE - 1) * 10u);
+    (void)raw;
+    return 0u;
 }
 
-static BSP_ADC_Channel_t Dal_ADC_MapChannel(ADC_Channel_EnumDef ch)
+static uint16_t Drv_ADC_GetRFCurrentValue(uint16_t raw)
 {
-    switch (ch) {
-        case E_ADC_CHANNEL_US_I:      return BSP_ADC_CH_US_I;
-        case E_ADC_CHANNEL_RF_I:      return BSP_ADC_CH_RF_I;
-        case E_ADC_CHANNEL_Heat_REF02: return BSP_ADC_CH_Heat_REF02;
-        case E_ADC_CHANNEL_Heat_REF01: return BSP_ADC_CH_Heat_REF01;
-        case E_ADC_CHANNEL_ESW_U:     return BSP_ADC_CH_ESW_U;
-        case E_ADC_CHANNEL_ESW_I:     return BSP_ADC_CH_ESW_I;
-        case E_ADC_CHANNEL_HP_PRE:    return BSP_ADC_CH_HP_PRE;
-        case E_ADC_CHANNEL_HAND_NTC:  return BSP_ADC_CH_HAND_NTC;
-        default:                      return BSP_ADC_CH_MAX;
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetHeatRef02Value(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetHeatRef01Value(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetESWVoltageValue(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetESWCurrentValue(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetHPPressureValue(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetHandNTCValue(uint16_t raw)
+{
+    (void)raw;
+    (void)s_ntc_temp_table[0];
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetVerIdValue(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_GetVoutValue(uint16_t raw)
+{
+    (void)raw;
+    return 0u;
+}
+
+static uint16_t Drv_ADC_ConvertChannel(ADC_Channel_EnumDef channel, uint16_t raw)
+{
+    switch (channel) {
+        case E_ADC_CHANNEL_US_I:
+            return Drv_ADC_GetUSCurrentValue(raw);
+        case E_ADC_CHANNEL_RF_I:
+            return Drv_ADC_GetRFCurrentValue(raw);
+        case E_ADC_CHANNEL_Heat_REF02:
+            return Drv_ADC_GetHeatRef02Value(raw);
+        case E_ADC_CHANNEL_Heat_REF01:
+            return Drv_ADC_GetHeatRef01Value(raw);
+        case E_ADC_CHANNEL_ESW_U:
+            return Drv_ADC_GetESWVoltageValue(raw);
+        case E_ADC_CHANNEL_ESW_I:
+            return Drv_ADC_GetESWCurrentValue(raw);
+        case E_ADC_CHANNEL_HP_PRE:
+            return Drv_ADC_GetHPPressureValue(raw);
+        case E_ADC_CHANNEL_HAND_NTC:
+            return Drv_ADC_GetHandNTCValue(raw);
+        case E_ADC_CHANNEL_VER_ID:
+            return Drv_ADC_GetVerIdValue(raw);
+        case E_ADC_CHANNEL_VOUT:
+            return Drv_ADC_GetVoutValue(raw);
+        case E_ADC_CHANNEL_MAX:
+        default:
+            return 0u;
     }
 }
 
-/* DAL: only called from DRV; calls BSP */
-static uint16_t Dal_ADC_ReadChannel(ADC_Channel_EnumDef channel)
+static uint16_t Drv_ADC_GetCachedPhysicalValue(ADC_Channel_EnumDef channel)
 {
-    if (channel >= E_ADC_CHANNEL_MAX)
-        return 0;
-    if (channel == E_ADC_CHANNEL_VER_ID || channel == E_ADC_CHANNEL_VOUT)
-        return 0;
-    BSP_ADC_Channel_t bch = Dal_ADC_MapChannel(channel);
-    return BSP_ADC_ReadChannel(bch);
+    switch (channel) {
+        case E_ADC_CHANNEL_US_I:
+            return s_adcPhysicalValues.usCurrent;
+        case E_ADC_CHANNEL_RF_I:
+            return s_adcPhysicalValues.rfCurrent;
+        case E_ADC_CHANNEL_Heat_REF02:
+            return s_adcPhysicalValues.heatRef02;
+        case E_ADC_CHANNEL_Heat_REF01:
+            return s_adcPhysicalValues.heatRef01;
+        case E_ADC_CHANNEL_ESW_U:
+            return s_adcPhysicalValues.eswVoltage;
+        case E_ADC_CHANNEL_ESW_I:
+            return s_adcPhysicalValues.eswCurrent;
+        case E_ADC_CHANNEL_HP_PRE:
+            return s_adcPhysicalValues.hpPressure;
+        case E_ADC_CHANNEL_HAND_NTC:
+            return s_adcPhysicalValues.handNTC;
+        case E_ADC_CHANNEL_VER_ID:
+            return s_adcPhysicalValues.verId;
+        case E_ADC_CHANNEL_VOUT:
+            return s_adcPhysicalValues.vout;
+        case E_ADC_CHANNEL_MAX:
+        default:
+            return 0u;
+    }
+}
+
+static void Drv_ADC_UpdatePhysicalValues(void)
+{
+    uint16_t rawValue;
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_US_I);
+    s_adcPhysicalValues.usCurrent = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_US_I, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_RF_I);
+    s_adcPhysicalValues.rfCurrent = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_RF_I, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_Heat_REF02);
+    s_adcPhysicalValues.heatRef02 = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_Heat_REF02, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_Heat_REF01);
+    s_adcPhysicalValues.heatRef01 = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_Heat_REF01, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_ESW_U);
+    s_adcPhysicalValues.eswVoltage = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_ESW_U, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_ESW_I);
+    s_adcPhysicalValues.eswCurrent = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_ESW_I, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_HP_PRE);
+    s_adcPhysicalValues.hpPressure = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_HP_PRE, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_HAND_NTC);
+    s_adcPhysicalValues.handNTC = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_HAND_NTC, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_VER_ID);
+    s_adcPhysicalValues.verId = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_VER_ID, rawValue);
+
+    rawValue = Drv_ADC_ReadChannel(E_ADC_CHANNEL_VOUT);
+    s_adcPhysicalValues.vout = Drv_ADC_ConvertChannel(E_ADC_CHANNEL_VOUT, rawValue);
+
+    s_adcPhysicalValues.updateTickMs = Drv_Delay_GetTickMs();
+}
+
+void Drv_ADC_Init(void)
+{
+    s_adcProcessTimer.start_ms = 0u;
+    s_adcProcessTimer.timeout_ms = 0u;
+    s_adcProcessTimer.running = false;
+    s_adcPhysicalValues.updateTickMs = 0u;
+    Drv_ADC_UpdatePhysicalValues();
+}
+
+void Drv_ADC_Process(void)
+{
+    // 50ms period for ADC processing; can be adjusted as needed
+    if (Drv_Timer_Tick(&s_adcProcessTimer, DRV_ADC_PROCESS_PERIOD_MS) == false) {
+        return;
+    }
+
+    Drv_ADC_UpdatePhysicalValues();
 }
 
 uint16_t Drv_ADC_ReadChannel(ADC_Channel_EnumDef channel)
 {
-    return Dal_ADC_ReadChannel(channel);
-}
+    if (channel >= E_ADC_CHANNEL_MAX) {
+        return 0u;
+    }
 
-uint32_t Drv_ADC_ReadVoltage(ADC_Channel_EnumDef channel)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(channel);
-    return ((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION;
-}
+    if (channel == E_ADC_CHANNEL_VOUT) {
+        return 0u;
+    }
 
-uint16_t Drv_ADC_ReadVOUT(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_VOUT);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadWorkCurrent(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_US_I);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadHandNTC(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_HAND_NTC);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadRFCurrent(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_RF_I);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadESWCurrent(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_ESW_I);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadESWVoltage(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_ESW_U);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
-}
-
-uint16_t Drv_ADC_ReadHPPre(void)
-{
-    uint16_t raw = Dal_ADC_ReadChannel(E_ADC_CHANNEL_HP_PRE);
-    return (uint16_t)(((uint32_t)raw * ADC_REF_MV) / ADC_RESOLUTION);
+    return BSP_ADC_ReadRaw((BSP_ADC_Channel_t)channel);
 }
 
 uint16_t Drv_ADC_GetRealValue(ADC_Channel_EnumDef channel)
 {
-    switch (channel) {
-        case E_ADC_CHANNEL_US_I:     return Drv_ADC_ReadWorkCurrent();
-        case E_ADC_CHANNEL_RF_I:     return Drv_ADC_ReadRFCurrent();
-        case E_ADC_CHANNEL_ESW_I:    return Drv_ADC_ReadESWCurrent();
-        case E_ADC_CHANNEL_ESW_U:    return Drv_ADC_ReadESWVoltage();
-        case E_ADC_CHANNEL_HP_PRE:   return Drv_ADC_ReadHPPre();
-        case E_ADC_CHANNEL_VOUT:     return Drv_ADC_ReadVOUT();
-        case E_ADC_CHANNEL_HAND_NTC: return Drv_ADC_ReadHandNTC();
-        default:                     return 0;
-    }
+    return Drv_ADC_GetCachedPhysicalValue(channel);
 }
 
-uint16_t Drv_ADC_GetNTCValue(NTC_Type_EnumDef ntcType)
+const Drv_ADC_PhysicalValues_t *Drv_ADC_GetPhysicalValues(void)
 {
-    if (ntcType >= E_NTC_MAX)
-        return 0;
-    ADC_Channel_EnumDef ch = Dal_NTC_MapChannel(ntcType);
-    uint16_t raw = Dal_ADC_ReadChannel(ch);
-    if (raw > NTC_RAW_OPEN)
-        return NTC_FAULT_OPEN;
-    if (raw < NTC_RAW_SHORT)
-        return NTC_FAULT_SHORT;
-    return Dal_NTC_ADCToTemp(raw);
+    return &s_adcPhysicalValues;
+}
+
+void Drv_ADC_SetTempOverride(char *data)
+{
+    (void)Dal_NTC_MapChannel(E_NTC_HAND);
+    (void)data;
 }

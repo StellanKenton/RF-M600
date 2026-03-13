@@ -56,6 +56,7 @@ void System_ChangeMode(System_Mode_EnumDef newMode)
 void System_Init(void)
 {
     Log_Init();
+    Drv_ADC_Init();
     Drv_WatchDogResartCheck();
     cm_backtrace_init(FIRMWARE_NAME, FIRMWARE_VERSION, HARDWARE_VERSION);
     LOG_I("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
@@ -103,12 +104,13 @@ void SystemManager(void)
             // Handle unexpected mode
             break;
     }
-	
-	App_LED_Process();
+
+	Drv_ADC_Process();          // Update ADC readings and physical values
+	App_LED_Process();          // Update LED status based on system state
     App_Memory_Process();       // Process memory configuration for all treatment modules
     App_Comm_Process();         // Process communication with external devices
     App_HandComm_Process();     // Process handle communication
-    Log_Process(10);
+    Log_Process(10);            // Process log messages with a time slice of 10ms
 }
 
 /**

@@ -245,7 +245,7 @@ void App_NegPrsHeat_CheckProbe(void)
 void App_NegPrsHeat_Monitor(void)
 {
     /* Monitor logic (reserved for treatmgr integration) */
-    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetNTCValue(E_NTC_HAND);
+    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(E_ADC_CHANNEL_HAND_NTC);
 }
 
 bool App_NegPrsHeat_StartCheck()

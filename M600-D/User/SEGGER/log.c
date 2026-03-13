@@ -172,7 +172,7 @@ void Log_Process(uint8_t taskTick) {
     int GetKey;
     Log_TimeStamp += taskTick;
     static Drv_Timer_t LogTimer;
-
+    // 日志处理任务，每10ms检查一次输入
     if(Drv_Timer_Tick(&LogTimer, taskTick) == false){
         return;
     }
@@ -193,19 +193,26 @@ void Log_Process(uint8_t taskTick) {
         // 执行注册的函数
         uint8_t keyIndex = 0;
         bool found = true;
-        while(LogCmd[keyIndex] != ' ') {
-            KeyBuf[keyIndex] = LogCmd[keyIndex];
-            keyIndex++;
+        char *param = NULL;
+
+        memset(KeyBuf, 0, sizeof(KeyBuf));
+        while (LogCmd[keyIndex] != '\0' && LogCmd[keyIndex] != ' ') {
             if (keyIndex >= sizeof(KeyBuf) - 1) {
                 found = false;
                 break;
             }
+            KeyBuf[keyIndex] = LogCmd[keyIndex];
+            keyIndex++;
         }
-        if(found) {
-            KeyBuf[keyIndex] = '\0';
+
+        if (LogCmd[keyIndex] == ' ') {
+            param = &LogCmd[keyIndex + 1];
+        }
+
+        if(found && KeyBuf[0] != '\0') {
             for (uint8_t i = 0; i < 10; i++) {
                 if (LogFunList[i].isUsed && (strcmp(LogFunList[i].Fun_Name, KeyBuf) == 0)) {
-                    LogFunList[i].Fun_Def(&LogCmd[keyIndex+1]);
+                    LogFunList[i].Fun_Def(param);
                     break;
                 }
             }

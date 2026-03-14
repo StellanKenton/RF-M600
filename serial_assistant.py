@@ -155,6 +155,8 @@ class SerialAssistant:
         self.poll_interval_ms = 1000
         self.connected_module = PROTOCOL_MODULE_DISCOVERY
         self.module_connected = False
+        self.status_field_vars = {}
+        self.status_panel_module = None
 
         self.setup_ui()
         self.refresh_ports()
@@ -237,6 +239,22 @@ class SerialAssistant:
         # 右侧：数据收发显示区域
         right_frame = ttk.Frame(main_paned)
         main_paned.add(right_frame, weight=1)
+
+        # 当前探头状态显示
+        status_frame = ttk.LabelFrame(right_frame, text="探头状态", padding="10")
+        status_frame.pack(fill=tk.X, pady=5)
+        self.status_empty_var = tk.StringVar(value="等待探头状态数据...")
+        self.status_empty_label = ttk.Label(
+            status_frame,
+            textvariable=self.status_empty_var,
+            foreground="gray",
+            anchor=tk.W,
+            justify=tk.LEFT
+        )
+        self.status_empty_label.pack(fill=tk.X)
+        self.status_grid_frame = ttk.Frame(status_frame)
+        self.status_grid_frame.pack(fill=tk.X, expand=True, pady=(8, 0))
+        self.render_status_fields([])
 
         # 数据接收显示
         recv_frame = ttk.LabelFrame(right_frame, text="接收数据", padding="5")
@@ -519,6 +537,9 @@ class SerialAssistant:
 
         self.serial_port.write(packet)
 
+        if cmd == PROTOCOL_CMD_GET_STATUS:
+            log_send = False
+
         if log_send:
             timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             module_name = self.get_module_name(module)
@@ -795,6 +816,171 @@ class SerialAssistant:
 
         return "\n".join(result)
 
+    def reset_status_display(self):
+        self.status_panel_module = None
+        if self.module_connected:
+            self.status_empty_var.set("等待当前探头状态刷新...")
+        else:
+            self.status_empty_var.set("当前未检测到探头，等待自动识别...")
+        self.render_status_fields([])
+
+    def build_status_entries(self, module, payload):
+        if module == PROTOCOL_MODULE_ULTRASOUND and len(payload) >= 14:
+            work_state = payload[0]
+            frequency = payload[1] | (payload[2] << 8)
+            temp_limit = payload[3] | (payload[4] << 8)
+            remain_time = payload[5] | (payload[6] << 8)
+            work_level = payload[7]
+            head_temp = payload[8] | (payload[9] << 8)
+            conn_state = payload[10]
+            error_code = payload[11]
+            remain_treatment_count = payload[12] | (payload[13] << 8)
+            return [
+                ("工作状态", self.get_work_state_name(work_state)),
+                ("频率", f"{frequency} kHz"),
+                ("温度限制", self.format_temp(temp_limit)),
+                ("剩余时间", f"{remain_time} 秒"),
+                ("工作级别", str(work_level)),
+                ("头部温度", self.format_temp_value(head_temp)),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
+                ("剩余治疗次数", str(remain_treatment_count)),
+            ]
+
+        if module == PROTOCOL_MODULE_RADIO_FREQ and len(payload) >= 12:
+            work_state = payload[0]
+            temp_limit = payload[1] | (payload[2] << 8)
+            remain_time = payload[3] | (payload[4] << 8)
+            work_level = payload[5]
+            head_temp = payload[6] | (payload[7] << 8)
+            conn_state = payload[8]
+            error_code = payload[9]
+            remain_treatment_count = payload[10] | (payload[11] << 8)
+            return [
+                ("工作状态", self.get_work_state_name(work_state)),
+                ("温度限制", self.format_temp(temp_limit)),
+                ("剩余时间", f"{remain_time} 秒"),
+                ("工作级别", str(work_level)),
+                ("头部温度", self.format_temp_value(head_temp)),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
+                ("剩余治疗次数", str(remain_treatment_count)),
+            ]
+
+        if module == PROTOCOL_MODULE_SHOCKWAVE and len(payload) >= 11:
+            work_state = payload[0]
+            frequency = payload[1]
+            remain_time = payload[2] | (payload[3] << 8)
+            work_level = payload[4]
+            head_temp = payload[5] | (payload[6] << 8)
+            conn_state = payload[7]
+            error_code = payload[8]
+            remain_treatment_count = payload[9] | (payload[10] << 8)
+            return [
+                ("工作状态", self.get_work_state_name(work_state)),
+                ("频率", f"{frequency} 级"),
+                ("剩余时间", f"{remain_time} 秒"),
+                ("工作级别", str(work_level)),
+                ("头部温度", self.format_temp_value(head_temp)),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
+                ("剩余治疗次数", str(remain_treatment_count)),
+            ]
+
+        if module == PROTOCOL_MODULE_HEAT and len(payload) >= 21:
+            work_state = payload[0]
+            temp_limit = payload[1] | (payload[2] << 8)
+            remain_heat_time = payload[3] | (payload[4] << 8)
+            suck_time = payload[5] | (payload[6] << 8)
+            release_time = payload[7] | (payload[8] << 8)
+            pressure = payload[9]
+            head_temp = payload[10] | (payload[11] << 8)
+            preheat_state = payload[12]
+            preheat_temp_limit = payload[13] | (payload[14] << 8)
+            remain_preheat_time = payload[15] | (payload[16] << 8)
+            conn_state = payload[17]
+            error_code = payload[18]
+            remain_treatment_count = payload[19] | (payload[20] << 8)
+            return [
+                ("工作状态", self.get_work_state_name(work_state)),
+                ("温度限制", self.format_temp(temp_limit)),
+                ("剩余加热时间", f"{remain_heat_time} 秒"),
+                ("吸合时间", f"{suck_time}*10ms"),
+                ("释放时间", f"{release_time}*10ms"),
+                ("压力", f"{pressure} KPa"),
+                ("头部温度", self.format_temp_value(head_temp)),
+                ("预热状态", self.get_work_state_name(preheat_state)),
+                ("预热温度限制", self.format_temp(preheat_temp_limit)),
+                ("剩余预热时间", f"{remain_preheat_time} 秒"),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
+                ("剩余治疗次数", str(remain_treatment_count)),
+            ]
+
+        return []
+
+    def render_status_fields(self, entries):
+        for widget in self.status_grid_frame.winfo_children():
+            widget.destroy()
+
+        self.status_field_vars = {}
+
+        if not entries:
+            self.status_empty_label.pack(fill=tk.X)
+            return
+
+        if self.status_empty_label.winfo_manager():
+            self.status_empty_label.pack_forget()
+
+        for column in range(4):
+            weight = 0 if column % 2 == 0 else 1
+            self.status_grid_frame.columnconfigure(column, weight=weight)
+
+        for index, (label_text, value_text) in enumerate(entries):
+            row = index // 2
+            base_col = (index % 2) * 2
+
+            ttk.Label(
+                self.status_grid_frame,
+                text=f"{label_text}:",
+                width=11,
+                anchor=tk.E,
+                justify=tk.RIGHT
+            ).grid(row=row, column=base_col, padx=(0, 8), pady=4, sticky=tk.E)
+
+            value_var = tk.StringVar(value=value_text)
+            self.status_field_vars[label_text] = value_var
+            ttk.Label(
+                self.status_grid_frame,
+                textvariable=value_var,
+                anchor=tk.W,
+                justify=tk.LEFT
+            ).grid(row=row, column=base_col + 1, padx=(0, 18), pady=4, sticky=tk.W)
+
+    def update_status_display(self, packet_info):
+        if packet_info['cmd'] != PROTOCOL_CMD_GET_STATUS:
+            return
+
+        module = packet_info['module']
+        if module not in KNOWN_MODULES:
+            return
+
+        entries = self.build_status_entries(module, packet_info['payload'])
+        if not entries:
+            return
+
+        if self.status_panel_module != module:
+            self.status_panel_module = module
+            self.render_status_fields(entries)
+            return
+
+        if set(self.status_field_vars.keys()) != {label for label, _ in entries}:
+            self.render_status_fields(entries)
+            return
+
+        for label, value in entries:
+            self.status_field_vars[label].set(value)
+
     def extract_conn_state(self, module, payload):
         if module == PROTOCOL_MODULE_ULTRASOUND and len(payload) >= 11:
             return payload[10]
@@ -820,6 +1006,7 @@ class SerialAssistant:
         self.update_module_status()
         self.update_command_visibility()
         self.setup_param_inputs()
+        self.reset_status_display()
 
     def handle_protocol_state(self, packet_info):
         if packet_info['cmd'] != PROTOCOL_CMD_GET_STATUS:
@@ -1048,9 +1235,13 @@ class SerialAssistant:
 
     def handle_received_packet(self, packet_data, packet_info):
         self.handle_protocol_state(packet_info)
+        self.update_status_display(packet_info)
         self.display_received_data(packet_data, packet_info)
 
     def display_received_data(self, packet_data, packet_info):
+        if packet_info['cmd'] == PROTOCOL_CMD_GET_STATUS:
+            return
+
         timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
         hex_str = ' '.join([f'{b:02X}' for b in packet_data])
 

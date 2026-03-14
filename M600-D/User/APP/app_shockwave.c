@@ -65,6 +65,7 @@ void App_Shockwave_UpdateStatus(void)
     s_SWCtrlInfo.Trans.TxStatus.remain_time = s_SWCtrlInfo.RemainPoints;
     s_SWCtrlInfo.Trans.TxStatus.work_level = s_SWCtrlInfo.WorkLevel;
     s_SWCtrlInfo.Trans.TxStatus.head_temp = s_SWCtrlInfo.HeadTemp;
+    s_SWCtrlInfo.Trans.TxStatus.remain_treatment_count = (uint16_t)s_SWCtrlInfo.TreatCounts;
 
     // Get connection state from treat mgr (probe + foot switch)
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_SHOCKWAVE);

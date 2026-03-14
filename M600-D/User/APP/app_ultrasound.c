@@ -34,6 +34,7 @@ void App_UltraSound_UpdateStatus(void)
     s_USCtrlInfo.Trans.TxStatus.remain_time = s_USCtrlInfo.TreatCounts/1000;
     s_USCtrlInfo.Trans.TxStatus.work_level = s_USCtrlInfo.WorkLevel;
     s_USCtrlInfo.Trans.TxStatus.head_temp = s_USCtrlInfo.HeadTemp;
+    s_USCtrlInfo.Trans.TxStatus.remain_treatment_count = s_USCtrlInfo.TreatRemainTimes;
     // Probe and foot switch status refreshed by mgr; conn_state uploaded by comm based on mgr state; only protocol fields kept here
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_ULTRASOUND);
     bool footClosed = App_TreatMgr_GetFootSwitchClosed();

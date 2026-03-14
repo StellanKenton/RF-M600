@@ -75,6 +75,7 @@ void App_NegPrsHeat_UpdateStatus(void)
     s_NPHCtrlInfo.Trans.TxStatus.head_temp = s_NPHCtrlInfo.HeadTemp;
     s_NPHCtrlInfo.Trans.TxStatus.preheat_temp_limit = s_NPHCtrlInfo.PreheatTempLimit;
     s_NPHCtrlInfo.Trans.TxStatus.remain_preheat_time = s_NPHCtrlInfo.PreheatTime;
+    s_NPHCtrlInfo.Trans.TxStatus.remain_treatment_count = s_NPHCtrlInfo.TreatRemainTimes;
 
     /* Get probe/foot state from treatmgr and update conn_state */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);

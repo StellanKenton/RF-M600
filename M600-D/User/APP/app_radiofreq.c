@@ -56,6 +56,7 @@ void App_RadioFreq_UpdateStatus(void)
     s_RFCtrlInfo.Trans.TxStatus.remain_time = s_RFCtrlInfo.TreatCounts / 1000;  /* ms -> s */
     s_RFCtrlInfo.Trans.TxStatus.work_level = s_RFCtrlInfo.WorkLevel;
     s_RFCtrlInfo.Trans.TxStatus.head_temp = s_RFCtrlInfo.HeadTemp;
+    s_RFCtrlInfo.Trans.TxStatus.remain_treatment_count = s_RFCtrlInfo.TreatRemainTimes;
 
     /* Get connection state from treat mgr (probe + foot switch) */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY);

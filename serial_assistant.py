@@ -18,6 +18,7 @@ PROTOCOL_DIR_HOST_TO_DEV = 0x00
 PROTOCOL_DIR_DEV_TO_HOST = 0x01
 
 # 模块定义
+PROTOCOL_MODULE_DISCOVERY = 0x00
 PROTOCOL_MODULE_ULTRASOUND = 0x01
 PROTOCOL_MODULE_RADIO_FREQ = 0x02
 PROTOCOL_MODULE_SHOCKWAVE = 0x03
@@ -49,6 +50,13 @@ TEMP_ERROR_OVER_LIMIT = 0xFFFF
 CONFIG_RESULT_SUCCESS = 0x00
 CONFIG_RESULT_FAIL = 0x01
 CONFIG_RESULT_OVER_LIMIT = 0x02
+
+KNOWN_MODULES = {
+    PROTOCOL_MODULE_ULTRASOUND,
+    PROTOCOL_MODULE_RADIO_FREQ,
+    PROTOCOL_MODULE_SHOCKWAVE,
+    PROTOCOL_MODULE_HEAT,
+}
 
 
 class ProtocolHelper:
@@ -93,7 +101,7 @@ class ProtocolHelper:
         packet.append(len(data_bytes))
         packet.extend(data_bytes)
 
-        # 计算CRC16（只对数据部分）
+        # 计算 CRC16（只对数据部分）
         crc = ProtocolHelper.crc16_compute(data_bytes)
         packet.append(crc & 0xFF)
         packet.append((crc >> 8) & 0xFF)
@@ -143,6 +151,10 @@ class SerialAssistant:
         self.is_connected = False
         self.receive_thread = None
         self.stop_receive = False
+        self.poll_job = None
+        self.poll_interval_ms = 1000
+        self.connected_module = PROTOCOL_MODULE_DISCOVERY
+        self.module_connected = False
 
         self.setup_ui()
         self.refresh_ports()
@@ -181,28 +193,30 @@ class SerialAssistant:
         module_frame = ttk.LabelFrame(left_frame, text="模块选择", padding="10")
         module_frame.pack(fill=tk.X, pady=5)
 
-        self.module_var = tk.IntVar(value=PROTOCOL_MODULE_ULTRASOUND)
-        ttk.Radiobutton(module_frame, text="超声 (0x01)", variable=self.module_var,
-                       value=PROTOCOL_MODULE_ULTRASOUND).pack(anchor=tk.W)
-        ttk.Radiobutton(module_frame, text="射频 (0x02)", variable=self.module_var,
-                       value=PROTOCOL_MODULE_RADIO_FREQ).pack(anchor=tk.W)
-        ttk.Radiobutton(module_frame, text="冲击波 (0x03)", variable=self.module_var,
-                       value=PROTOCOL_MODULE_SHOCKWAVE).pack(anchor=tk.W)
-        ttk.Radiobutton(module_frame, text="热疗 (0x04)", variable=self.module_var,
-                       value=PROTOCOL_MODULE_HEAT, command=self.on_module_change).pack(anchor=tk.W)
-        self.module_var.trace('w', lambda *args: self.on_module_change())
+        self.module_var = tk.IntVar(value=PROTOCOL_MODULE_DISCOVERY)
+        self.module_status_var = tk.StringVar(value="自动检测 (0x00)")
+        self.module_poll_var = tk.StringVar(value="每 1 秒轮询当前模块")
+        ttk.Label(module_frame, textvariable=self.module_status_var).pack(anchor=tk.W)
+        ttk.Label(module_frame, textvariable=self.module_poll_var, foreground="gray").pack(anchor=tk.W, pady=(4, 0))
 
         # 命令选择
-        cmd_frame = ttk.LabelFrame(left_frame, text="命令选择", padding="10")
-        cmd_frame.pack(fill=tk.X, pady=5)
+        self.cmd_frame = ttk.LabelFrame(left_frame, text="命令选择", padding="10")
+        self.cmd_frame.pack(fill=tk.X, pady=5)
 
         self.cmd_var = tk.IntVar(value=PROTOCOL_CMD_GET_STATUS)
-        ttk.Radiobutton(cmd_frame, text="获取状态 (0x00)", variable=self.cmd_var,
-                       value=PROTOCOL_CMD_GET_STATUS, command=self.on_cmd_change).pack(anchor=tk.W)
-        ttk.Radiobutton(cmd_frame, text="设置工作状态 (0x01)", variable=self.cmd_var,
-                       value=PROTOCOL_CMD_SET_WORK_STATE, command=self.on_cmd_change).pack(anchor=tk.W)
-        ttk.Radiobutton(cmd_frame, text="设置配置 (0x02)", variable=self.cmd_var,
-                       value=PROTOCOL_CMD_SET_CONFIG, command=self.on_cmd_change).pack(anchor=tk.W)
+        self.cmd_hint_label = ttk.Label(
+            self.cmd_frame,
+            text="当前无已连接模块，自动轮询期间隐藏命令选项。",
+            foreground="gray"
+        )
+        self.cmd_buttons = [
+            ttk.Radiobutton(self.cmd_frame, text="获取状态 (0x00)", variable=self.cmd_var,
+                            value=PROTOCOL_CMD_GET_STATUS, command=self.on_cmd_change),
+            ttk.Radiobutton(self.cmd_frame, text="设置工作状态 (0x01)", variable=self.cmd_var,
+                            value=PROTOCOL_CMD_SET_WORK_STATE, command=self.on_cmd_change),
+            ttk.Radiobutton(self.cmd_frame, text="设置配置 (0x02)", variable=self.cmd_var,
+                            value=PROTOCOL_CMD_SET_CONFIG, command=self.on_cmd_change),
+        ]
         self.cmd_var.trace('w', lambda *args: self.on_cmd_change())
 
         # 参数输入区域
@@ -215,8 +229,10 @@ class SerialAssistant:
         # 发送按钮
         send_frame = ttk.Frame(left_frame)
         send_frame.pack(fill=tk.X, pady=5)
-        ttk.Button(send_frame, text="发送命令", command=self.send_command).pack(side=tk.LEFT, padx=5)
-        ttk.Button(send_frame, text="清空参数", command=self.clear_params).pack(side=tk.LEFT, padx=5)
+        self.send_btn = ttk.Button(send_frame, text="发送命令", command=self.send_command)
+        self.send_btn.pack(side=tk.LEFT, padx=5)
+        self.clear_btn = ttk.Button(send_frame, text="清空参数", command=self.clear_params)
+        self.clear_btn.pack(side=tk.LEFT, padx=5)
 
         # 右侧：数据收发显示区域
         right_frame = ttk.Frame(main_paned)
@@ -242,36 +258,47 @@ class SerialAssistant:
         ttk.Button(clear_frame, text="清空接收", command=lambda: self.recv_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
         ttk.Button(clear_frame, text="清空发送", command=lambda: self.send_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
 
+        self.update_module_status()
+        self.update_command_visibility()
+
     def setup_param_inputs(self):
         # 清除现有控件
         for widget in self.param_frame.winfo_children():
             widget.destroy()
         self.param_widgets.clear()
 
+        if not self.module_connected:
+            ttk.Label(
+                self.param_frame,
+                text="当前无已连接模块，检测到模块后才会显示参数输入。",
+                foreground="gray"
+            ).pack(anchor=tk.W, pady=5)
+            return
+
         module = self.module_var.get()
         cmd = self.cmd_var.get()
 
         # 根据模块和命令设置参数
         if cmd == PROTOCOL_CMD_GET_STATUS:
-            # 获取状态命令通常无参数
+            # 获取状态命令通常无需参数
             ttk.Label(self.param_frame, text="此命令无需参数", foreground="gray").pack(anchor=tk.W, pady=5)
         elif cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
                 self.add_param_input("工作状态", "work_state", "0-停止, 1-开始, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "60", "uint16")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("工作级别", "work_level", "0-39 (40级)", "10", "uint8")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
                 self.add_param_input("工作状态", "work_state", "0-停止, 1-开始, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "60", "uint16")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("工作级别", "work_level", "0-20", "10", "uint8")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
                 self.add_param_input("工作状态", "work_state", "0-停止, 1-开始, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "60", "uint16")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("工作级别", "work_level", "0-26", "10", "uint8")
                 self.add_param_input("频率", "frequency", "0-16", "8", "uint8")
             elif module == PROTOCOL_MODULE_HEAT:
                 self.add_param_input("工作状态", "work_state", "0-停止, 1-开始, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "60", "uint16")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("压力(KPa)", "pressure", "10-100", "50", "uint8")
                 self.add_param_input("吸合时间(100ms)", "suck_time", "1-600 (0.1-60秒)", "10", "uint16")
                 self.add_param_input("释放时间(100ms)", "release_time", "1-600 (0.1-60秒)", "10", "uint16")
@@ -291,14 +318,14 @@ class SerialAssistant:
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
                 self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
-                self.add_param_input("ESW-P电流上限", "esw_p_current_high_limit", "ESW-P电流上限", "1000", "uint16")
-                self.add_param_input("ESW-P电流下限", "esw_p_current_low_limit", "ESW-P电流下限", "100", "uint16")
+                self.add_param_input("ESW-P 电流上限", "esw_p_current_high_limit", "ESW-P 电流上限", "1000", "uint16")
+                self.add_param_input("ESW-P 电流下限", "esw_p_current_low_limit", "ESW-P 电流下限", "100", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
-                self.add_param_input("ESW-N电流上限", "esw_n_current_high_limit", "ESW-N电流上限", "1000", "uint16")
-                self.add_param_input("ESW-N电流下限", "esw_n_current_low_limit", "ESW-N电流下限", "100", "uint16")
+                self.add_param_input("ESW-N 电流上限", "esw_n_current_high_limit", "ESW-N 电流上限", "1000", "uint16")
+                self.add_param_input("ESW-N 电流下限", "esw_n_current_low_limit", "ESW-N 电流下限", "100", "uint16")
             elif module == PROTOCOL_MODULE_HEAT:
                 self.add_param_input("预热状态", "preheat_state", "0-停止, 1-开始", "1", "uint8")
-                self.add_param_input("工作时间(秒)", "work_time", "最大3600秒", "300", "uint16")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "300", "uint16")
                 self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
                 self.add_param_input("预热温度限制", "preheat_temp_limit", "350-480 (35-48℃)", "400", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
@@ -327,6 +354,7 @@ class SerialAssistant:
 
     def on_module_change(self, *args):
         self.setup_param_inputs()
+        self.update_command_visibility()
 
     def on_cmd_change(self, *args):
         self.setup_param_inputs()
@@ -360,7 +388,7 @@ class SerialAssistant:
         data_bytes = bytearray()
 
         if cmd == PROTOCOL_CMD_GET_STATUS:
-            # 获取状态命令，通常只有一个dummy字节0x00
+            # 获取状态命令通常只有一个 dummy 字节 0x00
             data_bytes.append(0x00)
         elif cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
@@ -481,30 +509,20 @@ class SerialAssistant:
 
         return bytes(data_bytes)
 
-    def send_command(self):
-        if not self.is_connected:
-            messagebox.showwarning("警告", "请先打开串口！")
-            return
+    def send_packet(self, module, cmd, data_bytes, log_send=True):
+        packet = ProtocolHelper.build_packet(
+            PROTOCOL_DIR_HOST_TO_DEV,
+            module,
+            cmd,
+            data_bytes
+        )
 
-        try:
-            module = self.module_var.get()
-            cmd = self.cmd_var.get()
-            data_bytes = self.build_command_data()
+        self.serial_port.write(packet)
 
-            packet = ProtocolHelper.build_packet(
-                PROTOCOL_DIR_HOST_TO_DEV,
-                module,
-                cmd,
-                data_bytes
-            )
-
-            self.serial_port.write(packet)
-
-            # 显示发送的数据
+        if log_send:
             timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             module_name = self.get_module_name(module)
             cmd_name = self.get_cmd_name(cmd)
-
             hex_str = ' '.join([f'{b:02X}' for b in packet])
             self.send_text.insert(tk.END, f"[{timestamp}] 发送 - {module_name} - {cmd_name}\n")
             self.send_text.insert(tk.END, f"数据: {hex_str}\n")
@@ -513,8 +531,54 @@ class SerialAssistant:
             self.send_text.insert(tk.END, "-" * 60 + "\n")
             self.send_text.see(tk.END)
 
+    def send_command(self):
+        if not self.is_connected:
+            messagebox.showwarning("警告", "请先打开串口。")
+            return
+
+        if not self.module_connected:
+            messagebox.showwarning("警告", "当前无已连接模块，仅保留自动轮询。")
+            return
+
+        try:
+            module = self.module_var.get()
+            cmd = self.cmd_var.get()
+            data_bytes = self.build_command_data()
+
+            self.send_packet(module, cmd, data_bytes, log_send=True)
+
         except Exception as e:
             messagebox.showerror("错误", f"发送失败: {str(e)}")
+
+    def start_auto_poll(self):
+        self.stop_auto_poll()
+        self.schedule_auto_poll(immediate=True)
+
+    def stop_auto_poll(self):
+        if self.poll_job is not None:
+            self.root.after_cancel(self.poll_job)
+            self.poll_job = None
+
+    def schedule_auto_poll(self, immediate=False):
+        delay = 0 if immediate else self.poll_interval_ms
+        self.poll_job = self.root.after(delay, self.auto_poll_status)
+
+    def auto_poll_status(self):
+        self.poll_job = None
+
+        if not self.is_connected or self.serial_port is None:
+            return
+
+        module = self.connected_module if self.module_connected else PROTOCOL_MODULE_DISCOVERY
+
+        try:
+            self.send_packet(module, PROTOCOL_CMD_GET_STATUS, bytes([0x00]), log_send=False)
+        except Exception as e:
+            if self.is_connected:
+                messagebox.showerror("错误", f"自动轮询失败: {str(e)}")
+            return
+
+        self.schedule_auto_poll()
 
     def format_send_params(self, module, cmd, data_bytes):
         if cmd == PROTOCOL_CMD_GET_STATUS:
@@ -559,11 +623,11 @@ class SerialAssistant:
                 params.append(f"剩余治疗次数={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
                 params.append(f"温度限制={data_bytes[idx] | (data_bytes[idx+1] << 8)}")
-                params.append(f"ESW-P电流上限={data_bytes[idx+2] | (data_bytes[idx+3] << 8)}")
-                params.append(f"ESW-P电流下限={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}")
+                params.append(f"ESW-P 电流上限={data_bytes[idx+2] | (data_bytes[idx+3] << 8)}")
+                params.append(f"ESW-P 电流下限={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}")
                 params.append(f"剩余治疗次数={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}")
-                params.append(f"ESW-N电流上限={data_bytes[idx+8] | (data_bytes[idx+9] << 8)}")
-                params.append(f"ESW-N电流下限={data_bytes[idx+10] | (data_bytes[idx+11] << 8)}")
+                params.append(f"ESW-N 电流上限={data_bytes[idx+8] | (data_bytes[idx+9] << 8)}")
+                params.append(f"ESW-N 电流下限={data_bytes[idx+10] | (data_bytes[idx+11] << 8)}")
             elif module == PROTOCOL_MODULE_HEAT:
                 params.append(f"预热状态={data_bytes[idx]}")
                 params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
@@ -585,7 +649,11 @@ class SerialAssistant:
         result.append("")
 
         if cmd == PROTOCOL_CMD_GET_STATUS:
-            if module == PROTOCOL_MODULE_ULTRASOUND:
+            if module == PROTOCOL_MODULE_DISCOVERY:
+                if len(payload) >= 1:
+                    current_module = payload[0]
+                    result.append(f"当前模块: {self.get_module_name(current_module)}")
+            elif module == PROTOCOL_MODULE_ULTRASOUND:
                 if len(payload) >= 14:
                     work_state = payload[0]
                     frequency = payload[1] | (payload[2] << 8)
@@ -707,11 +775,11 @@ class SerialAssistant:
                     esw_n_current_high_result = payload[4]
                     esw_n_current_low_result = payload[5]
                     result.append(f"温度配置结果: {self.get_config_result_name(temp_result)}")
-                    result.append(f"ESW-P电流上限配置结果: {self.get_config_result_name(esw_p_current_high_result)}")
-                    result.append(f"ESW-P电流下限配置结果: {self.get_config_result_name(esw_p_current_low_result)}")
+                    result.append(f"ESW-P 电流上限配置结果: {self.get_config_result_name(esw_p_current_high_result)}")
+                    result.append(f"ESW-P 电流下限配置结果: {self.get_config_result_name(esw_p_current_low_result)}")
                     result.append(f"剩余治疗次数配置结果: {self.get_config_result_name(remain_treatment_count_result)}")
-                    result.append(f"ESW-N电流上限配置结果: {self.get_config_result_name(esw_n_current_high_result)}")
-                    result.append(f"ESW-N电流下限配置结果: {self.get_config_result_name(esw_n_current_low_result)}")
+                    result.append(f"ESW-N 电流上限配置结果: {self.get_config_result_name(esw_n_current_high_result)}")
+                    result.append(f"ESW-N 电流下限配置结果: {self.get_config_result_name(esw_n_current_low_result)}")
             elif module == PROTOCOL_MODULE_HEAT:
                 if len(payload) >= 5:
                     preheat_state_result = payload[0]
@@ -727,8 +795,84 @@ class SerialAssistant:
 
         return "\n".join(result)
 
+    def extract_conn_state(self, module, payload):
+        if module == PROTOCOL_MODULE_ULTRASOUND and len(payload) >= 11:
+            return payload[10]
+        if module == PROTOCOL_MODULE_RADIO_FREQ and len(payload) >= 9:
+            return payload[8]
+        if module == PROTOCOL_MODULE_SHOCKWAVE and len(payload) >= 8:
+            return payload[7]
+        if module == PROTOCOL_MODULE_HEAT and len(payload) >= 18:
+            return payload[17]
+        return None
+
+    def set_detected_module(self, module):
+        normalized_module = module if module in KNOWN_MODULES else PROTOCOL_MODULE_DISCOVERY
+        module_connected = normalized_module in KNOWN_MODULES
+
+        if self.connected_module == normalized_module and self.module_connected == module_connected:
+            return
+
+        self.connected_module = normalized_module
+        self.module_connected = module_connected
+        self.module_var.set(normalized_module)
+        self.cmd_var.set(PROTOCOL_CMD_GET_STATUS)
+        self.update_module_status()
+        self.update_command_visibility()
+        self.setup_param_inputs()
+
+    def handle_protocol_state(self, packet_info):
+        if packet_info['cmd'] != PROTOCOL_CMD_GET_STATUS:
+            return
+
+        module = packet_info['module']
+        payload = packet_info['payload']
+
+        if module == PROTOCOL_MODULE_DISCOVERY:
+            if len(payload) >= 1:
+                self.set_detected_module(payload[0])
+            return
+
+        if module not in KNOWN_MODULES:
+            return
+
+        conn_state = self.extract_conn_state(module, payload)
+        if conn_state is None:
+            return
+
+        if conn_state in (CONN_STATE_CONNECTED_FOOT_CLOSED, CONN_STATE_CONNECTED_FOOT_OPEN):
+            self.set_detected_module(module)
+        else:
+            self.set_detected_module(PROTOCOL_MODULE_DISCOVERY)
+
+    def update_module_status(self):
+        self.module_status_var.set(f"当前模块: {self.get_module_name(self.connected_module)}")
+        if self.module_connected:
+            self.module_poll_var.set(f"每 1 秒轮询 {self.get_module_name(self.connected_module)} 状态")
+        else:
+            self.module_poll_var.set("每 1 秒轮询自动检测模块 (0x00)")
+
+    def update_command_visibility(self):
+        if self.module_connected:
+            if self.cmd_hint_label.winfo_manager():
+                self.cmd_hint_label.pack_forget()
+            for button in self.cmd_buttons:
+                if not button.winfo_manager():
+                    button.pack(anchor=tk.W)
+            self.send_btn.config(state=tk.NORMAL)
+            self.clear_btn.config(state=tk.NORMAL)
+        else:
+            for button in self.cmd_buttons:
+                if button.winfo_manager():
+                    button.pack_forget()
+            if not self.cmd_hint_label.winfo_manager():
+                self.cmd_hint_label.pack(anchor=tk.W)
+            self.send_btn.config(state=tk.DISABLED)
+            self.clear_btn.config(state=tk.DISABLED)
+
     def get_module_name(self, module):
         names = {
+            PROTOCOL_MODULE_DISCOVERY: "自动检测 (0x00)",
             PROTOCOL_MODULE_ULTRASOUND: "超声",
             PROTOCOL_MODULE_RADIO_FREQ: "射频",
             PROTOCOL_MODULE_SHOCKWAVE: "冲击波",
@@ -799,7 +943,7 @@ class SerialAssistant:
         try:
             port = self.port_var.get()
             if not port:
-                messagebox.showwarning("警告", "请选择串口！")
+                messagebox.showwarning("警告", "请选择串口。")
                 return
 
             baudrate = int(self.baudrate_var.get())
@@ -812,6 +956,8 @@ class SerialAssistant:
             self.stop_receive = False
             self.receive_thread = threading.Thread(target=self.receive_data, daemon=True)
             self.receive_thread.start()
+            self.set_detected_module(PROTOCOL_MODULE_DISCOVERY)
+            self.start_auto_poll()
 
             self.recv_text.insert(tk.END, f"[{datetime.now().strftime('%H:%M:%S')}] 串口已打开: {port} @ {baudrate}\n")
             self.recv_text.see(tk.END)
@@ -821,6 +967,7 @@ class SerialAssistant:
 
     def close_port(self):
         try:
+            self.stop_auto_poll()
             self.stop_receive = True
             if self.serial_port:
                 self.serial_port.close()
@@ -828,6 +975,7 @@ class SerialAssistant:
             self.is_connected = False
             self.connect_btn.config(text="打开串口")
             self.port_combo.config(state='normal')
+            self.set_detected_module(PROTOCOL_MODULE_DISCOVERY)
 
             self.recv_text.insert(tk.END, f"[{datetime.now().strftime('%H:%M:%S')}] 串口已关闭\n")
             self.recv_text.see(tk.END)
@@ -865,7 +1013,7 @@ class SerialAssistant:
                         if len(buffer) < 8:
                             break
 
-                        # 检查方向（应该是设备到主机）
+                        # 检查方向（应当是设备到主机）
                         if buffer[2] != PROTOCOL_DIR_DEV_TO_HOST:
                             buffer.pop(0)
                             continue
@@ -884,10 +1032,10 @@ class SerialAssistant:
                         # 解析数据包
                         packet_info = ProtocolHelper.parse_packet(packet_data)
                         if packet_info:
-                            # 在主线程中更新UI
-                            self.root.after(0, self.display_received_data, packet_data, packet_info)
+                            # 在主线程中更新 UI
+                            self.root.after(0, self.handle_received_packet, packet_data, packet_info)
                         else:
-                            # CRC校验失败，丢弃一个字节继续
+                            # CRC 校验失败，丢弃一个字节继续
                             if len(buffer) > 0:
                                 buffer.pop(0)
 
@@ -897,6 +1045,10 @@ class SerialAssistant:
                 if self.is_connected:
                     self.root.after(0, lambda: messagebox.showerror("错误", f"接收数据出错: {str(e)}"))
                 break
+
+    def handle_received_packet(self, packet_data, packet_info):
+        self.handle_protocol_state(packet_info)
+        self.display_received_data(packet_data, packet_info)
 
     def display_received_data(self, packet_data, packet_info):
         timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]

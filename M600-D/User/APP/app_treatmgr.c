@@ -15,12 +15,19 @@
 #include "app_shockwave.h"
 #include "app_radiofreq.h"
 #include "app_negprsheat.h"
+#include "app_comm.h"
 #include "drv_delay.h"
 #include "drv_si5351.h"
 #include "drv_dac.h"
 #include "drv_24c02.h"
 #include "drv_memory.h"
 TreatMgr_t s_TreatMgr;
+
+static void App_TreatMgr_HandleProbeStatusChange(IODevice_WorkingMode_EnumDef newStatus)
+{
+    App_Comm_ClearAllRxWorkStates();
+    LOG_I("TreatMgr cleared all cached work-state");
+}
 
 
 static void App_TreatMgr_SetForceRunEnabled(bool enable)
@@ -198,6 +205,7 @@ void ProbeStatusCheck()
         if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
             s_TreatMgr.preProbeStaus = s_TreatMgr.eProbeStatus;
             s_TreatMgr.eProbeStatus = curStatus;
+            App_TreatMgr_HandleProbeStatusChange(curStatus);
             debounceCount = 0;
             pendingStatus = curStatus;
             switch(s_TreatMgr.eProbeStatus)

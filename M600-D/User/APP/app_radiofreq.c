@@ -49,7 +49,7 @@ void App_RadioFreq_UpdateStatus(void)
     // Update work state
     if(s_RFCtrlInfo.runState == E_RF_RUN_WORKING) {
         s_RFCtrlInfo.Trans.TxStatus.work_state = 0x01;
-    } else if(s_RFCtrlInfo.runState == E_RF_RUN_STOP) {
+    } else{
         s_RFCtrlInfo.Trans.TxStatus.work_state = 0x00;
     }
     s_RFCtrlInfo.Trans.TxStatus.temp_limit = s_RFCtrlInfo.TempLimit;
@@ -148,6 +148,7 @@ void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState)
 {
     if(newState != s_RFCtrlInfo.runState && newState < E_RF_RUN_MAX)
     {
+        RF_RunState_EnumDef oldState = s_RFCtrlInfo.runState;
         s_RFCtrlInfo.runState = newState;
         switch(newState)
         {
@@ -163,7 +164,9 @@ void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState)
                 break;
             case E_RF_RUN_STOP:
                 LOG_I("RF state changed to STOP");
-                Drv_IODevice_StartBuzzer(2000);
+                if(oldState == E_RF_RUN_WORKING) {
+                    Drv_IODevice_StartBuzzer(2000);
+                }
                 break;
             default:
                 break;
@@ -315,15 +318,8 @@ bool App_RadioFreq_IsHeadTempNormal(void)
 
 void App_RadioFreq_CheckProbe(void)
 {
-    static uint16_t debounceCount = 0;
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_RADIO_FREQUENCY) {
-        debounceCount++;
-        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
-            debounceCount = 0;
-            s_RFCtrlInfo.isWaitReturn = true;
-        }
-    } else {
-        debounceCount = 0;
+        s_RFCtrlInfo.isWaitReturn = true;
     }
 
     if(s_RFCtrlInfo.isWaitReturn) {

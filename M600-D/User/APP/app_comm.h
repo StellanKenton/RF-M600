@@ -34,6 +34,7 @@ extern "C" {
 #define PROTOCOL_DIR_DEV_TO_HOST   0x01    ///< Device to Host
 
 /* Module Command */
+#define PROTOCOL_MODULE_DISCOVERY      0x00    ///< Current connected module query
 #define PROTOCOL_MODULE_ULTRASOUND     0x01    ///< Ultrasound Module
 #define PROTOCOL_MODULE_RADIO_FREQ     0x02    ///< Radio Frequency Module
 #define PROTOCOL_MODULE_SHOCKWAVE      0x03    ///< Shockwave Module
@@ -94,7 +95,7 @@ typedef struct
 {
     uint8_t work_state;          ///< 0x00: Stop, 0x01: Working
     uint16_t frequency;          ///< 1000-1400 (kHz)
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ), 0xFFFF: Over limit
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?), 0xFFFF: Over limit
     uint16_t remain_time;        ///< Remaining work time (seconds), max 3600
     uint8_t work_level;          ///< Work level: 0-39 (40 levels)
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
@@ -116,7 +117,7 @@ typedef struct
 {
     uint16_t frequency;          ///< 1000-1400 (kHz)
     uint16_t voltage;            ///< 1000-2000 (10-20V)
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ)
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?)
     uint16_t Current_HighLimit;    ///< 
     uint16_t Current_LowLimit;     ///<
     uint16_t remain_treatment_count;  ///< Remaining treatment count
@@ -171,7 +172,7 @@ typedef struct
 typedef struct
 {
     uint8_t work_state;          ///< 0x00: Stop, 0x01: Working
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ), 0xFFFF: Over limit
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?), 0xFFFF: Over limit
     uint16_t remain_time;        ///< Remaining work time (seconds), max 3600
     uint8_t work_level;          ///< Work level: 0-20
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
@@ -191,7 +192,7 @@ typedef struct
 /* RF - Set Config (0x02) - Send */
 typedef struct
 {
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ)
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?)
     uint16_t Current_HighLimit;    ///<
     uint16_t Current_LowLimit;     ///<
     uint16_t remain_treatment_count;  ///< Remaining treatment count
@@ -261,7 +262,7 @@ typedef struct
 /* Shockwave - Set Config (0x02) - Reply */
 typedef struct
 {
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ)
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?)
     uint16_t ESW_P_Current_HighLimit;    ///< ESW-P Current High Limit
     uint16_t ESW_P_Current_LowLimit;     ///< ESW-P Current Low Limit
     uint16_t remain_treatment_count;  ///< Remaining treatment count
@@ -313,14 +314,14 @@ typedef struct
 typedef struct
 {
     uint8_t work_state;          ///< 0x00: Stop, 0x01: Working
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ), 0xFFFF: Over limit
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?), 0xFFFF: Over limit
     uint16_t remain_heat_time;   ///< Remaining heat time (seconds), max 3600
     uint16_t suck_time;            ///< Suck time: unit 10ms, 10-60000
     uint16_t release_time;        ///< Release time: unit 10ms, 10-60000
     uint8_t pressure;            ///< Pressure: 10-100 KPa
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t preheat_state;       ///< Preheat state: 0x00: Stop, 0x01: Working
-    uint16_t preheat_temp_limit; ///< Preheat temperature limit: 350-480 (35-48â„ƒ)
+    uint16_t preheat_temp_limit; ///< Preheat temperature limit: 350-480 (35-48â„?)
     uint16_t remain_preheat_time; ///< Remaining preheat time (seconds), max 3600
     uint8_t conn_state;          ///< Connection status
     uint8_t error_code;          ///< Reserved error code
@@ -335,7 +336,7 @@ typedef struct
     uint8_t pressure;            ///< Pressure: -10KPa to -100KPa (send positive value)
     uint16_t suck_time;           ///< Suck time: unit 100ms, 0.1s-60s
     uint16_t release_time;        ///< Release time: unit 100ms, 0.1s-60s
-    uint16_t temp_limit;         ///< 350-480 (35-48â„ƒ)
+    uint16_t temp_limit;         ///< 350-480 (35-48â„?)
 } Heat_SetWorkState_Send_t;
 
 /* Heat - Set Config/Preheat (0x02) - Send */
@@ -343,8 +344,8 @@ typedef struct
 {
     uint8_t preheat_state;       ///< 0x01: Start, 0x00: Stop (only when heat therapy stopped)
     uint16_t work_time;          ///< Work time (seconds), max 3600
-    uint16_t temp_limit;          ///< 350-480 (35-48â„ƒ)
-    uint16_t preheat_temp_limit;         ///< 350-480 (35-48â„ƒ)
+    uint16_t temp_limit;          ///< 350-480 (35-48â„?)
+    uint16_t preheat_temp_limit;         ///< 350-480 (35-48â„?)
     uint16_t remain_treatment_count;  ///< Remaining treatment count
 } Heat_SetPreheat_Send_t;
 
@@ -378,6 +379,7 @@ typedef struct
 } Heat_TransData_t;
 
 Heat_TransData_t *App_Comm_GetHeatTransData(void);
+void App_Comm_ClearAllRxWorkStates(void);
 
 typedef struct
 {
@@ -387,6 +389,7 @@ typedef struct
     RF_TransData_t RF;
     SW_TransData_t SW;
     Heat_TransData_t Heat;
+    bool ModuleDiscoveryPending;
 } App_Comm_Info_t;
 
 

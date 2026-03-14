@@ -26,7 +26,7 @@ void App_UltraSound_UpdateStatus(void)
     // Update work state
     if(s_USCtrlInfo.runState == E_US_RUN_WORKING) {
         s_USCtrlInfo.Trans.TxStatus.work_state = 0x01;
-    } else if(s_USCtrlInfo.runState == E_US_RUN_STOP) {
+    }else{
         s_USCtrlInfo.Trans.TxStatus.work_state = 0x00;
     }
     s_USCtrlInfo.Trans.TxStatus.frequency = s_USCtrlInfo.Frequency;
@@ -67,6 +67,7 @@ void App_Ultrasound_ChangeState(US_RunState_EnumDef newState)
 {
     if(newState != s_USCtrlInfo.runState && newState < E_US_RUN_MAX)
     {
+        US_RunState_EnumDef oldState = s_USCtrlInfo.runState;
         s_USCtrlInfo.runState = newState;
         switch(newState)
         {
@@ -83,8 +84,10 @@ void App_Ultrasound_ChangeState(US_RunState_EnumDef newState)
                 break;
             case E_US_RUN_STOP:
                 LOG_I("Ultrasound state changed to STOP");
-                // Buzzer beep when work ends (2s)
-                Drv_IODevice_StartBuzzer(2000);
+                // Only beep when output really stops, not when a module switch forces STOP from IDLE.
+                if(oldState == E_US_RUN_WORKING) {
+                    Drv_IODevice_StartBuzzer(2000);
+                }
                 break;
             default:
                 break;
@@ -342,15 +345,8 @@ bool App_UltraSound_IsHeadTempNormal(void)
 
 void App_Ultrasound_CheckProbe(void)
 {
-    static uint16_t debounceCount = 0;
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_ULTRASOUND) {
-        debounceCount++;
-        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
-            debounceCount = 0;
-            s_USCtrlInfo.isWaitReturn = true;
-        }
-    } else {
-        debounceCount = 0;
+        s_USCtrlInfo.isWaitReturn = true;
     }
 
     if(s_USCtrlInfo.isWaitReturn) {

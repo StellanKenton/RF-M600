@@ -25,6 +25,8 @@ static Protocol_Frame_t RxFrame;
 
 static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame);
 static uint8_t App_Comm_GetConnStateFromMgr(IODevice_WorkingMode_EnumDef moduleProbeMode);
+static uint8_t App_Comm_MapProbeStatusToProtocolModule(IODevice_WorkingMode_EnumDef probeStatus);
+static void App_Comm_ReplyCurrentModule(void);
 
 uint16_t Crc16Compute(const uint8_t *data, uint16_t length) {
     uint16_t crc = 0x0000;
@@ -123,6 +125,25 @@ static uint8_t App_Comm_GetConnStateFromMgr(IODevice_WorkingMode_EnumDef moduleP
     return CONN_STATE_DISCONNECTED_FOOT_OPEN;
 }
 
+static uint8_t App_Comm_MapProbeStatusToProtocolModule(IODevice_WorkingMode_EnumDef probeStatus)
+{
+    switch (probeStatus)
+    {
+        case E_IODEVICE_MODE_ULTRASOUND:
+            return PROTOCOL_MODULE_ULTRASOUND;
+        case E_IODEVICE_MODE_RADIO_FREQUENCY:
+            return PROTOCOL_MODULE_RADIO_FREQ;
+        case E_IODEVICE_MODE_SHOCKWAVE:
+            return PROTOCOL_MODULE_SHOCKWAVE;
+        case E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT:
+            return PROTOCOL_MODULE_HEAT;
+        case E_IODEVICE_MODE_NOT_CONNECTED:
+        case E_IODEVICE_MODE_ERROR:
+        default:
+            return PROTOCOL_MODULE_DISCOVERY;
+    }
+}
+
 static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
 {
     if(pRxFrame == NULL || pRxFrame->data == NULL){
@@ -132,6 +153,11 @@ static void App_Comm_RecvDataHandle(const Protocol_Frame_t *pRxFrame)
 
     switch(pRxFrame->module)
     {
+        case PROTOCOL_MODULE_DISCOVERY:
+            if (pRxFrame->cmd == PROTOCOL_CMD_GET_STATUS) {
+                s_AppCommInfo.ModuleDiscoveryPending = true;
+            }
+            break;
         case PROTOCOL_MODULE_ULTRASOUND:
             switch(pRxFrame->cmd)
             {
@@ -273,6 +299,18 @@ Heat_TransData_t *App_Comm_GetHeatTransData(void)
     return &s_AppCommInfo.Heat;
 }
 
+void App_Comm_ClearAllRxWorkStates(void)
+{
+    memset(&s_AppCommInfo.US.RxWorkState, 0, sizeof(s_AppCommInfo.US.RxWorkState));
+    memset(&s_AppCommInfo.RF.RxWorkState, 0, sizeof(s_AppCommInfo.RF.RxWorkState));
+    memset(&s_AppCommInfo.SW.RxWorkState, 0, sizeof(s_AppCommInfo.SW.RxWorkState));
+    memset(&s_AppCommInfo.Heat.RxWorkState, 0, sizeof(s_AppCommInfo.Heat.RxWorkState));
+
+    /* US work-state is only mirrored when the valid flag is set. Keep it enabled so
+       the cleared STOP command overwrites any stale local cache on the next process loop. */
+    s_AppCommInfo.US.RxValidFlag[PROTOCOL_CMD_SET_WORK_STATE] = true;
+}
+
 
 void App_Comm_CreateAndSend(uint8_t module, uint8_t cmd, void *pData, uint16_t data_len)
 {
@@ -288,6 +326,12 @@ void App_Comm_CreateAndSend(uint8_t module, uint8_t cmd, void *pData, uint16_t d
     s_AppCommInfo.TxData[data_len+6] = CaculateCrc & 0xFF;
     s_AppCommInfo.TxData[data_len+7] = CaculateCrc >> 8;
     Drv_USART1_Send(s_AppCommInfo.TxData, data_len+8);
+}
+
+static void App_Comm_ReplyCurrentModule(void)
+{
+    uint8_t currentModule = App_Comm_MapProbeStatusToProtocolModule(App_TreatMgr_GetProbeStatus());
+    App_Comm_CreateAndSend(PROTOCOL_MODULE_DISCOVERY, PROTOCOL_CMD_GET_STATUS, &currentModule, 1);
 }
 
 static void App_Comm_ReplyUSStatus(void)
@@ -448,6 +492,12 @@ static void App_Comm_ReplyHeatConfig(void)
 void App_Comm_SendData(void)
 {
     if(Drv_GetUSART1_DMA_SendStatus()){
+        return;
+    }
+
+    if(s_AppCommInfo.ModuleDiscoveryPending){
+        s_AppCommInfo.ModuleDiscoveryPending = false;
+        App_Comm_ReplyCurrentModule();
         return;
     }
 

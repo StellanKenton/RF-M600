@@ -193,6 +193,7 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
 {
     if(newState != s_NPHCtrlInfo.runState && newState < E_NPH_RUN_MAX)
     {
+        NPH_RunState_EnumDef oldState = s_NPHCtrlInfo.runState;
         s_NPHCtrlInfo.runState = newState;
         switch(newState)
         {
@@ -212,8 +213,10 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
                 break;
             case E_NPH_RUN_STOP:
                 LOG_I("NPH state changed to STOP");
-                /* Stop state: beep 2s */
-                Drv_IODevice_StartBuzzer(2000);
+                /* Only beep when output really stops, not when a module switch forces STOP from IDLE. */
+                if(oldState == E_NPH_RUN_WORKING) {
+                    Drv_IODevice_StartBuzzer(2000);
+                }
                 break;
             case E_NPH_RUN_WAIT_RETURN:
                 LOG_I("NPH state changed to WAIT_RETURN");
@@ -226,15 +229,8 @@ void App_NegPrsHeat_ChangeState(NPH_RunState_EnumDef newState)
 
 void App_NegPrsHeat_CheckProbe(void)
 {
-    static uint16_t debounceCount = 0;
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
-        debounceCount++;
-        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
-            debounceCount = 0;
-            s_NPHCtrlInfo.isWaitReturn = true;
-        }
-    } else {
-        debounceCount = 0;
+        s_NPHCtrlInfo.isWaitReturn = true;
     }
 
     if(s_NPHCtrlInfo.isWaitReturn) {

@@ -58,7 +58,7 @@ void App_Shockwave_UpdateStatus(void)
     // Update work state
     if(s_SWCtrlInfo.runState == E_SW_RUN_WORKING) {
         s_SWCtrlInfo.Trans.TxStatus.work_state = 0x01;
-    } else if(s_SWCtrlInfo.runState == E_SW_RUN_STOP) {
+    } else {
         s_SWCtrlInfo.Trans.TxStatus.work_state = 0x00;
     }
     s_SWCtrlInfo.Trans.TxStatus.frequency = s_SWCtrlInfo.FreqLevel;
@@ -143,6 +143,7 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
 {
     if(newState != s_SWCtrlInfo.runState && newState < E_SW_RUN_MAX)
     {
+        SW_RunState_EnumDef oldState = s_SWCtrlInfo.runState;
         s_SWCtrlInfo.runState = newState;
         switch(newState)
         {
@@ -159,8 +160,10 @@ void App_Shockwave_ChangeState(SW_RunState_EnumDef newState)
                 break;
             case E_SW_RUN_STOP:
                 LOG_I("SW state changed to STOP");
-                // Start buzzer for 2s when stopping
-                Drv_IODevice_StartBuzzer(2000);
+                // Only beep when output really stops, not when a module switch forces STOP from IDLE.
+                if(oldState == E_SW_RUN_WORKING) {
+                    Drv_IODevice_StartBuzzer(2000);
+                }
                 break;
             default:
                 break;
@@ -433,15 +436,8 @@ void App_Shockwave_ProcessPWM(void)
 
 void App_ShockWave_CheckProbe()
 {
-    static uint16_t debounceCount = 0;
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_SHOCKWAVE) {
-        debounceCount++;
-        if(debounceCount >= PROBE_STATUS_DEBOUNCE_CNT) {
-            debounceCount = 0;
-            s_SWCtrlInfo.isWaitReturn = true;
-        }
-    } else {
-        debounceCount = 0;
+        s_SWCtrlInfo.isWaitReturn = true;
     }
 
     if(s_SWCtrlInfo.isWaitReturn) {

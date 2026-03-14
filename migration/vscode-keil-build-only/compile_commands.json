@@ -1,0 +1,332 @@
+[
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_system.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_system.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_comm.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_comm.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_handcomm.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_handcomm.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_memory.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_memory.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_negprsheat.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_negprsheat.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_radiofreq.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_radiofreq.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_shockwave.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_shockwave.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_treatmgr.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_treatmgr.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_ultrasound.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP\\app_ultrasound.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_24c02.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_24c02.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_adc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_adc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_dac.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_dac.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_delay.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_delay.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_init.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_init.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_iodevice.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_iodevice.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_memory.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_memory.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_si5351.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_si5351.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_soft_i2c.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_soft_i2c.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_tim.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_tim.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_usart.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_usart.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_wdg.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV\\drv_wdg.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB\\lib_aiic.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB\\lib_aiic.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB\\lib_ringbuffer.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB\\lib_ringbuffer.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\log.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\log.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\SEGGER_RTT.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\SEGGER_RTT.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\SEGGER_RTT_printf.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER\\SEGGER_RTT_printf.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace\\cm_backtrace.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace\\cm_backtrace.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\main.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\main.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\stm32f103_it.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\stm32f103_it.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\delay.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\delay.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\example.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\example.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_24C02.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_24C02.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_adc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_adc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_dac.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_dac.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_delay.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_delay.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_gpio.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_gpio.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_i2c.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_i2c.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_iwdg.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_iwdg.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_SI5351.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_SI5351.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_tim.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_tim.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_usart.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP\\bsp_usart.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS\\core_cm3.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS\\core_cm3.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS\\system_stm32f10x.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS\\system_stm32f10x.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\misc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\misc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_adc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_adc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_bkp.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_bkp.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_can.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_can.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_cec.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_cec.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_crc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_crc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dac.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dac.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dbgmcu.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dbgmcu.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dma.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_dma.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_exti.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_exti.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_flash.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_flash.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_fsmc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_fsmc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_gpio.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_gpio.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_i2c.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_i2c.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_iwdg.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_iwdg.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_pwr.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_pwr.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_rcc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_rcc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_rtc.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_rtc.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_sdio.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_sdio.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_spi.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_spi.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_tim.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_tim.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_usart.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_usart.c"
+  },
+  {
+    "directory": "D:\\Space\\Cosmos\\RF-M600\\M600-D",
+    "command": "arm-none-eabi-gcc -std=c11 -mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections -g -O0 -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -D__CC_ARM -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\APP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\DRV -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\LIB -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\SEGGER -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User\\BackTrace -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\User -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\BSP -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\CMSIS -ID:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\inc -c D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_wwdg.c",
+    "file": "D:\\Space\\Cosmos\\RF-M600\\M600-D\\Libraries\\FWlib\\src\\stm32f10x_wwdg.c"
+  }
+]

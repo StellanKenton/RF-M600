@@ -1,0 +1,96 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Keil: Build",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/.vscode/scripts/keil-build.ps1",
+        "-ProjectPath",
+        "${workspaceFolder}/<YOUR_PROJECT_DIR>/Project/<YOUR_PROJECT_NAME>.uvprojx",
+        "-Target",
+        "<YOUR_TARGET_NAME>",
+        "-Mode",
+        "Build"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$keil-armcc"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Keil: Rebuild",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/.vscode/scripts/keil-build.ps1",
+        "-ProjectPath",
+        "${workspaceFolder}/<YOUR_PROJECT_DIR>/Project/<YOUR_PROJECT_NAME>.uvprojx",
+        "-Target",
+        "<YOUR_TARGET_NAME>",
+        "-Mode",
+        "Rebuild"
+      ],
+      "problemMatcher": [
+        "$keil-armcc"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Clangd: Regenerate compile_commands.json",
+      "type": "shell",
+      "command": "py",
+      "args": [
+        "-3",
+        "${workspaceFolder}/generate_compile_commands.py"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ],
+  "problemMatchers": [
+    {
+      "name": "keil-armcc",
+      "owner": "cpp",
+      "fileLocation": [
+        "relative",
+        "${workspaceFolder}/<YOUR_PROJECT_DIR>/Project"
+      ],
+      "pattern": [
+        {
+          "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4
+        },
+        {
+          "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+#\\d+:\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4
+        }
+      ]
+    }
+  ]
+}

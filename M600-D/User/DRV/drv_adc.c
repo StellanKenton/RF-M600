@@ -17,7 +17,7 @@
 #define NTC_TEMP_MIN_C       (-40)
 #define NTC_TEMP_MAX_C       105
 #define NTC_TEMP_SCALE       10
-#define DRV_ADC_PROCESS_PERIOD_MS  50u
+#define DRV_ADC_PROCESS_PERIOD_MS  10u
 
 /* NTC 10R table: -40~105C, per 1C, from spec (10R NTC) */
 static const uint32_t s_ntc_temp_table[] = {

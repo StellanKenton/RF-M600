@@ -228,7 +228,6 @@ bool App_Shockwave_StartCheck()
         return false;
     }
 
-    LOG_I("SW: Start check passed");
     return true;
 }
 
@@ -264,6 +263,9 @@ bool App_Shockwave_IsCurrentNormal(void)
     uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_ESW_I);
     bool isNormal = true;
 
+    if(TreatGetRunFlag()) {
+        return true;
+    }
     // Check current only when corresponding PWM is high
     if(s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_ESW_P_HIGH)
     {
@@ -307,7 +309,10 @@ bool App_Shockwave_IsVoltageNormal(void)
     uint16_t voltage = Drv_ADC_GetRealValue(BSP_ADC_CH_ESW_U);
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
-
+    
+    if(TreatGetRunFlag()) {
+        return true;
+    }
     // Voltage must remain below threshold for 100 ms before it is treated as abnormal.
     if(voltage < SW_VOLTAGE_THRESHOLD_MV)
     {
@@ -342,7 +347,10 @@ bool App_Shockwave_IsHeadTempNormal(void)
     uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
     s_SWCtrlInfo.HeadTemp = temp;
     bool isNormal = true;
-
+    
+    if(TreatGetRunFlag()) {
+        return true;
+    }
     if(temp > s_SWCtrlInfo.TempLimit)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_TEMP_TOO_HIGH;
@@ -435,6 +443,37 @@ void App_Shockwave_ProcessPWM(void)
     }
 }
 
+static void App_Shockwave_RunChangeLevel(void)
+{
+    bool workLevelChanged = false;
+    bool freqLevelChanged = false;
+
+    if((s_SWCtrlInfo.Trans.RxWorkState.work_level > 0) &&
+       (s_SWCtrlInfo.Trans.RxWorkState.work_level <= SW_WORK_LEVEL_MAX) &&
+       (s_SWCtrlInfo.WorkLevel != s_SWCtrlInfo.Trans.RxWorkState.work_level))
+    {
+        s_SWCtrlInfo.WorkLevel = s_SWCtrlInfo.Trans.RxWorkState.work_level;
+        s_SWCtrlInfo.pwmESW_NHighTimeMs = App_Shockwave_CalculateESW_NHighTime(s_SWCtrlInfo.WorkLevel);
+        workLevelChanged = true;
+    }
+
+    if((s_SWCtrlInfo.Trans.RxWorkState.frequency > 0) &&
+       (s_SWCtrlInfo.Trans.RxWorkState.frequency <= SW_FREQ_LEVEL_MAX) &&
+       (s_SWCtrlInfo.FreqLevel != s_SWCtrlInfo.Trans.RxWorkState.frequency))
+    {
+        s_SWCtrlInfo.FreqLevel = s_SWCtrlInfo.Trans.RxWorkState.frequency;
+        s_SWCtrlInfo.cyclePeriodMs = App_Shockwave_CalculateCyclePeriod(s_SWCtrlInfo.FreqLevel);
+        freqLevelChanged = true;
+    }
+
+    if(workLevelChanged || freqLevelChanged)
+    {
+        LOG_I("SW: Run params updated - level=%d, freq=%d, period=%d ms, ESW_N_high=%d ms",
+              s_SWCtrlInfo.WorkLevel, s_SWCtrlInfo.FreqLevel,
+              s_SWCtrlInfo.cyclePeriodMs, s_SWCtrlInfo.pwmESW_NHighTimeMs);
+    }
+}
+
 void App_ShockWave_CheckProbe()
 {
     if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_SHOCKWAVE) {
@@ -497,6 +536,7 @@ void App_Shockwave_Process(void)
                 App_Shockwave_ChangeState(E_SW_RUN_STOP);
             } else {
                 App_Shockwave_ProcessPWM();
+                App_Shockwave_RunChangeLevel();
             }
             break;
 
@@ -507,6 +547,7 @@ void App_Shockwave_Process(void)
             s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
             s_SWCtrlInfo.cycleStartTime = 0;
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
+            App_Shockwave_ChangeState(E_SW_RUN_IDLE);
             if(s_SWCtrlInfo.isWaitReturn)
             {
                 App_Shockwave_ChangeState(E_SW_RUN_WAIT_RETURN);

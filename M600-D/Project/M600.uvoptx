@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>O</Name>
+          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -249,6 +249,11 @@
           <count>19</count>
           <WinNumber>1</WinNumber>
           <ItemText>voltage,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>s_lastRxWorkState</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -614,7 +619,7 @@
 
   <Group>
     <GroupName>BSP</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -622,7 +627,7 @@
       <GroupNumber>3</GroupNumber>
       <FileNumber>26</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\bsp_adc.c</PathWithFileName>
@@ -730,7 +735,7 @@
 
   <Group>
     <GroupName>DRV</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

@@ -595,24 +595,26 @@ void App_NegPrsHeat_Process(void)
                 s_NPHCtrlInfo.heatControlActive = false;
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
                 break;
-            }
-
-            /* When preheat temp reached, switch to NH and WORKING */
-            if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
-            {
-                if(App_NegPrsHeat_StartCheck()) {
-                    App_NegPrsHeat_SetWorkParams();
-                    Drv_IODevice_ChangeChannel(CHANNEL_READY);
-    
-                    App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
-                    LOG_I("NPH: Preheat completed, entering working state");
+            }else {
+                /* When preheat temp reached, switch to NH and WORKING */
+                if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
+                {
+                    if(App_NegPrsHeat_StartCheck()) {
+                        App_NegPrsHeat_SetWorkParams();
+                        Drv_IODevice_ChangeChannel(CHANNEL_READY);
+                        App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
+                        LOG_I("NPH: Preheat completed, entering working state");
+                    }
+                    
+                } else {
+                    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
                 }
-                
-            }
-            if(App_NegPrsHeat_IsHeadTempNormal() == false) {
-                App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
-            } else {
-                App_NegPrsHeat_ControlTemperature();
+                if(App_NegPrsHeat_IsHeadTempNormal() == false) {
+                    App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
+                } else {
+                    App_NegPrsHeat_ControlTemperature();
+                }
+
             }
             break;
 

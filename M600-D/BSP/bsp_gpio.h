@@ -39,9 +39,9 @@ extern "C" {
 #define CTR_FAN_HP_Port      GPIOC
 #define CTR_FAN_Pin          GPIO_Pin_6
 #define CTR_FAN_Port         GPIOC
-#define ESW_P_Pin            GPIO_Pin_8   /* PB8, shockwave ESW+ (was TIM4_CH3) */
+#define ESW_P_Pin            GPIO_Pin_9   /* PB9, shockwave ESW+ */
 #define ESW_P_Port           GPIOB
-#define ESW_N_Pin            GPIO_Pin_9   /* PB9, shockwave ESW- (was TIM4_CH4) */
+#define ESW_N_Pin            GPIO_Pin_8   /* PB8, shockwave ESW- */
 #define ESW_N_Port           GPIOB
 #define LED_PIN              GPIO_Pin_15
 #define LED_PORT             GPIOC

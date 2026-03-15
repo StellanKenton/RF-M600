@@ -242,7 +242,6 @@ void App_Shockwave_SetWorkParams(void)
     // Set work/freq/points from Rx
     s_SWCtrlInfo.WorkLevel = s_SWCtrlInfo.Trans.RxWorkState.work_level;
     s_SWCtrlInfo.FreqLevel = s_SWCtrlInfo.Trans.RxWorkState.frequency;
-    s_SWCtrlInfo.RemainPoints = s_SWCtrlInfo.Trans.RxWorkState.work_time;
 
     // Cycle period from frequency level
     s_SWCtrlInfo.cyclePeriodUs = App_Shockwave_CalculateCyclePeriodUs(s_SWCtrlInfo.FreqLevel);

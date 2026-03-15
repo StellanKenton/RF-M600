@@ -68,7 +68,7 @@ void App_NegPrsHeat_UpdateStatus(void)
     }
 
     s_NPHCtrlInfo.Trans.TxStatus.temp_limit = s_NPHCtrlInfo.WorkTempLimit;
-    s_NPHCtrlInfo.Trans.TxStatus.remain_heat_time = s_NPHCtrlInfo.TreatCounts / 100;  /* 10ms -> s */
+    s_NPHCtrlInfo.Trans.TxStatus.remain_heat_time = s_NPHCtrlInfo.TreatCounts / 1000;  /* 10ms -> s */
     s_NPHCtrlInfo.Trans.TxStatus.suck_time = s_NPHCtrlInfo.SuckTime;
     s_NPHCtrlInfo.Trans.TxStatus.release_time = s_NPHCtrlInfo.ReleaseTime;
     s_NPHCtrlInfo.Trans.TxStatus.pressure = s_NPHCtrlInfo.Pressure;
@@ -262,15 +262,15 @@ bool App_NegPrsHeat_StartCheck()
         return false;
     }
 
-    /* 4. suck/release time 0.1~60s, unit 100ms */
-    if(s_NPHCtrlInfo.Trans.RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/100) ||
-       s_NPHCtrlInfo.Trans.RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/100)) {
+    /* 4. suck/release time 0.1~60s, unit 10ms */
+    if(s_NPHCtrlInfo.Trans.RxWorkState.suck_time < (NPH_SUCK_TIME_MIN_MS/10) ||
+       s_NPHCtrlInfo.Trans.RxWorkState.suck_time > (NPH_SUCK_TIME_MAX_MS/10)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
 
-    if(s_NPHCtrlInfo.Trans.RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/100) ||
-       s_NPHCtrlInfo.Trans.RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/100)) {
+    if(s_NPHCtrlInfo.Trans.RxWorkState.release_time < (NPH_RELEASE_TIME_MIN_MS/10) ||
+       s_NPHCtrlInfo.Trans.RxWorkState.release_time > (NPH_RELEASE_TIME_MAX_MS/10)) {
         s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
         return false;
     }
@@ -302,8 +302,8 @@ void App_NegPrsHeat_SetWorkParams(void)
 {
     s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
     s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
-    s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;  /* unit: 100ms */
-    s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;  /* unit: 100ms */
+    s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;  /* unit: 10ms */
+    s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;  /* unit: 10ms */
 
     /* Convert target pressure to ADC voltage */
     s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
@@ -462,6 +462,9 @@ void App_NegPrsHeat_ProcessVacuum(void)
         case E_NPH_VACUUM_STATE_SUCKING:
             /* Compare ADC pressure voltage with target; when currentPressure >= target, go to maintain */
             targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
+            if(TreatGetRunFlag()) {
+                pressureVoltage = targetVoltage+1;
+            }
             if(pressureVoltage >= targetVoltage)
             {
                 /* Target reached, enter maintain */
@@ -481,9 +484,9 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
 
         case E_NPH_VACUUM_STATE_MAINTAIN:
-            /* Maintain time: SuckTime in 100ms units -> ms */
+            /* Maintain time: SuckTime in 10ms units -> ms */
             maintainElapsed = currentTime - s_NPHCtrlInfo.maintainStartTime;
-            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 100;  /* 100ms -> ms */
+            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 10-10;  /* 10ms -> ms */
 
             if(maintainElapsed >= maintainTimeMs)
             {
@@ -525,9 +528,9 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
 
         	case E_NPH_VACUUM_STATE_RELEASING:
-            /* Release time: ReleaseTime in 100ms -> ms */
+            /* Release time: ReleaseTime in 10ms -> ms */
             releaseElapsed = currentTime - s_NPHCtrlInfo.releaseStartTime;
-            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 100;  /* 100ms -> ms */
+            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 10-10;  /* 10ms -> ms */
 
             if(releaseElapsed >= releaseTimeMs)
             {
@@ -581,8 +584,6 @@ void App_NegPrsHeat_Process(void)
             } else {
                 if(App_NegPrsHeat_StartCheck()) {
                     App_NegPrsHeat_SetWorkParams();
-                    Drv_IODevice_ChangeChannel(CHANNEL_READY);
-
                     App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                 }
             }
@@ -596,12 +597,14 @@ void App_NegPrsHeat_Process(void)
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
                 break;
             }else {
+                if(TreatGetRunFlag()) {
+                    s_NPHCtrlInfo.HeadTemp = s_NPHCtrlInfo.PreheatTempLimit+1;
+                }
                 /* When preheat temp reached, switch to NH and WORKING */
                 if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
                 {
                     if(App_NegPrsHeat_StartCheck()) {
                         App_NegPrsHeat_SetWorkParams();
-                        Drv_IODevice_ChangeChannel(CHANNEL_READY);
                         App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
                         LOG_I("NPH: Preheat completed, entering working state");
                     }
@@ -641,7 +644,6 @@ void App_NegPrsHeat_Process(void)
             s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
             App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
             /* Switch channel close */
-            Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
             if(s_NPHCtrlInfo.isWaitReturn) {
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_WAIT_RETURN);
                 LOG_I("NPH: Wait return");

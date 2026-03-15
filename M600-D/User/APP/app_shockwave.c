@@ -281,7 +281,7 @@ void App_Shockwave_SetWorkParams(void)
     s_SWCtrlInfo.pwmESW_NHighTimeUs = App_Shockwave_CalculateESW_NHighTimeUs(s_SWCtrlInfo.WorkLevel);
 
     // Switch to READY channel (pwr_control1 etc.)
-    Drv_IODevice_ChangeChannel(CHANNEL_READY);
+    Drv_IODevice_ChangeChannel(CHANNEL_SW_READY);
 
     App_Shockwave_ResetPulseEngine();
 
@@ -538,7 +538,7 @@ void App_Shockwave_Process(void)
             // If StartCheck passes, set params and start working
             if(App_Shockwave_StartCheck()) {
                 App_Shockwave_SetWorkParams();
-                Drv_IODevice_ChangeChannel(CHANNEL_READY);
+                Drv_IODevice_ChangeChannel(CHANNEL_SW_READY);
                 App_Shockwave_ChangeState(E_SW_RUN_WORKING);
             }
             break;
@@ -559,7 +559,7 @@ void App_Shockwave_Process(void)
         case E_SW_RUN_STOP:
             // Stop PWM output
             App_Shockwave_ResetPulseEngine();
-            Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
+            Drv_IODevice_ChangeChannel(CHANNEL_SW_CLOSE);
             App_Shockwave_ChangeState(E_SW_RUN_IDLE);
             if(s_SWCtrlInfo.isWaitReturn)
             {

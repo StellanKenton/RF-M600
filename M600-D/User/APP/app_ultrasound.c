@@ -420,7 +420,7 @@ void App_Ultrasound_Process(void)
                 App_UltraSound_SetWorkParams();
                 Drv_SI5351_SetComplementaryPWM(true);
                 // pwr_control2 switch to output enabled (normally disabled)
-                Drv_IODevice_ChangeChannel(CHANNEL_READY);
+                Drv_IODevice_ChangeChannel(CHANNEL_RF_US_READY);
                 App_Ultrasound_ChangeState(E_US_RUN_WORKING);
             }
             break;
@@ -437,7 +437,7 @@ void App_Ultrasound_Process(void)
 			s_USCtrlInfo.WorkLevel = 0;
 			s_USCtrlInfo.Trans.RxWorkState.work_state = 0;
             // Close output channel
-            Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
+            Drv_IODevice_ChangeChannel(CHANNEL_RF_US_CLOSE);
             App_Ultrasound_ChangeState(E_US_RUN_IDLE);
             if(s_USCtrlInfo.isWaitReturn) {
                 App_Ultrasound_ChangeState(E_US_RUN_WAIT_RETURN);

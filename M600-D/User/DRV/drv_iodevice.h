@@ -28,8 +28,10 @@ typedef enum {
     CHANNEL_SW,
     CHANNEL_RF,
     CHANNEL_NH,
-    CHANNEL_CLOSE,
-    CHANNEL_READY,
+    CHANNEL_RF_US_CLOSE,
+    CHANNEL_RF_US_READY,
+    CHANNEL_SW_CLOSE,
+    CHANNEL_SW_READY,
     CHANNEL_MAX,
 } IODevice_Channel_EnumDef;
 
@@ -42,6 +44,7 @@ typedef struct {
     uint8_t us;
     uint8_t esw;
     uint8_t rf;
+    uint8_t nh;
 } IODevice_SyncSignals_t;
 
 void Drv_IODevice_ReadSyncSignals(IODevice_SyncSignals_t *pSignals);

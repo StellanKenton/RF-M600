@@ -319,8 +319,8 @@ typedef struct
     uint8_t work_state;          ///< 0x00: Stop, 0x01: Working
     uint16_t temp_limit;         ///< 350-480 (35-48â„?), 0xFFFF: Over limit
     uint16_t remain_heat_time;   ///< Remaining heat time (seconds), max 3600
-    uint16_t suck_time;            ///< Suck time: unit 10ms, 10-60000
-    uint16_t release_time;        ///< Release time: unit 10ms, 10-60000
+    uint16_t suck_time;          ///< Suck time: unit 10ms, 0.1s-60s (10-6000)
+    uint16_t release_time;       ///< Release time: unit 10ms, 0.1s-60s (10-6000)
     uint8_t pressure;            ///< Pressure: 10-100 KPa
     uint16_t head_temp;          ///< Head temperature = value/10, 0xFFFF: NTC open, 0xEEFF: NTC short
     uint8_t preheat_state;       ///< Preheat state: 0x00: Stop, 0x01: Working
@@ -337,8 +337,8 @@ typedef struct
     uint8_t work_state;          ///< 0x01: Start, 0x00: Stop, 0x02: Reset
     uint16_t work_time;          ///< Work time (seconds), max 3600
     uint8_t pressure;            ///< Pressure: -10KPa to -100KPa (send positive value)
-    uint16_t suck_time;           ///< Suck time: unit 100ms, 0.1s-60s
-    uint16_t release_time;        ///< Release time: unit 100ms, 0.1s-60s
+    uint16_t suck_time;           ///< Suck time: unit 10ms, 0.1s-60s (10-6000)
+    uint16_t release_time;        ///< Release time: unit 10ms, 0.1s-60s (10-6000)
     uint16_t temp_limit;         ///< 350-480 (35-48â„?)
 } Heat_SetWorkState_Send_t;
 

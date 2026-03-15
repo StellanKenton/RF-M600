@@ -396,7 +396,7 @@ void App_RadioFreq_Process(void)
             if(App_RadioFreq_StartCheck()) {
                 App_RadioFreq_SetWorkParams();
                 Drv_SI5351_SetComplementaryPWM(true);
-                Drv_IODevice_ChangeChannel(CHANNEL_READY);
+                Drv_IODevice_ChangeChannel(CHANNEL_RF_US_READY);
                 App_RadioFreq_ChangeState(E_RF_RUN_WORKING);
             }
             break;
@@ -414,7 +414,7 @@ void App_RadioFreq_Process(void)
             s_RFCtrlInfo.WorkLevel = 0;
 			s_RFCtrlInfo.Trans.RxWorkState.work_state = 0;
             Drv_SI5351_SetComplementaryPWM(false);
-            Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
+            Drv_IODevice_ChangeChannel(CHANNEL_RF_US_CLOSE);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
             if(s_RFCtrlInfo.isWaitReturn) {
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);

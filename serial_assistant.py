@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 import struct
 
-# 协�??常量
+# 协议常量
 PROTOCOL_HEADER_0 = 0x5A
 PROTOCOL_HEADER_1 = 0xA5
 PROTOCOL_DIR_HOST_TO_DEV = 0x00
@@ -29,21 +29,21 @@ PROTOCOL_CMD_GET_STATUS = 0x00
 PROTOCOL_CMD_SET_WORK_STATE = 0x01
 PROTOCOL_CMD_SET_CONFIG = 0x02
 
-# 工作状�?
+# 工作状态
 WORK_STATE_STOP = 0x00
 WORK_STATE_START = 0x01
 WORK_STATE_RESET = 0x02
 
-# 连接状�?
+# 连接状态
 CONN_STATE_CONNECTED_FOOT_CLOSED = 0x00
 CONN_STATE_DISCONNECTED_FOOT_CLOSED = 0x10
 CONN_STATE_CONNECTED_FOOT_OPEN = 0x01
 CONN_STATE_DISCONNECTED_FOOT_OPEN = 0x11
 
-# 温度 / 限值错�?�?
+# 温度 / 限值错误标记
 TEMP_ERROR_NTC_OPEN = 0xFFFF
 TEMP_ERROR_NTC_SHORT = 0xEEFF
-# 与固件一致：温度/频率等“超限”也�? 0xFFFF 表示
+# 与固件一致：温度/频率等“超限”也用 0xFFFF 表示
 TEMP_ERROR_OVER_LIMIT = 0xFFFF
 
 # 配置结果
@@ -75,7 +75,7 @@ class ProtocolHelper:
             crc ^= (r << 8)
             crc &= 0xFFFF
 
-            # 处理8�?
+            # 处理 8 位
             for i in range(8):
                 if crc & 0x8000:
                     crc = ((crc << 1) ^ 0x8005) & 0xFFFF
@@ -101,7 +101,7 @@ class ProtocolHelper:
         packet.append(len(data_bytes))
         packet.extend(data_bytes)
 
-        # 计算 CRC16（只对数�?部分�?
+        # 计算 CRC16（只对数据部分）
         crc = ProtocolHelper.crc16_compute(data_bytes)
         packet.append(crc & 0xFF)
         packet.append((crc >> 8) & 0xFF)
@@ -167,14 +167,14 @@ class SerialAssistant:
         config_frame = ttk.Frame(self.root, padding="10")
         config_frame.pack(fill=tk.X)
 
-        ttk.Label(config_frame, text="串口�?:").grid(row=0, column=0, padx=5)
+        ttk.Label(config_frame, text="串口号:").grid(row=0, column=0, padx=5)
         self.port_var = tk.StringVar()
         self.port_combo = ttk.Combobox(config_frame, textvariable=self.port_var, width=15)
         self.port_combo.grid(row=0, column=1, padx=5)
 
         ttk.Button(config_frame, text="刷新", command=self.refresh_ports).grid(row=0, column=2, padx=5)
 
-        ttk.Label(config_frame, text="波特�?:").grid(row=0, column=3, padx=5)
+        ttk.Label(config_frame, text="波特率:").grid(row=0, column=3, padx=5)
         self.baudrate_var = tk.StringVar(value="115200")
         baudrate_combo = ttk.Combobox(config_frame, textvariable=self.baudrate_var,
                                      values=["9600", "19200", "38400", "57600", "115200", "230400"], width=10)
@@ -183,11 +183,11 @@ class SerialAssistant:
         self.connect_btn = ttk.Button(config_frame, text="打开串口", command=self.toggle_connection)
         self.connect_btn.grid(row=0, column=5, padx=5)
 
-        # 主内容区域（左右分栏�?
+        # 主内容区域（左右分栏）
         main_paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
         main_paned.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # 左侧：命令发送区�?
+        # 左侧：命令发送区域
         left_frame = ttk.Frame(main_paned)
         main_paned.add(left_frame, weight=1)
 
@@ -196,8 +196,8 @@ class SerialAssistant:
         module_frame.pack(fill=tk.X, pady=5)
 
         self.module_var = tk.IntVar(value=PROTOCOL_MODULE_DISCOVERY)
-        self.module_status_var = tk.StringVar(value="�?动�?��? (0x00)")
-        self.module_poll_var = tk.StringVar(value="�? 1 秒轮询当前模�?")
+        self.module_status_var = tk.StringVar(value="自动探测 (0x00)")
+        self.module_poll_var = tk.StringVar(value="每 1 秒轮询当前模块")
         ttk.Label(module_frame, textvariable=self.module_status_var).pack(anchor=tk.W)
         ttk.Label(module_frame, textvariable=self.module_poll_var, foreground="gray").pack(anchor=tk.W, pady=(4, 0))
 
@@ -208,13 +208,13 @@ class SerialAssistant:
         self.cmd_var = tk.IntVar(value=PROTOCOL_CMD_GET_STATUS)
         self.cmd_hint_label = ttk.Label(
             self.cmd_frame,
-            text="当前无已连接模块，自动轮询期间隐藏命令选项�?",
+            text="当前无已连接模块，自动轮询期间隐藏命令选项。",
             foreground="gray"
         )
         self.cmd_buttons = [
-            ttk.Radiobutton(self.cmd_frame, text="获取状�? (0x00)", variable=self.cmd_var,
+            ttk.Radiobutton(self.cmd_frame, text="获取状态 (0x00)", variable=self.cmd_var,
                             value=PROTOCOL_CMD_GET_STATUS, command=self.on_cmd_change),
-            ttk.Radiobutton(self.cmd_frame, text="设置工作状�? (0x01)", variable=self.cmd_var,
+            ttk.Radiobutton(self.cmd_frame, text="设置工作状态 (0x01)", variable=self.cmd_var,
                             value=PROTOCOL_CMD_SET_WORK_STATE, command=self.on_cmd_change),
             ttk.Radiobutton(self.cmd_frame, text="设置配置 (0x02)", variable=self.cmd_var,
                             value=PROTOCOL_CMD_SET_CONFIG, command=self.on_cmd_change),
@@ -228,22 +228,22 @@ class SerialAssistant:
         self.param_widgets = {}
         self.setup_param_inputs()
 
-        # 发送按�?
+        # 发送按钮
         send_frame = ttk.Frame(left_frame)
         send_frame.pack(fill=tk.X, pady=5)
-        self.send_btn = ttk.Button(send_frame, text="发送命�?", command=self.send_command)
+        self.send_btn = ttk.Button(send_frame, text="发送命令", command=self.send_command)
         self.send_btn.pack(side=tk.LEFT, padx=5)
         self.clear_btn = ttk.Button(send_frame, text="清空参数", command=self.clear_params)
         self.clear_btn.pack(side=tk.LEFT, padx=5)
 
-        # 右侧：数�?收发显示区域
+        # 右侧：数据收发显示区域
         right_frame = ttk.Frame(main_paned)
         main_paned.add(right_frame, weight=1)
 
-        # 当前探头状态显�?
-        status_frame = ttk.LabelFrame(right_frame, text="探头状�?", padding="10")
+        # 当前探头状态显示
+        status_frame = ttk.LabelFrame(right_frame, text="探头状态", padding="10")
         status_frame.pack(fill=tk.X, pady=5)
-        self.status_empty_var = tk.StringVar(value="等待探头状态数�?...")
+        self.status_empty_var = tk.StringVar(value="等待探头状态数据...")
         self.status_empty_label = ttk.Label(
             status_frame,
             textvariable=self.status_empty_var,
@@ -263,8 +263,8 @@ class SerialAssistant:
         self.recv_text = scrolledtext.ScrolledText(recv_frame, height=20, font=("Consolas", 9))
         self.recv_text.pack(fill=tk.BOTH, expand=True)
 
-        # 数据发送显�?
-        send_display_frame = ttk.LabelFrame(right_frame, text="发送数�?", padding="5")
+        # 数据发送显示
+        send_display_frame = ttk.LabelFrame(right_frame, text="发送数据", padding="5")
         send_display_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
         self.send_text = scrolledtext.ScrolledText(send_display_frame, height=10, font=("Consolas", 9))
@@ -274,7 +274,7 @@ class SerialAssistant:
         clear_frame = ttk.Frame(right_frame)
         clear_frame.pack(fill=tk.X, pady=5)
         ttk.Button(clear_frame, text="清空接收", command=lambda: self.recv_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(clear_frame, text="清空发�?", command=lambda: self.send_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(clear_frame, text="清空发送", command=lambda: self.send_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
 
         self.update_module_status()
         self.update_command_visibility()
@@ -288,7 +288,7 @@ class SerialAssistant:
         if not self.module_connected:
             ttk.Label(
                 self.param_frame,
-                text="当前无已连接模块，�?�测到模块后才会显示参数输入�?",
+                text="当前无已连接模块，检测到模块后才会显示参数输入。",
                 foreground="gray"
             ).pack(anchor=tk.W, pady=5)
             return
@@ -296,56 +296,56 @@ class SerialAssistant:
         module = self.module_var.get()
         cmd = self.cmd_var.get()
 
-        # 根据模块和命令�?�置参数
+        # 根据模块和命令配置参数
         if cmd == PROTOCOL_CMD_GET_STATUS:
             # 获取状态命令通常无需参数
             ttk.Label(self.param_frame, text="此命令无需参数", foreground="gray").pack(anchor=tk.W, pady=5)
         elif cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
-                self.add_param_input("工作状�?", "work_state", "0-停�??, 1-开�?, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(�?)", "work_time", "最�? 3600 �?", "60", "uint16")
-                self.add_param_input("工作级别", "work_level", "0-39 (40�?)", "10", "uint8")
+                self.add_param_input("工作状态", "work_state", "0-停止, 1-启动, 2-复位", "1", "uint8")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
+                self.add_param_input("工作级别", "work_level", "0-39 (40档)", "10", "uint8")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                self.add_param_input("工作状�?", "work_state", "0-停�??, 1-开�?, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(�?)", "work_time", "最�? 3600 �?", "60", "uint16")
+                self.add_param_input("工作状态", "work_state", "0-停止, 1-启动, 2-复位", "1", "uint8")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("工作级别", "work_level", "0-20", "10", "uint8")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
-                self.add_param_input("工作状�?", "work_state", "0-停�??, 1-开�?, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(�?)", "work_time", "最�? 3600 �?", "60", "uint16")
+                self.add_param_input("工作状态", "work_state", "0-停止, 1-启动, 2-复位", "1", "uint8")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 10000 次", "60", "uint16")
                 self.add_param_input("工作级别", "work_level", "0-26", "10", "uint8")
                 self.add_param_input("频率", "frequency", "0-16", "8", "uint8")
             elif module == PROTOCOL_MODULE_HEAT:
-                self.add_param_input("工作状�?", "work_state", "0-停�??, 1-开�?, 2-复位", "1", "uint8")
-                self.add_param_input("工作时间(�?)", "work_time", "最�? 3600 �?", "60", "uint16")
+                self.add_param_input("工作状态", "work_state", "0-停止, 1-启动, 2-复位", "1", "uint8")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "60", "uint16")
                 self.add_param_input("压力(KPa)", "pressure", "10-100", "50", "uint8")
-                self.add_param_input("吸合时间(10ms)", "suck_time", "10-6000 (0.1-60�?)", "10", "uint16")
-                self.add_param_input("释放时间(10ms)", "release_time", "10-6000 (0.1-60�?)", "10", "uint16")
-                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48�?)", "400", "uint16")
+                self.add_param_input("吸合时间(10ms)", "suck_time", "10-6000 (0.1-60秒)", "10", "uint16")
+                self.add_param_input("释放时间(10ms)", "release_time", "10-6000 (0.1-60秒)", "10", "uint16")
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
         elif cmd == PROTOCOL_CMD_SET_CONFIG:
             if module == PROTOCOL_MODULE_ULTRASOUND:
                 self.add_param_input("频率(kHz)", "frequency", "1000-1400", "1200", "uint16")
                 self.add_param_input("电压(10mV)", "voltage", "1000-2000 (10-20V)", "1500", "uint16")
-                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48�?)", "400", "uint16")
-                self.add_param_input("电流上限", "current_high_limit", "电流上限�?", "1000", "uint16")
-                self.add_param_input("电流下限", "current_low_limit", "电流下限�?", "100", "uint16")
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("电流上限", "current_high_limit", "电流上限值", "1000", "uint16")
+                self.add_param_input("电流下限", "current_low_limit", "电流下限值", "100", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48�?)", "400", "uint16")
-                self.add_param_input("电流上限", "current_high_limit", "电流上限�?", "1000", "uint16")
-                self.add_param_input("电流下限", "current_low_limit", "电流下限�?", "100", "uint16")
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("电流上限", "current_high_limit", "电流上限值", "1000", "uint16")
+                self.add_param_input("电流下限", "current_low_limit", "电流下限值", "100", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
-                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48�?)", "400", "uint16")
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
                 self.add_param_input("ESW-P 电流上限", "esw_p_current_high_limit", "ESW-P 电流上限", "1000", "uint16")
                 self.add_param_input("ESW-P 电流下限", "esw_p_current_low_limit", "ESW-P 电流下限", "100", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
                 self.add_param_input("ESW-N 电流上限", "esw_n_current_high_limit", "ESW-N 电流上限", "1000", "uint16")
                 self.add_param_input("ESW-N 电流下限", "esw_n_current_low_limit", "ESW-N 电流下限", "100", "uint16")
             elif module == PROTOCOL_MODULE_HEAT:
-                self.add_param_input("预热状�?", "preheat_state", "0-停�??, 1-开�?", "1", "uint8")
-                self.add_param_input("工作时间(�?)", "work_time", "最�? 3600 �?", "300", "uint16")
-                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48�?)", "400", "uint16")
-                self.add_param_input("预热温度限制", "preheat_temp_limit", "350-480 (35-48�?)", "400", "uint16")
+                self.add_param_input("预热状态", "preheat_state", "0-停止, 1-启动", "1", "uint8")
+                self.add_param_input("工作时间(秒)", "work_time", "最大 3600 秒", "300", "uint16")
+                self.add_param_input("温度限制", "temp_limit", "350-480 (35-48℃)", "400", "uint16")
+                self.add_param_input("预热温度限制", "preheat_temp_limit", "350-480 (35-48℃)", "400", "uint16")
                 self.add_param_input("剩余治疗次数", "remain_treatment_count", "剩余次数", "100", "uint16")
 
     def add_param_input(self, label, key, desc, default, data_type):
@@ -356,7 +356,7 @@ class SerialAssistant:
         desc_label = ttk.Label(frame, text=f"{label}: {desc}", font=("Arial", 9))
         desc_label.pack(anchor=tk.W)
 
-        # 输入�?
+        # 输入框
         input_frame = ttk.Frame(frame)
         input_frame.pack(fill=tk.X, padx=20)
 
@@ -406,7 +406,7 @@ class SerialAssistant:
         data_bytes = bytearray()
 
         if cmd == PROTOCOL_CMD_GET_STATUS:
-            # 获取状态命令通常�?有一�? dummy 字节 0x00
+            # 获取状态命令通常带有一个 dummy 字节 0x00
             data_bytes.append(0x00)
         elif cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
@@ -545,7 +545,7 @@ class SerialAssistant:
             module_name = self.get_module_name(module)
             cmd_name = self.get_cmd_name(cmd)
             hex_str = ' '.join([f'{b:02X}' for b in packet])
-            self.send_text.insert(tk.END, f"[{timestamp}] 发�? - {module_name} - {cmd_name}\n")
+            self.send_text.insert(tk.END, f"[{timestamp}] 发送 - {module_name} - {cmd_name}\n")
             self.send_text.insert(tk.END, f"数据: {hex_str}\n")
             self.send_text.insert(tk.END, f"长度: {len(packet)} 字节\n")
             self.send_text.insert(tk.END, f"参数: {self.format_send_params(module, cmd, data_bytes)}\n")
@@ -554,11 +554,11 @@ class SerialAssistant:
 
     def send_command(self):
         if not self.is_connected:
-            messagebox.showwarning("警告", "请先打开串口�?")
+            messagebox.showwarning("警告", "请先打开串口。")
             return
 
         if not self.module_connected:
-            messagebox.showwarning("警告", "当前无已连接模块，仅保留�?动轮�?�?")
+            messagebox.showwarning("警告", "当前无已连接模块，仅保留自动轮询。")
             return
 
         try:
@@ -569,7 +569,7 @@ class SerialAssistant:
             self.send_packet(module, cmd, data_bytes, log_send=True)
 
         except Exception as e:
-            messagebox.showerror("错�??", f"发送失�?: {str(e)}")
+            messagebox.showerror("错误", f"发送失败: {str(e)}")
 
     def start_auto_poll(self):
         self.stop_auto_poll()
@@ -596,35 +596,35 @@ class SerialAssistant:
             self.send_packet(module, PROTOCOL_CMD_GET_STATUS, bytes([0x00]), log_send=False)
         except Exception as e:
             if self.is_connected:
-                messagebox.showerror("错�??", f"�?动轮询失�?: {str(e)}")
+                messagebox.showerror("错误", f"自动轮询失败: {str(e)}")
             return
 
         self.schedule_auto_poll()
 
     def format_send_params(self, module, cmd, data_bytes):
         if cmd == PROTOCOL_CMD_GET_STATUS:
-            return "无参�?"
+            return "无参数"
 
         params = []
         idx = 0
 
         if cmd == PROTOCOL_CMD_SET_WORK_STATE:
             if module == PROTOCOL_MODULE_ULTRASOUND:
-                params.append(f"工作状�?={data_bytes[idx]}")
-                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}�?")
+                params.append(f"工作状态={data_bytes[idx]}")
+                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"工作级别={data_bytes[idx+3]}")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
-                params.append(f"工作状�?={data_bytes[idx]}")
-                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}�?")
+                params.append(f"工作状态={data_bytes[idx]}")
+                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"工作级别={data_bytes[idx+3]}")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
-                params.append(f"工作状�?={data_bytes[idx]}")
-                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}�?")
+                params.append(f"工作状态={data_bytes[idx]}")
+                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"工作级别={data_bytes[idx+3]}")
-                params.append(f"频率={data_bytes[idx+4]}")
+                params.append(f"频率={data_bytes[idx+4]}档")
             elif module == PROTOCOL_MODULE_HEAT:
-                params.append(f"工作状�?={data_bytes[idx]}")
-                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}�?")
+                params.append(f"工作状态={data_bytes[idx]}")
+                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"压力={data_bytes[idx+3]}KPa")
                 params.append(f"吸合时间={data_bytes[idx+4] | (data_bytes[idx+5] << 8)}*10ms")
                 params.append(f"释放时间={data_bytes[idx+6] | (data_bytes[idx+7] << 8)}*10ms")
@@ -650,8 +650,8 @@ class SerialAssistant:
                 params.append(f"ESW-N 电流上限={data_bytes[idx+8] | (data_bytes[idx+9] << 8)}")
                 params.append(f"ESW-N 电流下限={data_bytes[idx+10] | (data_bytes[idx+11] << 8)}")
             elif module == PROTOCOL_MODULE_HEAT:
-                params.append(f"预热状�?={data_bytes[idx]}")
-                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}�?")
+                params.append(f"预热状态={data_bytes[idx]}")
+                params.append(f"工作时间={data_bytes[idx+1] | (data_bytes[idx+2] << 8)}秒")
                 params.append(f"温度限制={data_bytes[idx+3] | (data_bytes[idx+4] << 8)}")
                 params.append(f"预热温度限制={data_bytes[idx+5] | (data_bytes[idx+6] << 8)}")
                 params.append(f"剩余治疗次数={data_bytes[idx+7] | (data_bytes[idx+8] << 8)}")
@@ -686,14 +686,14 @@ class SerialAssistant:
                     error_code = payload[11]
                     remain_treatment_count = payload[12] | (payload[13] << 8)
 
-                    result.append(f"工作状�?: {self.get_work_state_name(work_state)}")
+                    result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"频率: {frequency} kHz")
                     result.append(f"温度限制: {self.format_temp(temp_limit)}")
-                    result.append(f"剩余时间: {remain_time} �?")
+                    result.append(f"剩余时间: {remain_time} 秒")
                     result.append(f"工作级别: {work_level}")
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
-                    result.append(f"连接状�?: {self.get_conn_state_name(conn_state)}")
-                    result.append(f"错�??�?: 0x{error_code:02X}")
+                    result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
+                    result.append(f"错误码: 0x{error_code:02X}")
                     result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_RADIO_FREQ:
                 if len(payload) >= 12:
@@ -706,13 +706,13 @@ class SerialAssistant:
                     error_code = payload[9]
                     remain_treatment_count = payload[10] | (payload[11] << 8)
 
-                    result.append(f"工作状�?: {self.get_work_state_name(work_state)}")
+                    result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"温度限制: {self.format_temp(temp_limit)}")
-                    result.append(f"剩余时间: {remain_time} �?")
+                    result.append(f"剩余时间: {remain_time} 秒")
                     result.append(f"工作级别: {work_level}")
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
-                    result.append(f"连接状�?: {self.get_conn_state_name(conn_state)}")
-                    result.append(f"错�??�?: 0x{error_code:02X}")
+                    result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
+                    result.append(f"错误码: 0x{error_code:02X}")
                     result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_SHOCKWAVE:
                 if len(payload) >= 11:
@@ -725,13 +725,13 @@ class SerialAssistant:
                     error_code = payload[8]
                     remain_treatment_count = payload[9] | (payload[10] << 8)
 
-                    result.append(f"工作状�?: {self.get_work_state_name(work_state)}")
-                    result.append(f"频率: {frequency} �?")
-                    result.append(f"剩余时间: {remain_time} �?")
+                    result.append(f"工作状态: {self.get_work_state_name(work_state)}")
+                    result.append(f"频率: {frequency} 档")
+                    result.append(f"剩余时间: {remain_time} 秒")
                     result.append(f"工作级别: {work_level}")
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
-                    result.append(f"连接状�?: {self.get_conn_state_name(conn_state)}")
-                    result.append(f"错�??�?: 0x{error_code:02X}")
+                    result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
+                    result.append(f"错误码: 0x{error_code:02X}")
                     result.append(f"剩余治疗次数: {remain_treatment_count}")
             elif module == PROTOCOL_MODULE_HEAT:
                 if len(payload) >= 21:
@@ -749,18 +749,18 @@ class SerialAssistant:
                     error_code = payload[18]
                     remain_treatment_count = payload[19] | (payload[20] << 8)
 
-                    result.append(f"工作状�?: {self.get_work_state_name(work_state)}")
+                    result.append(f"工作状态: {self.get_work_state_name(work_state)}")
                     result.append(f"温度限制: {self.format_temp(temp_limit)}")
-                    result.append(f"剩余加热时间: {remain_heat_time} �?")
+                    result.append(f"剩余加热时间: {remain_heat_time} 秒")
                     result.append(f"吸合时间: {suck_time}*10ms")
                     result.append(f"释放时间: {release_time}*10ms")
                     result.append(f"压力: {pressure} KPa")
                     result.append(f"头部温度: {self.format_temp_value(head_temp)}")
-                    result.append(f"预热状�?: {self.get_work_state_name(preheat_state)}")
+                    result.append(f"预热状态: {self.get_work_state_name(preheat_state)}")
                     result.append(f"预热温度限制: {self.format_temp(preheat_temp_limit)}")
-                    result.append(f"剩余预热时间: {remain_preheat_time} �?")
-                    result.append(f"连接状�?: {self.get_conn_state_name(conn_state)}")
-                    result.append(f"错�??�?: 0x{error_code:02X}")
+                    result.append(f"剩余预热时间: {remain_preheat_time} 秒")
+                    result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
+                    result.append(f"错误码: 0x{error_code:02X}")
                     result.append(f"剩余治疗次数: {remain_treatment_count}")
         elif cmd == PROTOCOL_CMD_SET_CONFIG:
             if module == PROTOCOL_MODULE_ULTRASOUND:
@@ -808,7 +808,7 @@ class SerialAssistant:
                     temp_limit_result = payload[2]
                     preheat_temp_limit_result = payload[3]
                     remain_treatment_count_result = payload[4]
-                    result.append(f"预热状态配�?结果: {self.get_config_result_name(preheat_state_result)}")
+                    result.append(f"预热状态配置结果: {self.get_config_result_name(preheat_state_result)}")
                     result.append(f"工作时间配置结果: {self.get_config_result_name(work_time_result)}")
                     result.append(f"温度限制配置结果: {self.get_config_result_name(temp_limit_result)}")
                     result.append(f"预热温度限制配置结果: {self.get_config_result_name(preheat_temp_limit_result)}")
@@ -819,9 +819,9 @@ class SerialAssistant:
     def reset_status_display(self):
         self.status_panel_module = None
         if self.module_connected:
-            self.status_empty_var.set("等待当前探头状态刷�?...")
+            self.status_empty_var.set("等待当前探头状态刷新...")
         else:
-            self.status_empty_var.set("当前�?检测到探头，等待自动识�?...")
+            self.status_empty_var.set("当前未检测到探头，等待自动识别...")
         self.render_status_fields([])
 
     def build_status_entries(self, module, payload):
@@ -836,14 +836,14 @@ class SerialAssistant:
             error_code = payload[11]
             remain_treatment_count = payload[12] | (payload[13] << 8)
             return [
-                ("工作状�?", self.get_work_state_name(work_state)),
+                ("工作状态", self.get_work_state_name(work_state)),
                 ("频率", f"{frequency} kHz"),
                 ("温度限制", self.format_temp(temp_limit)),
-                ("剩余时间", f"{remain_time} �?"),
+                ("剩余时间", f"{remain_time} 秒"),
                 ("工作级别", str(work_level)),
                 ("头部温度", self.format_temp_value(head_temp)),
-                ("连接状�?", self.get_conn_state_name(conn_state)),
-                ("错�??�?", f"0x{error_code:02X}"),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
                 ("剩余治疗次数", str(remain_treatment_count)),
             ]
 
@@ -857,13 +857,13 @@ class SerialAssistant:
             error_code = payload[9]
             remain_treatment_count = payload[10] | (payload[11] << 8)
             return [
-                ("工作状�?", self.get_work_state_name(work_state)),
+                ("工作状态", self.get_work_state_name(work_state)),
                 ("温度限制", self.format_temp(temp_limit)),
-                ("剩余时间", f"{remain_time} �?"),
+                ("剩余时间", f"{remain_time} 秒"),
                 ("工作级别", str(work_level)),
                 ("头部温度", self.format_temp_value(head_temp)),
-                ("连接状�?", self.get_conn_state_name(conn_state)),
-                ("错�??�?", f"0x{error_code:02X}"),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
                 ("剩余治疗次数", str(remain_treatment_count)),
             ]
 
@@ -877,13 +877,13 @@ class SerialAssistant:
             error_code = payload[8]
             remain_treatment_count = payload[9] | (payload[10] << 8)
             return [
-                ("工作状�?", self.get_work_state_name(work_state)),
-                ("频率", f"{frequency} �?"),
-                ("剩余时间", f"{remain_time} �?"),
+                ("工作状态", self.get_work_state_name(work_state)),
+                ("频率", f"{frequency} 档"),
+                ("剩余时间", f"{remain_time} 秒"),
                 ("工作级别", str(work_level)),
                 ("头部温度", self.format_temp_value(head_temp)),
-                ("连接状�?", self.get_conn_state_name(conn_state)),
-                ("错�??�?", f"0x{error_code:02X}"),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
                 ("剩余治疗次数", str(remain_treatment_count)),
             ]
 
@@ -902,18 +902,18 @@ class SerialAssistant:
             error_code = payload[18]
             remain_treatment_count = payload[19] | (payload[20] << 8)
             return [
-                ("工作状�?", self.get_work_state_name(work_state)),
+                ("工作状态", self.get_work_state_name(work_state)),
                 ("温度限制", self.format_temp(temp_limit)),
-                ("剩余加热时间", f"{remain_heat_time} �?"),
+                ("剩余加热时间", f"{remain_heat_time} 秒"),
                 ("吸合时间", f"{suck_time}*10ms"),
                 ("释放时间", f"{release_time}*10ms"),
                 ("压力", f"{pressure} KPa"),
                 ("头部温度", self.format_temp_value(head_temp)),
-                ("预热状�?", self.get_work_state_name(preheat_state)),
+                ("预热状态", self.get_work_state_name(preheat_state)),
                 ("预热温度限制", self.format_temp(preheat_temp_limit)),
-                ("剩余预热时间", f"{remain_preheat_time} �?"),
-                ("连接状�?", self.get_conn_state_name(conn_state)),
-                ("错�??�?", f"0x{error_code:02X}"),
+                ("剩余预热时间", f"{remain_preheat_time} 秒"),
+                ("连接状态", self.get_conn_state_name(conn_state)),
+                ("错误码", f"0x{error_code:02X}"),
                 ("剩余治疗次数", str(remain_treatment_count)),
             ]
 
@@ -1035,9 +1035,9 @@ class SerialAssistant:
     def update_module_status(self):
         self.module_status_var.set(f"当前模块: {self.get_module_name(self.connected_module)}")
         if self.module_connected:
-            self.module_poll_var.set(f"�? 1 秒轮�? {self.get_module_name(self.connected_module)} 状�?")
+            self.module_poll_var.set(f"每 1 秒轮询 {self.get_module_name(self.connected_module)} 状态")
         else:
-            self.module_poll_var.set("�? 1 秒轮询自动�?�测模�? (0x00)")
+            self.module_poll_var.set("每 1 秒轮询自动探测模块 (0x00)")
 
     def update_command_visibility(self):
         if self.module_connected:
@@ -1059,38 +1059,38 @@ class SerialAssistant:
 
     def get_module_name(self, module):
         names = {
-            PROTOCOL_MODULE_DISCOVERY: "�?动�?��? (0x00)",
+            PROTOCOL_MODULE_DISCOVERY: "自动探测 (0x00)",
             PROTOCOL_MODULE_ULTRASOUND: "超声",
-            PROTOCOL_MODULE_RADIO_FREQ: "射�??",
-            PROTOCOL_MODULE_SHOCKWAVE: "冲击�?",
-            PROTOCOL_MODULE_HEAT: "�?�?"
+            PROTOCOL_MODULE_RADIO_FREQ: "射频",
+            PROTOCOL_MODULE_SHOCKWAVE: "冲击波",
+            PROTOCOL_MODULE_HEAT: "热疗"
         }
-        return names.get(module, f"�?知模�?(0x{module:02X})")
+        return names.get(module, f"未知模块(0x{module:02X})")
 
     def get_cmd_name(self, cmd):
         names = {
-            PROTOCOL_CMD_GET_STATUS: "获取状�?",
-            PROTOCOL_CMD_SET_WORK_STATE: "设置工作状�?",
+            PROTOCOL_CMD_GET_STATUS: "获取状态",
+            PROTOCOL_CMD_SET_WORK_STATE: "设置工作状态",
             PROTOCOL_CMD_SET_CONFIG: "设置配置"
         }
-        return names.get(cmd, f"�?知命�?(0x{cmd:02X})")
+        return names.get(cmd, f"未知命令(0x{cmd:02X})")
 
     def get_work_state_name(self, state):
         names = {
-            WORK_STATE_STOP: "停�??",
+            WORK_STATE_STOP: "停止",
             WORK_STATE_START: "工作",
             WORK_STATE_RESET: "复位"
         }
-        return names.get(state, f"�?�?(0x{state:02X})")
+        return names.get(state, f"未知(0x{state:02X})")
 
     def get_conn_state_name(self, state):
         names = {
-            CONN_STATE_CONNECTED_FOOT_CLOSED: "头部连接，脚部关�?",
-            CONN_STATE_DISCONNECTED_FOOT_CLOSED: "头部�?开，脚部关�?",
+            CONN_STATE_CONNECTED_FOOT_CLOSED: "头部连接，脚部关闭",
+            CONN_STATE_DISCONNECTED_FOOT_CLOSED: "头部断开，脚部关闭",
             CONN_STATE_CONNECTED_FOOT_OPEN: "头部连接，脚部打开",
-            CONN_STATE_DISCONNECTED_FOOT_OPEN: "头部�?开，脚部打开"
+            CONN_STATE_DISCONNECTED_FOOT_OPEN: "头部断开，脚部打开"
         }
-        return names.get(state, f"�?�?(0x{state:02X})")
+        return names.get(state, f"未知(0x{state:02X})")
 
     def get_config_result_name(self, result):
         names = {
@@ -1098,20 +1098,20 @@ class SerialAssistant:
             CONFIG_RESULT_FAIL: "失败",
             CONFIG_RESULT_OVER_LIMIT: "超限"
         }
-        return names.get(result, f"�?�?(0x{result:02X})")
+        return names.get(result, f"未知(0x{result:02X})")
 
     def format_temp(self, value):
         if value == TEMP_ERROR_OVER_LIMIT:
             return "超限"
-        return f"{value/10:.1f}�?"
+        return f"{value/10:.1f}℃"
 
     def format_temp_value(self, value):
         if value == TEMP_ERROR_NTC_OPEN:
-            return "NTC开�?"
+            return "NTC开路"
         elif value == TEMP_ERROR_NTC_SHORT:
-            return "NTC�?�?"
+            return "NTC短路"
         else:
-            return f"{value/10:.1f}�?"
+            return f"{value/10:.1f}℃"
 
     def refresh_ports(self):
         ports = serial.tools.list_ports.comports()
@@ -1130,7 +1130,7 @@ class SerialAssistant:
         try:
             port = self.port_var.get()
             if not port:
-                messagebox.showwarning("警告", "请选择串口�?")
+                messagebox.showwarning("警告", "请选择串口。")
                 return
 
             baudrate = int(self.baudrate_var.get())
@@ -1139,7 +1139,7 @@ class SerialAssistant:
             self.connect_btn.config(text="关闭串口")
             self.port_combo.config(state='disabled')
 
-            # �?动接收线�?
+            # 启动接收线程
             self.stop_receive = False
             self.receive_thread = threading.Thread(target=self.receive_data, daemon=True)
             self.receive_thread.start()
@@ -1150,7 +1150,7 @@ class SerialAssistant:
             self.recv_text.see(tk.END)
 
         except Exception as e:
-            messagebox.showerror("错�??", f"打开串口失败: {str(e)}")
+            messagebox.showerror("错误", f"打开串口失败: {str(e)}")
 
     def close_port(self):
         try:
@@ -1168,7 +1168,7 @@ class SerialAssistant:
             self.recv_text.see(tk.END)
 
         except Exception as e:
-            messagebox.showerror("错�??", f"关闭串口失败: {str(e)}")
+            messagebox.showerror("错误", f"关闭串口失败: {str(e)}")
 
     def receive_data(self):
         buffer = bytearray()
@@ -1179,7 +1179,7 @@ class SerialAssistant:
                     data = self.serial_port.read(self.serial_port.in_waiting)
                     buffer.extend(data)
 
-                    # 尝试解析数据�?
+                    # 尝试解析数据包
                     while len(buffer) >= 8:
                         # 查找帧头
                         header_idx = -1
@@ -1189,18 +1189,18 @@ class SerialAssistant:
                                 break
 
                         if header_idx == -1:
-                            # 没找到帧头，清空缓冲�?
+                            # 没找到帧头，清空缓冲区
                             buffer.clear()
                             break
 
                         if header_idx > 0:
-                            # 丢弃帧头之前的数�?
+                            # 丢弃帧头之前的数据
                             buffer = buffer[header_idx:]
 
                         if len(buffer) < 8:
                             break
 
-                        # 检查方向（应当�?设�?�到主机�?
+                        # 检查方向（应当是设备到主机）
                         if buffer[2] != PROTOCOL_DIR_DEV_TO_HOST:
                             buffer.pop(0)
                             continue
@@ -1209,20 +1209,20 @@ class SerialAssistant:
                         packet_len = 8 + data_len
 
                         if len(buffer) < packet_len:
-                            # 数据不完整，等待更�?�数�?
+                            # 数据不完整，等待更多数据
                             break
 
-                        # 提取完整数据�?
+                        # 提取完整数据包
                         packet_data = bytes(buffer[:packet_len])
                         buffer = buffer[packet_len:]
 
-                        # 解析数据�?
+                        # 解析数据包
                         packet_info = ProtocolHelper.parse_packet(packet_data)
                         if packet_info:
-                            # 在主线程�?更新 UI
+                            # 在主线程中更新 UI
                             self.root.after(0, self.handle_received_packet, packet_data, packet_info)
                         else:
-                            # CRC 校验失败，丢弃一�?字节继续
+                            # CRC 校验失败，丢弃一个字节继续
                             if len(buffer) > 0:
                                 buffer.pop(0)
 
@@ -1230,7 +1230,7 @@ class SerialAssistant:
 
             except Exception as e:
                 if self.is_connected:
-                    self.root.after(0, lambda: messagebox.showerror("错�??", f"接收数据出错: {str(e)}"))
+                    self.root.after(0, lambda: messagebox.showerror("错误", f"接收数据出错: {str(e)}"))
                 break
 
     def handle_received_packet(self, packet_data, packet_info):
@@ -1246,7 +1246,7 @@ class SerialAssistant:
         hex_str = ' '.join([f'{b:02X}' for b in packet_data])
 
         self.recv_text.insert(tk.END, f"[{timestamp}] 接收数据\n")
-        self.recv_text.insert(tk.END, f"原�?�数�?: {hex_str}\n")
+        self.recv_text.insert(tk.END, f"原始数据: {hex_str}\n")
         self.recv_text.insert(tk.END, f"长度: {len(packet_data)} 字节\n")
         self.recv_text.insert(tk.END, "\n")
         self.recv_text.insert(tk.END, self.parse_received_data(packet_info))

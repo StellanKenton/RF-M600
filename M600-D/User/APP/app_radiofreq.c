@@ -85,6 +85,25 @@ void App_RadioFreq_RxDataHandle(void)
        before the state machine can react to start/stop/reset commands. */
     s_RFCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
     s_RFCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
+
+    if(pTransData->flag.bits.Sync_Config)
+    {
+        const RF_TreatParams_t *pParams = App_Memory_GetRFParams();
+
+        s_RFCtrlInfo.TreatParams = *pParams;
+        if(s_RFCtrlInfo.runState != E_RF_RUN_WORKING)
+        {
+            s_RFCtrlInfo.TempLimit = pParams->TempLimit;
+            s_RFCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+            s_RFCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+            s_RFCtrlInfo.CurrentLow = pParams->CurrentLow;
+        }
+
+        pTransData->flag.bits.Sync_Config = 0;
+        LOG_I("RF config synced: temp=%d, current=[%d, %d], remain=%d, runtime_updated=%d",
+              pParams->TempLimit, pParams->CurrentLow, pParams->CurrentHigh,
+              pParams->TreatRemainTimes, s_RFCtrlInfo.runState != E_RF_RUN_WORKING);
+    }
 }
 
 void App_RadioFreq_WorkTimeHandle(void)

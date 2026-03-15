@@ -62,6 +62,27 @@ void App_UltraSound_RxDataHandle(void)
     {
         s_USCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
     }
+
+    if(pTransData->flag.bits.Sync_Config)
+    {
+        const US_TreatParams_t *pParams = App_Memory_GetUSParams();
+
+        s_USCtrlInfo.TreatParams = *pParams;
+        if(s_USCtrlInfo.runState != E_US_RUN_WORKING)
+        {
+            s_USCtrlInfo.Frequency = pParams->Frequency;
+            s_USCtrlInfo.TempLimit = pParams->TempLimit;
+            s_USCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+            s_USCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+            s_USCtrlInfo.CurrentLow = pParams->CurrentLow;
+            s_USCtrlInfo.VoltageBase = pParams->Voltage;
+        }
+
+        pTransData->flag.bits.Sync_Config = 0;
+        LOG_I("US config synced: freq=%d, temp=%d, voltage=%d, remain=%d, runtime_updated=%d",
+              pParams->Frequency, pParams->TempLimit, pParams->Voltage,
+              pParams->TreatRemainTimes, s_USCtrlInfo.runState != E_US_RUN_WORKING);
+    }
 }
 
 void App_Ultrasound_ChangeState(US_RunState_EnumDef newState)

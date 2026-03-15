@@ -140,7 +140,8 @@ typedef union {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
         uint16_t Process_Config : 1;
-        uint16_t Reserved : 13;
+        uint16_t Sync_Config : 1;
+        uint16_t Reserved : 12;
     } bits;
 } UltraSound_ByteUnion;
 
@@ -213,7 +214,8 @@ typedef union {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
         uint16_t Process_Config : 1;
-        uint16_t Reserved : 13;
+        uint16_t Sync_Config : 1;
+        uint16_t Reserved : 12;
     } bits;
 } RF_ByteUnion;
 
@@ -286,7 +288,8 @@ typedef union {
         uint16_t Rely_Status : 1;
         uint16_t Process_Config : 1;
         uint16_t Rely_Config : 1;
-        uint16_t Reserved : 13;
+        uint16_t Sync_Config : 1;
+        uint16_t Reserved : 12;
     } bits;
 } SW_ByteUnion;
 
@@ -365,7 +368,8 @@ typedef union {
         uint16_t Rely_Status : 1;
         uint16_t Rely_Config : 1;
         uint16_t Process_Config : 1;
-        uint16_t Reserved : 13;
+        uint16_t Sync_Config : 1;
+        uint16_t Reserved : 12;
     } bits;
 } Heat_ByteUnion;
 

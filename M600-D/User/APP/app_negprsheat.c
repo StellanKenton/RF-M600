@@ -99,30 +99,26 @@ void App_NegPrsHeat_RxDataHandle(void)
     /* RxWorkState and WorkTimeHandle are processed in WorkTimeHandle() */
     s_NPHCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
     s_NPHCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
-    /* Config flag set: apply RxPreheat and save params */
-    if(pTransData->flag.bits.Rely_Config)
+    /* Memory config has been validated and persisted; apply it to runtime state. */
+    if(pTransData->flag.bits.Sync_Config)
     {
-        /* RxPreheat requests preheat: apply temp_limit and work_time */
-        if(pTransData->RxConfig.preheat_state == 0x01)
+        const NPH_TreatParams_t *pParams = App_Memory_GetNPHParams();
+        bool runtimeCanUpdate = (s_NPHCtrlInfo.runState != E_NPH_RUN_WORKING);
+
+        s_NPHCtrlInfo.TreatParams = *pParams;
+        if(runtimeCanUpdate)
         {
-            s_NPHCtrlInfo.PreheatEnable = true;
-            s_NPHCtrlInfo.PreheatTempLimit = pTransData->RxConfig.temp_limit;
-            s_NPHCtrlInfo.PreheatTime = pTransData->RxConfig.work_time;
-        }
-        else
-        {
-            s_NPHCtrlInfo.PreheatEnable = false;
+            s_NPHCtrlInfo.TempLimit = pParams->TempLimit;
+            s_NPHCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+            s_NPHCtrlInfo.PreheatEnable = (pParams->PreheatEnable == 1);
+            s_NPHCtrlInfo.PreheatTempLimit = pParams->PreheatTempLimit;
+            s_NPHCtrlInfo.PreheatTime = pParams->PreheatTime;
         }
 
-        /* Save preheat params to NPH and memory */
-        s_NPHCtrlInfo.TreatParams.PreheatEnable = s_NPHCtrlInfo.PreheatEnable ? 1 : 0;
-        s_NPHCtrlInfo.TreatParams.PreheatTempLimit = s_NPHCtrlInfo.PreheatTempLimit;
-        s_NPHCtrlInfo.TreatParams.PreheatTime = s_NPHCtrlInfo.PreheatTime;
-        App_Memory_SaveNPHParams(&s_NPHCtrlInfo.TreatParams);
-
-        pTransData->flag.bits.Rely_Config = 0;
-        LOG_I("NPH Config updated: preheat_enable=%d, preheat_temp=%d, preheat_time=%d",
-              s_NPHCtrlInfo.PreheatEnable, s_NPHCtrlInfo.PreheatTempLimit, s_NPHCtrlInfo.PreheatTime);
+        pTransData->flag.bits.Sync_Config = 0;
+        LOG_I("NPH config synced: temp=%d, remain=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d, runtime_updated=%d",
+              pParams->TempLimit, pParams->TreatRemainTimes, pParams->PreheatEnable,
+              pParams->PreheatTempLimit, pParams->PreheatTime, runtimeCanUpdate);
     }
 }
 
@@ -299,7 +295,6 @@ bool App_NegPrsHeat_StartCheck()
         return false;
     }
 
-    LOG_I("NPH: Start check passed");
     return true;
 }
 
@@ -332,7 +327,9 @@ bool App_NegPrsHeat_IsHeadTempNormal(void)
     uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
-
+    if(TreatGetRunFlag()) {
+        return true;
+    }
     /* Invalid NTC read (sensor error) */
     if(temp == 0xFFFF || temp == 0xEEFF)
     {
@@ -592,16 +589,25 @@ void App_NegPrsHeat_Process(void)
             break;
 
         case E_NPH_RUN_PREHEAT:
+            if(s_NPHCtrlInfo.PreheatEnable == false)
+            {
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+                s_NPHCtrlInfo.heatControlActive = false;
+                App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
+                break;
+            }
+
             /* When preheat temp reached, switch to NH and WORKING */
             if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
             {
                 if(App_NegPrsHeat_StartCheck()) {
                     App_NegPrsHeat_SetWorkParams();
                     Drv_IODevice_ChangeChannel(CHANNEL_READY);
-
+    
                     App_NegPrsHeat_ChangeState(E_NPH_RUN_WORKING);
+                    LOG_I("NPH: Preheat completed, entering working state");
                 }
-                LOG_I("NPH: Preheat completed, entering working state");
+                
             }
             if(App_NegPrsHeat_IsHeadTempNormal() == false) {
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_STOP);
@@ -631,7 +637,7 @@ void App_NegPrsHeat_Process(void)
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
             s_NPHCtrlInfo.motorState = false;
             s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
-
+            App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
             /* Switch channel close */
             Drv_IODevice_ChangeChannel(CHANNEL_CLOSE);
             if(s_NPHCtrlInfo.isWaitReturn) {

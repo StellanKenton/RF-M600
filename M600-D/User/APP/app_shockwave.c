@@ -99,6 +99,30 @@ void App_Shockwave_RxDataHandle(void)
 {
     SW_TransData_t *pTransData = App_Comm_GetSWTransData();
     s_SWCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
+    s_SWCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
+
+    if(pTransData->flag.bits.Sync_Config)
+    {
+        const SW_TreatParams_t *pParams = App_Memory_GetSWParams();
+
+        s_SWCtrlInfo.TreatParams = *pParams;
+        if(s_SWCtrlInfo.runState != E_SW_RUN_WORKING)
+        {
+            s_SWCtrlInfo.TempLimit = pParams->TempLimit;
+            s_SWCtrlInfo.TreatCounts = pParams->TreatRemainTimes;
+            s_SWCtrlInfo.CurrentHigh_ESW_P = pParams->CurrentHigh_ESW_P;
+            s_SWCtrlInfo.CurrentLow_ESW_P = pParams->CurrentLow_ESW_P;
+            s_SWCtrlInfo.CurrentHigh_ESW_N = pParams->CurrentHigh_ESW_N;
+            s_SWCtrlInfo.CurrentLow_ESW_N = pParams->CurrentLow_ESW_N;
+        }
+
+        pTransData->flag.bits.Sync_Config = 0;
+        LOG_I("SW config synced: temp=%d, remain=%d, ESW_P=[%d, %d], ESW_N=[%d, %d], runtime_updated=%d",
+              pParams->TempLimit, pParams->TreatRemainTimes,
+              pParams->CurrentLow_ESW_P, pParams->CurrentHigh_ESW_P,
+              pParams->CurrentLow_ESW_N, pParams->CurrentHigh_ESW_N,
+              s_SWCtrlInfo.runState != E_SW_RUN_WORKING);
+    }
 }
 
 void App_Shockwave_WorkTimeHandle(void)

@@ -505,6 +505,7 @@ static void App_Memory_ProcessUSConfig(void)
         pUS->TxConfig.current_lowlimit_result = current_low_result;
         pUS->TxConfig.remain_treatment_count_result = remain_count_result;
         pUS->flag.bits.Rely_Config  = 1;
+        pUS->flag.bits.Sync_Config  = 1;
         pUS->flag.bits.Process_Config = 0;
     }
 }
@@ -557,6 +558,7 @@ static void App_Memory_ProcessRFConfig(void)
         pRF->TxConfig.current_lowlimit_result = current_low_result;
         pRF->TxConfig.remain_treatment_count_result = remain_count_result;
         pRF->flag.bits.Rely_Config  = 1;
+        pRF->flag.bits.Sync_Config  = 1;
         pRF->flag.bits.Process_Config = 0;
     }
 }
@@ -582,16 +584,18 @@ static void App_Memory_ProcessHeatConfig(void)
             temp_limit_result = CONFIG_RESULT_OVER_LIMIT;
         }
 
-        /* Validate preheat_temp_limit */
-        if (pHeat->RxConfig.preheat_temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.preheat_temp_limit > PARAM_TEMP_MAX)
+        if (pHeat->RxConfig.preheat_state == 0x01)
         {
-            preheat_temp_result = CONFIG_RESULT_OVER_LIMIT;
-        }
+            /* Preheat settings are only mandatory when preheat is enabled. */
+            if (pHeat->RxConfig.preheat_temp_limit < PARAM_TEMP_MIN || pHeat->RxConfig.preheat_temp_limit > PARAM_TEMP_MAX)
+            {
+                preheat_temp_result = CONFIG_RESULT_OVER_LIMIT;
+            }
 
-        /* Validate work_time */
-        if (pHeat->RxConfig.work_time > PARAM_WORK_TIME_MAX)
-        {
-            work_time_result = CONFIG_RESULT_OVER_LIMIT;
+            if (pHeat->RxConfig.work_time > PARAM_WORK_TIME_MAX)
+            {
+                work_time_result = CONFIG_RESULT_OVER_LIMIT;
+            }
         }
 
         if (preheat_state_result == CONFIG_RESULT_SUCCESS && work_time_result == CONFIG_RESULT_SUCCESS &&
@@ -634,6 +638,7 @@ static void App_Memory_ProcessHeatConfig(void)
         pHeat->TxConfig.preheat_temp_limit_result = preheat_temp_result;
         pHeat->TxConfig.remain_treatment_count_result = remain_count_result;
         pHeat->flag.bits.Rely_Config  = 1;
+        pHeat->flag.bits.Sync_Config  = 1;
         pHeat->flag.bits.Process_Config = 0;
     }
 }
@@ -694,6 +699,7 @@ static void App_Memory_ProcessSWConfig(void)
         pSW->TxConfig.ESW_N_current_highlimit_result = esw_n_high_result;
         pSW->TxConfig.ESW_N_current_lowlimit_result = esw_n_low_result;
         pSW->flag.bits.Rely_Config = 1;
+        pSW->flag.bits.Sync_Config = 1;
         pSW->flag.bits.Process_Config = 0;
     }
 }

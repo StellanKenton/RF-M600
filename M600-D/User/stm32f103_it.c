@@ -9,6 +9,7 @@
 #include "drv_usart.h"
 #include "bsp_adc.h"
 #include "drv_delay.h"
+#include "app_shockwave.h"
 #include "app_ultrasound.h"
 /* -----------------------------------------------------------------------------
  * Cortex-M3 exception handlers
@@ -58,6 +59,7 @@ void TIM2_IRQHandler(void)
     {
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
         Drv_SysTick_Increment();  /* Updates g_SystemTimeUs by 100us */
+        App_Shockwave_TimerTick100us();
         App_Ultrasound_SetHighFreqPowerHandle();
     }
 }
@@ -88,7 +90,7 @@ void DMA1_Channel4_IRQHandler(void)
     if (DMA_GetITStatus(DMA1_IT_TC4) != RESET)
     {
         DMA_ClearITPendingBit(DMA1_IT_TC4);
-        /* 发送完成后关闭TX DMA通道，否则EN位会保持为1，导致TxStatus一直显示busy */
+        /* 发送完成后关闭TX DMA通道，否则EN位会保持�?1，�?�致TxStatus一直显示busy */
         DMA_Cmd(DMA1_Channel4, DISABLE);
         while (DMA1_Channel4->CCR & DMA_CCR4_EN) { }
         /* Optional: user callback for TX complete */
@@ -161,15 +163,15 @@ void USART1_IRQHandler(void)
 {
     if (USART_GetITStatus(USART1, USART_IT_IDLE) != RESET)
     {
-        /* 必须先读取 USART_DR 寄存器来清除 IDLE 中断标志 */
-        /* 即使数据已经被 DMA 读取，也需要读取一次来清除 IDLE 标志 */
+        /* 必须先�?�取 USART_DR 寄存器来清除 IDLE �?�?标志 */
+        /* 即使数据已经�? DMA 读取，也需要�?�取一次来清除 IDLE 标志 */
         volatile uint16_t temp = USART1->DR;
-        (void)temp;  /* 避免编译器警告 */
+        (void)temp;  /* 避免编译器�?�告 */
         
         /* 然后处理接收到的数据 */
         Drv_USART1_Rx();
         
-        /* 清除 IDLE 中断标志（虽然读取 DR 后标志应该已经清除，但为了保险还是清除一下） */
+        /* 清除 IDLE �?�?标志（虽然�?�取 DR 后标志应该已经清除，但为了保险还�?清除一下） */
         USART_ClearITPendingBit(USART1, USART_IT_IDLE);
         /* Optional: frame end - process BSP_USART1_RxBuf, restart DMA, etc. */    
     }
@@ -182,12 +184,12 @@ void USART2_IRQHandler(void)
 {
     if (USART_GetITStatus(USART2, USART_IT_IDLE) != RESET)
     {
-        /* 必须先读取 USART_DR 寄存器来清除 IDLE 中断标志 */
-        /* 即使数据已经被 DMA 读取，也需要读取一次来清除 IDLE 标志 */
+        /* 必须先�?�取 USART_DR 寄存器来清除 IDLE �?�?标志 */
+        /* 即使数据已经�? DMA 读取，也需要�?�取一次来清除 IDLE 标志 */
         volatile uint16_t temp = USART2->DR;
-        (void)temp;  /* 避免编译器警告 */
+        (void)temp;  /* 避免编译器�?�告 */
         
-        /* 清除 IDLE 中断标志（虽然读取 DR 后标志应该已经清除，但为了保险还是清除一下） */
+        /* 清除 IDLE �?�?标志（虽然�?�取 DR 后标志应该已经清除，但为了保险还�?清除一下） */
         USART_ClearITPendingBit(USART2, USART_IT_IDLE);
         
         /* 然后处理接收到的数据 */

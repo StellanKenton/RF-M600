@@ -31,10 +31,10 @@ extern "C" {
 #define SW_TEMP_MONITOR_PERIOD_MS  10          ///< Head temp monitor period (10ms)
 
 /* PWM timing */
-#define SW_PWM_ESW_P_HIGH_TIME_MS     5       ///< PWM_ESW+ high time (5ms)
-#define SW_PWM_ESW_P_WAIT_TIME_MS     17      ///< Wait time after ESW_P before ESW_N (17ms)
-#define SW_PWM_ESW_N_BASE_TIME_MS     3       ///< PWM_ESW-N base high time (3ms)
-#define SW_PWM_ESW_N_STEP_TIME_MS     0.28f   ///< PWM_ESW-N step per level (0.28ms)
+#define SW_PWM_ESW_P_HIGH_TIME_US     5000U   ///< PWM_ESW+ high time (5ms)
+#define SW_PWM_ESW_P_WAIT_TIME_US     17000U  ///< Wait time after ESW_P low before ESW_N high (17ms)
+#define SW_PWM_ESW_N_BASE_TIME_US     3000U   ///< PWM_ESW-N base high time (3ms)
+#define SW_PWM_ESW_N_STEP_TIME_US     280U    ///< PWM_ESW-N step per level (0.28ms)
 
 typedef enum
 {
@@ -92,11 +92,12 @@ typedef struct
     SW_TreatParams_t TreatParams;
     SW_TransData_t Trans;
     
-    /* PWM timing (ms) */
-    uint32_t pwmStateStartTime;    ///< Current PWM state start time (ms)
-    uint32_t cycleStartTime;       ///< Current cycle start time (ms)
-    uint32_t cyclePeriodMs;        ///< Cycle period (ms), 1000/freqLevel
-    uint32_t pwmESW_NHighTimeMs;   ///< PWM_ESW-N high time (ms)
+    /* PWM timing */
+    uint64_t pwmStateStartTimeUs;  ///< Current PWM state start time (us)
+    uint64_t cycleStartTimeUs;     ///< Current cycle start time (us)
+    uint64_t nextCycleStartTimeUs; ///< Next cycle start time (us)
+    uint32_t cyclePeriodUs;        ///< Cycle period (us), 1000000/freqLevel
+    uint32_t pwmESW_NHighTimeUs;   ///< PWM_ESW-N high time (us)
     
     /* Monitoring */
     uint32_t lastTempMonitorTime;  ///< Last head temp monitor tick
@@ -104,6 +105,7 @@ typedef struct
 
 void App_Shockwave_Init(void);
 void App_Shockwave_Process(void);
+void App_Shockwave_TimerTick100us(void);
 bool App_Shockwave_StartCheck(void);
 void App_Shockwave_SetWorkParams(void);
 SW_GetStatus_Reply_t *App_Shockwave_GetStatus(void);

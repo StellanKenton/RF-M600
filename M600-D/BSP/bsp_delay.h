@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : bsp_delay.h
  * @brief    : M600 delay and tick - Unified timer using TIM2
- * @details  : Uses TIM2 (100us interrupt) and shared global time variable.
+ * @details  : Uses TIM2 (10us interrupt) and shared global time variable.
  * @hardware : STM32F103xE (M600-D)
  ***********************************************************************************/
 #ifndef __BSP_DELAY_H

@@ -1,7 +1,7 @@
 /************************************************************************************
  * @file     : bsp_tim.c
  * @brief    : M600 TIM1/TIM2 init - ported from M600 HAL
- * @details  : TIM1: external clock ETR(PA12), PWM CH1(PA8)/CH1N(PB13). TIM2: 100us tick. PB8/PB9 as GPIO (see bsp_gpio).
+ * @details  : TIM1: external clock ETR(PA12), PWM CH1(PA8)/CH1N(PB13). TIM2: 10us tick. PB8/PB9 as GPIO (see bsp_gpio).
  ***********************************************************************************/
 #include "bsp_tim.h"
 
@@ -81,14 +81,14 @@ void BSP_TIM2_Init(void)
     /* Enable TIM2 clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    /* Time base configuration: 100us period
+    /* Time base configuration: 10us period
      * Assuming APB1 timer clock = 72MHz (if APB1 prescaler = 1)
-     * To get 100us period: 72MHz * 100us = 7200 cycles
-     * Prescaler = 720 - 1 = 719 -> timer clock = 72MHz / 720 = 100kHz
-     * Period = 10 - 1 = 9 -> interrupt every 10 cycles = 100us
+     * To get 10us period: 72MHz * 10us = 720 cycles
+     * Prescaler = 72 - 1 = 71 -> timer clock = 72MHz / 72 = 1MHz
+     * Period = 10 - 1 = 9 -> interrupt every 10 cycles = 10us
      */
-    TIM_TimeBaseStructure.TIM_Period        = 10 - 1;  /* 10 cycles = 100us at 100kHz */
-    TIM_TimeBaseStructure.TIM_Prescaler     = 720 - 1; /* 72MHz / 720 = 100kHz */
+    TIM_TimeBaseStructure.TIM_Period        = 10 - 1; /* 10 cycles = 10us at 1MHz */
+    TIM_TimeBaseStructure.TIM_Prescaler     = 72 - 1; /* 72MHz / 72 = 1MHz */
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);

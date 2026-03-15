@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define SYSTEM_TICK_PER_SECOND  100u  /* us per Drv_SysTick_Increment (if used) */
+#define SYSTEM_TICK_PER_SECOND  10u   /* us per Drv_SysTick_Increment */
 
 void Dal_Delay(uint32_t ms);   /* DAL: uses unified global time; only used inside DRV */
 uint32_t Dal_GetTick(void);    /* DAL: uses unified global time; only used inside DRV */

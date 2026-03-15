@@ -88,7 +88,7 @@ US_RunState_EnumDef App_Ultrasound_GetRunState(void);
 void App_Ultrasound_ChangeState(US_RunState_EnumDef newState);
 US_GetStatus_Reply_t *App_UltraSound_GetStatus(void);
 US_SetConfig_Reply_t *App_UltraSound_GetConfig(void);
-void App_Ultrasound_SetHighFreqPowerHandle(void);
+void App_Ultrasound_SetHighFreqPowerHandle10us(void);
 #ifdef __cplusplus
 }
 #endif

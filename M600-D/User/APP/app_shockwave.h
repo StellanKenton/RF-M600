@@ -105,7 +105,7 @@ typedef struct
 
 void App_Shockwave_Init(void);
 void App_Shockwave_Process(void);
-void App_Shockwave_TimerTick100us(void);
+void App_Shockwave_TimerTick10us(uint64_t nowUs);
 bool App_Shockwave_StartCheck(void);
 void App_Shockwave_SetWorkParams(void);
 SW_GetStatus_Reply_t *App_Shockwave_GetStatus(void);

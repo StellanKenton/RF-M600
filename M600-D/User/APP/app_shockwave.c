@@ -22,6 +22,13 @@ static SW_CtrlInfo_t s_SWCtrlInfo;
 
 static void App_Shockwave_ResetPulseEngine(void)
 {
+    if ((s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_IDLE) &&
+        (s_SWCtrlInfo.pwmStateStartTimeUs == 0U) &&
+        (s_SWCtrlInfo.cycleStartTimeUs == 0U) &&
+        (s_SWCtrlInfo.nextCycleStartTimeUs == 0U)) {
+        return;
+    }
+
     Drv_GPIO_SetESW_P(false);
     Drv_GPIO_SetESW_N(false);
     s_SWCtrlInfo.pwmState = E_SW_PWM_STATE_IDLE;
@@ -370,16 +377,12 @@ bool App_Shockwave_IsHeadTempNormal(void)
     return isNormal;
 }
 
-void App_Shockwave_TimerTick100us(void)
+void App_Shockwave_TimerTick10us(uint64_t nowUs)
 {
-    uint64_t nowUs;
-
     if(s_SWCtrlInfo.runState != E_SW_RUN_WORKING || s_SWCtrlInfo.RemainPoints == 0U) {
         App_Shockwave_ResetPulseEngine();
         return;
     }
-
-    nowUs = Drv_GetSystemTickUs();
 
     switch(s_SWCtrlInfo.pwmState)
     {

@@ -461,25 +461,41 @@ US_RunState_EnumDef App_Ultrasound_GetRunState(void)
     return s_USCtrlInfo.runState;
 }
 
-void App_Ultrasound_SetHighFreqPowerHandle(void)
+void App_Ultrasound_SetHighFreqPowerHandle10us(void)
 {
-    static uint32_t s_highFreqPowerWorkTime = 0;
-    uint32_t nowLevel = s_USCtrlInfo.WorkLevel*500;    // 500us per level
-    if(s_USCtrlInfo.runState == E_US_RUN_WORKING) {
-        if(s_highFreqPowerWorkTime >= 20000) {
-            s_highFreqPowerWorkTime = 0;
-        } else {
-            if(s_highFreqPowerWorkTime >= nowLevel) {
-                Drv_IO_HighFreqPowerOutput(false);
-            } else {
-                Drv_IO_HighFreqPowerOutput(true);
-            }
+    static uint32_t s_highFreqPowerWorkTimeUs = 0U;
+    static uint32_t s_activeWindowUs = 0U;
+    static uint8_t s_lastWorkLevel = 0xFFU;
+    static bool s_outputEnabled = false;
+    bool enableOutput;
+
+    if(s_USCtrlInfo.runState != E_US_RUN_WORKING) {
+        s_highFreqPowerWorkTimeUs = 0U;
+        s_activeWindowUs = 0U;
+        s_lastWorkLevel = 0xFFU;
+        if(s_outputEnabled) {
+            Drv_IO_HighFreqPowerOutput(false);
+            s_outputEnabled = false;
         }
-        s_highFreqPowerWorkTime += 100;
-    } else {
-        s_highFreqPowerWorkTime = 0;
-        Drv_IO_HighFreqPowerOutput(false);
+        return;
     }
+
+    if(s_USCtrlInfo.WorkLevel != s_lastWorkLevel) {
+        s_lastWorkLevel = s_USCtrlInfo.WorkLevel;
+        s_activeWindowUs = (uint32_t)s_lastWorkLevel * 500U;
+    }
+
+    if(s_highFreqPowerWorkTimeUs >= 20000U) {
+        s_highFreqPowerWorkTimeUs = 0U;
+    }
+
+    enableOutput = (s_highFreqPowerWorkTimeUs < s_activeWindowUs);
+    if(enableOutput != s_outputEnabled) {
+        Drv_IO_HighFreqPowerOutput(enableOutput);
+        s_outputEnabled = enableOutput;
+    }
+
+    s_highFreqPowerWorkTimeUs += 10U;
 }
 
 /**************************End of file********************************/

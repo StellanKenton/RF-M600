@@ -1,11 +1,11 @@
 /************************************************************************************
  * @file     : bsp_delay.c
  * @brief    : M600 delay and tick - Unified timer using TIM2
- * @details  : Uses TIM2 (100us interrupt) and shared global time variable.
+ * @details  : Uses TIM2 (10us interrupt) and shared global time variable.
  ***********************************************************************************/
 #include "bsp_delay.h"
 
-/* Global system time in microseconds (updated by TIM2 interrupt every 100us) */
+/* Global system time in microseconds (updated by TIM2 interrupt every 10us) */
 volatile uint64_t g_SystemTimeUs = 0;
 
 void BSP_SysTick_Init(void)

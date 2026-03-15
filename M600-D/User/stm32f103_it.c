@@ -52,15 +52,16 @@ void PendSV_Handler(void)
 {
 }
 
-/* TIM2: 100us interrupt for unified system time */
+/* TIM2: 10us interrupt for unified system time */
 void TIM2_IRQHandler(void)
 {
-    if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+    if ((TIM2->SR & TIM_SR_UIF) != 0U)
     {
-        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-        Drv_SysTick_Increment();  /* Updates g_SystemTimeUs by 100us */
-        App_Shockwave_TimerTick100us();
-        App_Ultrasound_SetHighFreqPowerHandle();
+        const uint64_t nowUs = (g_SystemTimeUs += SYSTEM_TICK_PER_SECOND);
+
+        TIM2->SR = (uint16_t)~TIM_SR_UIF;
+        App_Shockwave_TimerTick10us(nowUs);
+        App_Ultrasound_SetHighFreqPowerHandle10us();
     }
 }
 

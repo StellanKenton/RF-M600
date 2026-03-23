@@ -18,8 +18,16 @@
 #include "drv_si5351.h"
 #include "drv_delay.h"
 #include "bsp_tim.h"
+#include "app_radiofreq.h"
 
 static US_CtrlInfo_t s_USCtrlInfo;
+
+static void App_UltraSound_UpdateHeadTemp(void)
+{
+    if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_ULTRASOUND) {
+        s_USCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    }
+}
 
 void App_UltraSound_UpdateStatus(void)
 {
@@ -340,8 +348,7 @@ bool App_UltraSound_IsCurrentNormal(void)
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
-    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
-    s_USCtrlInfo.HeadTemp = temp;
+    uint16_t temp = s_USCtrlInfo.HeadTemp;
 
     if(TreatGetRunFlag()) {
         return true;
@@ -390,6 +397,7 @@ void App_Ultra_RunChangeLevel()
 void App_Ultrasound_Process(void)
 {
     // Process the ultrasound module
+    App_UltraSound_UpdateHeadTemp();
     App_UltraSound_UpdateStatus();
     App_UltraSound_RxDataHandle();
     App_Ultrasound_WorkTimeHandle();
@@ -412,6 +420,7 @@ void App_Ultrasound_Process(void)
 			// Switch relay pwr_control1 to ultrasound channel
             Drv_IODevice_ChangeChannel(CHANNEL_US);
             App_Ultrasound_ChangeState(E_US_RUN_IDLE);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
             break;
         case E_US_RUN_IDLE:
             // Use App_UltraSound_StartCheck for pre-start check (all param checks)
@@ -421,7 +430,7 @@ void App_Ultrasound_Process(void)
                 Drv_SI5351_SetComplementaryPWM(true);
                 // pwr_control2 switch to output enabled (normally disabled)
                 Drv_IODevice_ChangeChannel(CHANNEL_RF_US_READY);
-                App_Ultrasound_ChangeState(E_US_RUN_WORKING);
+                App_Ultrasound_ChangeState(E_US_RUN_WORKING);          
             }
             break;
         case E_US_RUN_WORKING:
@@ -488,17 +497,27 @@ void App_Ultrasound_SetHighFreqPowerHandle10us(void)
     static uint32_t s_activeWindowUs = 0U;
     static uint8_t s_lastWorkLevel = 0xFFU;
     static bool s_outputEnabled = false;
+    IODevice_WorkingMode_EnumDef probeStatus = App_TreatMgr_GetProbeStatus();
     bool enableOutput;
 
-    if(s_USCtrlInfo.runState != E_US_RUN_WORKING) {
+    if((s_USCtrlInfo.runState != E_US_RUN_WORKING)) {
         s_highFreqPowerWorkTimeUs = 0U;
         s_activeWindowUs = 0U;
         s_lastWorkLevel = 0xFFU;
-        if(s_outputEnabled) {
-            Drv_IO_HighFreqPowerOutput(false);
-            s_outputEnabled = false;
-        }
-        return;
+        if(probeStatus == E_IODEVICE_MODE_RADIO_FREQUENCY) {
+            enableOutput = (App_RadioFreq_GetRunState() == E_RF_RUN_WORKING);
+            if(enableOutput != s_outputEnabled) {
+                Drv_IO_HighFreqPowerOutput(enableOutput);
+                s_outputEnabled = enableOutput;
+            }
+            return;
+        } else {
+            if(s_outputEnabled) {
+                Drv_IO_HighFreqPowerOutput(false);
+                s_outputEnabled = false;
+            }
+            return;
+        }  
     }
 
     if(s_USCtrlInfo.WorkLevel != s_lastWorkLevel) {

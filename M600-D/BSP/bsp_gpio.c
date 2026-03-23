@@ -29,8 +29,8 @@ void BSP_GPIO_Init(void)
                            RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD |
                            RCC_APB2Periph_AFIO, ENABLE);
 
-    /* PB4 is JNTRST by default - remap SWJ to release PB4 as normal GPIO */
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
+    /* Disable JTAG and keep SWD so PA15/PB3/PB4 can be used as normal GPIOs. */
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
     /* --- Set initial output levels LOW before configuring as outputs --- */
     /* GPIOC outputs: Buzzer(PC13), pwr_control5(PC12), CTR_HP_motor(PC7),

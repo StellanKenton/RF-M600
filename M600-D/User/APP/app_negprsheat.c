@@ -19,6 +19,13 @@
 
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
 
+static void App_NegPrsHeat_UpdateHeadTemp(void)
+{
+    if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
+        s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    }
+}
+
 /**
  * @brief Convert pressure KPa to ADC voltage
  * @param pressure_kpa Pressure in KPa (10-100)
@@ -238,7 +245,6 @@ void App_NegPrsHeat_CheckProbe(void)
 void App_NegPrsHeat_Monitor(void)
 {
     /* Monitor logic (reserved for treatmgr integration) */
-    s_NPHCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
 }
 
 bool App_NegPrsHeat_StartCheck()
@@ -324,7 +330,7 @@ void App_NegPrsHeat_SetWorkParams(void)
 
 bool App_NegPrsHeat_IsHeadTempNormal(void)
 {
-    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    uint16_t temp = s_NPHCtrlInfo.HeadTemp;
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
     if(TreatGetRunFlag()) {
@@ -549,6 +555,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
 void App_NegPrsHeat_Process(void)
 {
     // Process the negative pressure heat module
+    App_NegPrsHeat_UpdateHeadTemp();
     App_NegPrsHeat_UpdateStatus();
     App_NegPrsHeat_RxDataHandle();
     App_NegPrsHeat_WorkTimeHandle();
@@ -597,9 +604,6 @@ void App_NegPrsHeat_Process(void)
                 App_NegPrsHeat_ChangeState(E_NPH_RUN_IDLE);
                 break;
             }else {
-                if(TreatGetRunFlag()) {
-                    s_NPHCtrlInfo.HeadTemp = s_NPHCtrlInfo.PreheatTempLimit+1;
-                }
                 /* When preheat temp reached, switch to NH and WORKING */
                 if(s_NPHCtrlInfo.HeadTemp >= s_NPHCtrlInfo.PreheatTempLimit)
                 {

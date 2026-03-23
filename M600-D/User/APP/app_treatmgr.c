@@ -208,6 +208,7 @@ void ProbeStatusCheck()
             App_TreatMgr_HandleProbeStatusChange(curStatus);
             debounceCount = 0;
             pendingStatus = curStatus;
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             switch(s_TreatMgr.eProbeStatus)
             {
             case E_IODEVICE_MODE_ULTRASOUND:

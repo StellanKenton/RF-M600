@@ -107,7 +107,6 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
             Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 1);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             break;
         case CHANNEL_RF:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL1, 0);
@@ -116,7 +115,6 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL5, 1);
             Dal_Write_Pin(E_GPIO_OUT_CTR_US_RF, 0);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             break;
         case CHANNEL_SW:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL1, 0);
@@ -124,7 +122,6 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL5, 0);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             break;
         case CHANNEL_NH:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL1, 1);
@@ -142,12 +139,10 @@ void Drv_IODevice_ChangeChannel(IODevice_Channel_EnumDef channel)
         case CHANNEL_SW_CLOSE:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 0);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 0);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             break;
         case CHANNEL_SW_READY:
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL3, 1);
             Dal_Write_Pin(E_GPIO_OUT_PWR_CTRL4, 1);
-            Dal_Write_Pin(E_GPIO_OUT_CTR_HEAT_HP, 1);
             break;
         default:
             break;

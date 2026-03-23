@@ -21,6 +21,13 @@
 
 static RF_CtrlInfo_t s_RFCtrlInfo;
 
+static void App_RadioFreq_UpdateHeadTemp(void)
+{
+    if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY) {
+        s_RFCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    }
+}
+
 /**
  * @brief Calculate voltage from work level (level 1-20 maps to 11-30V)
  * @param level Work level (0-20)
@@ -305,16 +312,10 @@ bool App_RadioFreq_IsCurrentNormal(void)
     return isNormal;
 }
 
-
-uint16_t App_RadioFreq_GetProbeTemp(void)
-{
-    return 350;
-}
-
 bool App_RadioFreq_IsHeadTempNormal(void)
 {
     bool isNormal = true;
-    uint16_t temp = App_RadioFreq_GetProbeTemp();
+    uint16_t temp = s_RFCtrlInfo.HeadTemp;
     s_RFCtrlInfo.HeadTemp = temp;
 
     if(TreatGetRunFlag()) {
@@ -362,6 +363,7 @@ void App_RaidoFreq_RunChangeLevel()
 
 void App_RadioFreq_Process(void)
 {
+    App_RadioFreq_UpdateHeadTemp();
     App_RadioFreq_UpdateStatus();
     App_RadioFreq_RxDataHandle();
     App_RadioFreq_WorkTimeHandle();
@@ -388,8 +390,8 @@ void App_RadioFreq_Process(void)
             // 1.00MHz
             Drv_SI5351_SetFrequency(1000);
             Drv_IODevice_ChangeChannel(CHANNEL_RF);
-            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
             break;
 
         case E_RF_RUN_IDLE:
@@ -416,8 +418,7 @@ void App_RadioFreq_Process(void)
             Drv_SI5351_SetComplementaryPWM(false);
             Drv_IODevice_ChangeChannel(CHANNEL_RF_US_CLOSE);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
-            if(s_RFCtrlInfo.isWaitReturn) {
-                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+            if(s_RFCtrlInfo.isWaitReturn) {           
                 App_RadioFreq_ChangeState(E_RF_RUN_WAIT_RETURN);
                 LOG_I("RF: Wait return");
                 s_RFCtrlInfo.isWaitReturn = false;

@@ -20,6 +20,13 @@
 
 static SW_CtrlInfo_t s_SWCtrlInfo;
 
+static void App_Shockwave_UpdateHeadTemp(void)
+{
+    if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_SHOCKWAVE) {
+        s_SWCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    }
+}
+
 static void App_Shockwave_ResetPulseEngine(void)
 {
     if ((s_SWCtrlInfo.pwmState == E_SW_PWM_STATE_IDLE) &&
@@ -376,7 +383,7 @@ bool App_Shockwave_IsVoltageNormal(void)
 
 bool App_Shockwave_IsHeadTempNormal(void)
 {
-    uint16_t temp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+    uint16_t temp = s_SWCtrlInfo.HeadTemp;
     s_SWCtrlInfo.HeadTemp = temp;
     bool isNormal = true;
     
@@ -504,6 +511,7 @@ void App_ShockWave_CheckProbe()
 void App_Shockwave_Process(void)
 {
     // Process the shockwave module
+    App_Shockwave_UpdateHeadTemp();
     App_Shockwave_UpdateStatus();
     App_Shockwave_RxDataHandle();
     App_Shockwave_WorkTimeHandle();
@@ -532,6 +540,7 @@ void App_Shockwave_Process(void)
             // Switch to SW channel (pwr_control3/4 etc.)
             Drv_IODevice_ChangeChannel(CHANNEL_SW);
             App_Shockwave_ChangeState(E_SW_RUN_IDLE);
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 1);
             break;
 
         case E_SW_RUN_IDLE:

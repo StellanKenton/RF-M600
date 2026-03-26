@@ -6,7 +6,6 @@
 #include "bsp_adc.h"
 #include "drv_delay.h"
 
-#define ADC_REF_MV      3300u
 #define ADC_RESOLUTION  4096u
 #define VOUT_DIVIDER_NUMERATOR  15.3529f
 #define NTC_SERIES_R    10000u  /* series R with NTC, ohm */
@@ -159,7 +158,7 @@ static uint16_t Drv_ADC_GetVerIdValue(uint16_t raw)
 static uint16_t Drv_ADC_GetVoutValue(uint16_t raw)
 {
     float rawAdf = (float)raw;
-    float Voltage = (ADC_REF_MV / 10u) *((float)(rawAdf / (float)ADC_RESOLUTION));
+    float Voltage = (BSP_ADC_REF_MV / 10u) *((float)(rawAdf / (float)ADC_RESOLUTION));
     return (uint16_t)((uint32_t)VOUT_DIVIDER_NUMERATOR * Voltage);
 }
 
@@ -264,7 +263,7 @@ void Drv_ADC_Init(void)
     s_adcProcessTimer.timeout_ms = 0u;
     s_adcProcessTimer.running = false;
     s_adcPhysicalValues.updateTickMs = 0u;
-    Drv_ADC_UpdatePhysicalValues();
+    BSP_ADC_RequestScan();
 }
 
 void Drv_ADC_Process(void)
@@ -274,7 +273,11 @@ void Drv_ADC_Process(void)
         return;
     }
 
-    Drv_ADC_UpdatePhysicalValues();
+    if (BSP_ADC_IsDataReady() != 0u) {
+        Drv_ADC_UpdatePhysicalValues();
+    }
+
+    BSP_ADC_RequestScan();
 }
 
 uint16_t Drv_ADC_ReadChannel(BSP_ADC_Channel_t channel)

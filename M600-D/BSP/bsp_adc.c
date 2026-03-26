@@ -29,13 +29,26 @@ static const uint8_t s_adc_ch[] = {
 static uint16_t s_adc_dma_buffer[BSP_ADC_CH_MAX];  /* DMA working buffer */
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
 static volatile uint8_t s_adc_buffer_ready = 0;     /* Buffer ready flag */
+static volatile uint8_t s_adc_scan_in_progress = 0; /* One-shot scan state */
+
+static void BSP_ADC_StartScanInternal(void)
+{
+    if (s_adc_scan_in_progress != 0u)
+    {
+        return;
+    }
+
+    s_adc_buffer_ready = 0;
+    s_adc_scan_in_progress = 1;
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+}
 
 static float BSP_ADC_ConvertToVoltageV(uint16_t raw)
 {
     if (raw > (BSP_ADC_RESOLUTION - 1u))
         raw = (BSP_ADC_RESOLUTION - 1u);
 
-    return ((float)raw * 3.3f) / (float)BSP_ADC_RESOLUTION;
+    return ((float)raw * ((float)BSP_ADC_REF_MV / 1000.0f)) / (float)BSP_ADC_RESOLUTION;
 }
 
 void BSP_ADC_Init(void)
@@ -98,10 +111,13 @@ void BSP_ADC_Init(void)
         s_adc_read_buffer[i] = 0;
     }
 
-    /* Configure ADC1: scan mode, continuous conversion */
+    /* Configure ADC1: one full scan per software trigger.
+     * High-impedance analog sources are less likely to be biased upward when
+     * the ADC is not running continuously across all channels.
+     */
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode       = ENABLE;
-    ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+    ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
     ADC_InitStructure.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign          = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel       = BSP_ADC_CH_MAX;
@@ -114,16 +130,16 @@ void BSP_ADC_Init(void)
      * Including the fixed 12.5 conversion cycles, one full conversion is
      * 84 cycles total, about 7.00 us per channel.
      */
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_RF_I],       1, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_US_I],       2, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF01], 3, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF02], 4, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_U],      5, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_I],      6, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, ADC_SampleTime_71Cycles5);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_VOUT],      10, ADC_SampleTime_71Cycles5);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_RF_I],       1, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_US_I],       2, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF01], 3, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF02], 4, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_U],      5, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_I],      6, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, BSP_ADC_SAMPLE_TIME);
+    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_VOUT],      10, BSP_ADC_SAMPLE_TIME);
 
     /* Enable ADC DMA before enabling ADC */
     ADC_DMACmd(ADC1, ENABLE);
@@ -135,10 +151,8 @@ void BSP_ADC_Init(void)
     ADC_StartCalibration(ADC1);
     while (ADC_GetCalibrationStatus(ADC1)) { }
 
-    /* Start ADC continuous conversion */
-    /* In continuous mode with DMA circular mode, this triggers continuous conversions */
-    /* The ADC will keep converting automatically, and DMA will continuously update the buffer */
-    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    /* Start a first one-shot scan so callers can obtain initial data soon after init. */
+    BSP_ADC_StartScanInternal();
 }
 
 uint16_t BSP_ADC_ReadRaw(BSP_ADC_Channel_t ch)
@@ -170,6 +184,16 @@ const uint16_t* BSP_ADC_GetDmaBuffer(void)
     return (const uint16_t*)s_adc_read_buffer;
 }
 
+void BSP_ADC_RequestScan(void)
+{
+    BSP_ADC_StartScanInternal();
+}
+
+uint8_t BSP_ADC_IsDataReady(void)
+{
+    return s_adc_buffer_ready;
+}
+
 /* DMA transfer complete interrupt handler - called from stm32f103_it.c */
 void BSP_ADC_DMA_TC_Handler(void)
 {
@@ -179,5 +203,6 @@ void BSP_ADC_DMA_TC_Handler(void)
     for (i = 0; i < BSP_ADC_CH_MAX; i++) {
         s_adc_read_buffer[i] = s_adc_dma_buffer[i];
     }
+    s_adc_scan_in_progress = 0;
     s_adc_buffer_ready = 1;
 }

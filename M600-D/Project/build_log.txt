@@ -1,6 +1,4 @@
-*** Target 'Development' uses ARM-Compiler 'V5.06 update 6 (build 750)' which is not available.
-*** Please review the installed ARM Compiler Versions:
-   'Manage Project Items - Folders/Extensions' to manage ARM Compiler Versions.
-   'Options for Target - Target' to select an ARM Compiler Version for the target.
-*** Build aborted.
-Build Time Elapsed:  00:00:01
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'Development'
+".\Objects\M600.axf" - 0 Error(s), 0 Warning(s).
+Build Time Elapsed:  00:00:00

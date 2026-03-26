@@ -1,11 +1,12 @@
 /************************************************************************************
  * @file     : bsp_adc.c
- * @brief    : M600 ADC1 init with DMA - ported from M600 HAL
- * @details  : DMA continuous conversion, scan mode. Channels PA0,1,5,6,7 / PB0,1 / PC3,4,5.
+ * @brief    : M600 ADC1 init - one settled channel sampled per request
+ * @details  : Software-triggered per-channel conversions with first-sample discard.
  ***********************************************************************************/
 #include "bsp_adc.h"
 
-static const uint8_t s_adc_ch[] = {
+/* Logical channel -> STM32 ADC hardware channel mapping. */
+static const uint8_t s_adc_hw_ch[] = {
     ADC_Channel_0,   /* RF_I      PA0 */
     ADC_Channel_1,   /* US_I      PA1 */
     ADC_Channel_5,   /* Heat_REF01 PA5 */
@@ -18,29 +19,62 @@ static const uint8_t s_adc_ch[] = {
     ADC_Channel_15,  /* VOUT      PC5 */
 };
 
-/* Double buffer for ADC values
- * - s_adc_dma_buffer: DMA writes here (working buffer)
- * - s_adc_read_buffer: Application reads from here (read buffer)
- * Buffer organization: Each array element corresponds to one channel
- * [0] = RF_I (PA0), [1] = US_I (PA1), [2] = Heat_REF01 (PA5), [3] = Heat_REF02 (PA6)
- * [4] = ESW_U (PB0), [5] = ESW_I (PB1), [6] = HP_PRE (PA7), [7] = HAND_NTC (PC3)
- * [8] = HARD_VER (PC4), [9] = VOUT (PC5)
+/*
+ * Settled sampling policy:
+ * - After each mux switch, discard the first conversion.
+ * - Average the following stable conversions.
  */
-static uint16_t s_adc_dma_buffer[BSP_ADC_CH_MAX];  /* DMA working buffer */
+#define BSP_ADC_SETTLE_DISCARD_COUNT  1u
+#define BSP_ADC_STABLE_SAMPLE_COUNT   2u
+
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
 static volatile uint8_t s_adc_buffer_ready = 0;     /* Buffer ready flag */
-static volatile uint8_t s_adc_scan_in_progress = 0; /* One-shot scan state */
+static uint8_t s_adc_next_channel = 0u;             /* Round-robin channel index */
 
-static void BSP_ADC_StartScanInternal(void)
+static uint16_t BSP_ADC_ReadSingleConversion(void)
 {
-    if (s_adc_scan_in_progress != 0u)
-    {
-        return;
+    ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET) {
     }
 
-    s_adc_buffer_ready = 0;
-    s_adc_scan_in_progress = 1;
-    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    return ADC_GetConversionValue(ADC1);
+}
+
+static uint16_t BSP_ADC_ReadSettledChannel(BSP_ADC_Channel_t ch)
+{
+    uint32_t accumulated = 0u;
+    uint8_t sampleIndex;
+
+    ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[ch], 1u, BSP_ADC_SAMPLE_TIME);
+
+    for (sampleIndex = 0u; sampleIndex < BSP_ADC_SETTLE_DISCARD_COUNT; sampleIndex++) {
+        (void)BSP_ADC_ReadSingleConversion();
+    }
+
+    for (sampleIndex = 0u; sampleIndex < BSP_ADC_STABLE_SAMPLE_COUNT; sampleIndex++) {
+        accumulated += (uint32_t)BSP_ADC_ReadSingleConversion();
+    }
+
+    return (uint16_t)((accumulated + (BSP_ADC_STABLE_SAMPLE_COUNT / 2u)) / BSP_ADC_STABLE_SAMPLE_COUNT);
+}
+
+static void BSP_ADC_SampleOneChannelInternal(BSP_ADC_Channel_t channel)
+{
+    s_adc_buffer_ready = 0u;
+    s_adc_read_buffer[channel] = BSP_ADC_ReadSettledChannel(channel);
+    s_adc_buffer_ready = 1u;
+}
+
+static void BSP_ADC_PrimeAllChannelsInternal(void)
+{
+    uint8_t channelIndex;
+
+    for (channelIndex = 0u; channelIndex < BSP_ADC_CH_MAX; channelIndex++) {
+        BSP_ADC_SampleOneChannelInternal((BSP_ADC_Channel_t)channelIndex);
+    }
+
+    s_adc_next_channel = 0u;
 }
 
 static float BSP_ADC_ConvertToVoltageV(uint16_t raw)
@@ -55,13 +89,10 @@ void BSP_ADC_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     ADC_InitTypeDef ADC_InitStructure;
-    DMA_InitTypeDef DMA_InitStructure;
     uint8_t i;
-    NVIC_InitTypeDef NVIC_InitStructure;
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOA |
                            RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     /* Analog pins: PA0,1,5,6,7 / PB0,1 / PC3,4,5 */
     GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
@@ -77,72 +108,29 @@ void BSP_ADC_Init(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-
-    /* Configure DMA1 Channel1 for ADC1 */
-    DMA_DeInit(DMA1_Channel1);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-    DMA_InitStructure.DMA_MemoryBaseAddr      = (uint32_t)s_adc_dma_buffer;
-    DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize         = BSP_ADC_CH_MAX;
-    DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    DMA_InitStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    DMA_InitStructure.DMA_Mode               = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority           = DMA_Priority_High;
-    DMA_InitStructure.DMA_M2M                = DMA_M2M_Disable;
-    DMA_Init(DMA1_Channel1, &DMA_InitStructure);
-    
-    /* Enable DMA transfer complete interrupt for double buffering */
-    DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE);
-    DMA_ITConfig(DMA1_Channel1, DMA_IT_TE, ENABLE);
-    
-    /* Enable DMA interrupt in NVIC */
-    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
-    DMA_Cmd(DMA1_Channel1, ENABLE);
     
     /* Initialize read buffer */
     for (i = 0; i < BSP_ADC_CH_MAX; i++) {
         s_adc_read_buffer[i] = 0;
     }
 
-    /* Configure ADC1: one full scan per software trigger.
-     * High-impedance analog sources are less likely to be biased upward when
-     * the ADC is not running continuously across all channels.
-     */
+    /* Configure ADC1 for software-triggered single conversions. */
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent;
-    ADC_InitStructure.ADC_ScanConvMode       = ENABLE;
+    ADC_InitStructure.ADC_ScanConvMode       = DISABLE;
     ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
     ADC_InitStructure.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign          = ADC_DataAlign_Right;
-    ADC_InitStructure.ADC_NbrOfChannel       = BSP_ADC_CH_MAX;
+    ADC_InitStructure.ADC_NbrOfChannel       = 1u;
     ADC_Init(ADC1, &ADC_InitStructure);
 
-    /* Configure regular channel sequence */
-    /* ADC clock = PCLK2 / 6. With STM32F103 PCLK2 typically at 72 MHz,
+    /* ADC timing at max sample time to reduce high-source-impedance error.
+     * ADC clock = PCLK2 / 6. With STM32F103 PCLK2 typically at 72 MHz,
      * ADCCLK = 12 MHz, so 1 cycle = 1 / 12 MHz = 83.3 ns.
-     * ADC_SampleTime_71Cycles5 means 71.5 sampling cycles, about 5.96 us.
+     * ADC_SampleTime_239Cycles5 means 239.5 sampling cycles, about 19.96 us.
      * Including the fixed 12.5 conversion cycles, one full conversion is
-     * 84 cycles total, about 7.00 us per channel.
+     * 252 cycles total, about 21.00 us per sample.
      */
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_RF_I],       1, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_US_I],       2, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF01], 3, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_Heat_REF02], 4, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_U],      5, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_ESW_I],      6, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HP_PRE],     7, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HAND_NTC],   8, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_HARD_VER],   9, BSP_ADC_SAMPLE_TIME);
-    ADC_RegularChannelConfig(ADC1, s_adc_ch[BSP_ADC_CH_VOUT],      10, BSP_ADC_SAMPLE_TIME);
-
-    /* Enable ADC DMA before enabling ADC */
-    ADC_DMACmd(ADC1, ENABLE);
+    ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[BSP_ADC_CH_RF_I], 1u, BSP_ADC_SAMPLE_TIME);
 
     /* Enable ADC */
     ADC_Cmd(ADC1, ENABLE);
@@ -151,8 +139,8 @@ void BSP_ADC_Init(void)
     ADC_StartCalibration(ADC1);
     while (ADC_GetCalibrationStatus(ADC1)) { }
 
-    /* Start a first one-shot scan so callers can obtain initial data soon after init. */
-    BSP_ADC_StartScanInternal();
+    /* Prime all channels once at startup so callers do not see zeroed samples. */
+    BSP_ADC_PrimeAllChannelsInternal();
 }
 
 uint16_t BSP_ADC_ReadRaw(BSP_ADC_Channel_t ch)
@@ -180,13 +168,17 @@ uint16_t BSP_ADC_ReadChannel(BSP_ADC_Channel_t ch)
 
 const uint16_t* BSP_ADC_GetDmaBuffer(void)
 {
-    /* Return read buffer (safe for application use) */
+    /* Backward-compatible accessor for the latest stable samples. */
     return (const uint16_t*)s_adc_read_buffer;
 }
 
 void BSP_ADC_RequestScan(void)
 {
-    BSP_ADC_StartScanInternal();
+    BSP_ADC_SampleOneChannelInternal((BSP_ADC_Channel_t)s_adc_next_channel);
+    s_adc_next_channel++;
+    if (s_adc_next_channel >= (uint8_t)BSP_ADC_CH_MAX) {
+        s_adc_next_channel = 0u;
+    }
 }
 
 uint8_t BSP_ADC_IsDataReady(void)
@@ -197,12 +189,5 @@ uint8_t BSP_ADC_IsDataReady(void)
 /* DMA transfer complete interrupt handler - called from stm32f103_it.c */
 void BSP_ADC_DMA_TC_Handler(void)
 {
-    /* Copy DMA working buffer to read buffer (atomic operation) */
-    uint8_t i;
-
-    for (i = 0; i < BSP_ADC_CH_MAX; i++) {
-        s_adc_read_buffer[i] = s_adc_dma_buffer[i];
-    }
-    s_adc_scan_in_progress = 0;
-    s_adc_buffer_ready = 1;
+    /* ADC DMA is no longer used; keep this symbol for compatibility. */
 }

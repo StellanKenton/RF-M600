@@ -70,38 +70,38 @@ void Drv_Uart_init()
 
 void Drv_USART1_Rx(void)
 {
-    // 停止DMA接收（防止数据被覆盖）
+    // 停�??DMA接收（防止数�?�?覆盖�?
     DMA_Cmd(DMA1_Channel5, DISABLE);
     
-    // 等待DMA停止
+    // 等待DMA停�??
     while (DMA1_Channel5->CCR & DMA_CCR5_EN) { }
     
     // 计算已接收的数据长度
-    // DMA1_Channel5是循环模式，当前计数器表示剩余未接收的字节数
+    // DMA1_Channel5�?�?�?模式，当前�?�数器表示剩余未接收的字节数
     uint16_t dmaCounter = DMA_GetCurrDataCounter(DMA1_Channel5);
     uint16_t rxLen = BSP_USART_REC_LEN - dmaCounter;
     
-    // 如果有数据，将BSP层接收缓冲区的数据写入DRV层环形缓冲区
+    // 如果有数�?，将BSP层接收缓冲区的数�?写入DRV层环形缓冲区
     if (rxLen > 0)
     {
         CBuff_Write(&s_USART1_RxBuffer, BSP_USART1_RxBuf, rxLen);
     }
     
-    // 重新启动DMA接收（循环模式）
+    // 重新�?动DMA接收（循�?模式�?
     DMA_SetCurrDataCounter(DMA1_Channel5, BSP_USART_REC_LEN);
     DMA_Cmd(DMA1_Channel5, ENABLE);
 }
 
 void Drv_USART2_Rx(void)
 {
-    // 停止DMA接收（防止数据被覆盖）
+    // 停�??DMA接收（防止数�?�?覆盖�?
     DMA_Cmd(DMA1_Channel6, DISABLE);
     
-    // 等待DMA停止
+    // 等待DMA停�??
     while (DMA1_Channel6->CCR & DMA_CCR6_EN) { }
     
     // 计算已接收的数据长度
-    // DMA1_Channel6是循环模式，当前计数器表示剩余未接收的字节数
+    // DMA1_Channel6�?�?�?模式，当前�?�数器表示剩余未接收的字节数
     uint16_t dmaCounter = DMA_GetCurrDataCounter(DMA1_Channel6);
     uint16_t rxLen = BSP_USART_REC_LEN - dmaCounter;
     if (rxLen > 0)
@@ -109,7 +109,7 @@ void Drv_USART2_Rx(void)
         CBuff_Write(&s_USART2_RxBuffer, BSP_USART2_RxBuf, rxLen);
     }
     
-    // 重新启动DMA接收（循环模式）
+    // 重新�?动DMA接收（循�?模式�?
     DMA_SetCurrDataCounter(DMA1_Channel6, BSP_USART_REC_LEN);
     DMA_Cmd(DMA1_Channel6, ENABLE);
 }

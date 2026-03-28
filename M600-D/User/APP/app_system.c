@@ -14,6 +14,7 @@
 #include "app_handcomm.h"
 #include "drv_adc.h"
 #include "drv_si5351.h"
+#include "drv_temp_module.h"
 #include "app_memory.h"
 #include "app_led.h"
 #include "bsp_delay.h"
@@ -72,6 +73,8 @@ void System_Init(void)
     LOG_I("Communication initialized.");
     App_HandComm_Init();
     LOG_I("Handle communication initialized.");
+    Drv_TempModule_Init();
+    LOG_I("Temperature module initialized on USART2 (PA2/PA3).");
     App_LED_Init();
     LOG_I("LED module initialized.");
     App_Memory_Init();
@@ -110,6 +113,7 @@ void SystemManager(void)
     App_Memory_Process();       // Process memory configuration for all treatment modules
     App_Comm_Process();         // Process communication with external devices
     App_HandComm_Process();     // Process handle communication
+    Drv_TempModule_Process();   // Process temperature module keepalive/query
     Log_Process(10);            // Process log messages with a time slice of 10ms
 }
 

@@ -13,7 +13,24 @@
 #include "drv_delay.h"
 #include <string.h>
 
+#define HANDCOMM_TEMP_HEADER_1 0x5A
+
 static HandComm_Info_t s_HandCommInfo;
+
+static bool HandComm_IsTempFramePending(CBuff *pRxBuffer)
+{
+    uint8_t header[2];
+
+    if ((pRxBuffer == NULL) || (CBuff_GetLength(pRxBuffer) < 2u)) {
+        return false;
+    }
+
+    if (CBuff_Read(pRxBuffer, header, 2u) == false) {
+        return false;
+    }
+
+    return (header[0] == HANDCOMM_HEADER_0) && (header[1] == HANDCOMM_TEMP_HEADER_1);
+}
 
 /* =============================================================================
  * Private Functions
@@ -141,6 +158,10 @@ static void App_HandComm_RecvData(void)
     
     CBuff* pRxBuffer = Drv_GetUsart2RingPtr();
     if (pRxBuffer == NULL) {
+        return;
+    }
+
+    if (HandComm_IsTempFramePending(pRxBuffer)) {
         return;
     }
     

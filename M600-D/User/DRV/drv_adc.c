@@ -40,10 +40,11 @@ static const uint32_t s_ntc_temp_table[] = {
 
 static Drv_ADC_PhysicalValues_t s_adcPhysicalValues;
 static Drv_Timer_t s_adcProcessTimer;
+static BSP_ADC_Channel_t s_currentChannel;
 
 static uint16_t Drv_ADC_ConvertChannel(BSP_ADC_Channel_t channel, uint16_t raw);
 static uint16_t Drv_ADC_GetCachedPhysicalValue(BSP_ADC_Channel_t channel);
-static void Drv_ADC_UpdatePhysicalValues(void);
+static void Drv_ADC_UpdateOneChannel(BSP_ADC_Channel_t channel, uint16_t rawValue);
 
 static BSP_ADC_Channel_t Dal_NTC_MapChannel(NTC_Type_EnumDef ntcType)
 {
@@ -66,7 +67,8 @@ static uint16_t Drv_ADC_GetUSCurrentValue(uint16_t raw)
 
 static uint16_t Drv_ADC_GetRFCurrentValue(uint16_t raw)
 {
-    if(raw < 3950) {
+    // <= 0.5V
+    if(raw <= 620) {
         s_adcPhysicalValues.isContactSkin = false;
     } else {
         s_adcPhysicalValues.isContactSkin = true;
@@ -122,7 +124,8 @@ static uint16_t Drv_ADC_GetHandNTCValue(uint16_t raw)
     if (raw <= NTC_RAW_SHORT) {
         return NTC_TEMP_SHORT_CODE;
     }
-    raw = 4096 - raw;  // convert to NTC side raw
+
+    /* Divider topology: 3.3V -> 10k -> sense node -> NTC -> GND. */
     resistance10 = ((uint32_t)raw * (NTC_SERIES_R / 10u) + ((uint32_t)(ADC_RESOLUTION - raw) / 2u)) /
                    (uint32_t)(ADC_RESOLUTION - raw);
 
@@ -220,41 +223,42 @@ static uint16_t Drv_ADC_GetCachedPhysicalValue(BSP_ADC_Channel_t channel)
     }
 }
 
-static void Drv_ADC_UpdatePhysicalValues(void)
+static void Drv_ADC_UpdateOneChannel(BSP_ADC_Channel_t channel, uint16_t rawValue)
 {
-    uint16_t rawValue;
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_US_I);
-    s_adcPhysicalValues.usCurrent = Drv_ADC_ConvertChannel(BSP_ADC_CH_US_I, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_RF_I);
-    s_adcPhysicalValues.rfCurrent = Drv_ADC_ConvertChannel(BSP_ADC_CH_RF_I, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_Heat_REF02);
-    s_adcPhysicalValues.heatRef02 = Drv_ADC_ConvertChannel(BSP_ADC_CH_Heat_REF02, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_Heat_REF01);
-    s_adcPhysicalValues.heatRef01 = Drv_ADC_ConvertChannel(BSP_ADC_CH_Heat_REF01, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_ESW_U);
-    s_adcPhysicalValues.eswVoltage = Drv_ADC_ConvertChannel(BSP_ADC_CH_ESW_U, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_ESW_I);
-    s_adcPhysicalValues.eswCurrent = Drv_ADC_ConvertChannel(BSP_ADC_CH_ESW_I, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_HP_PRE);
-    s_adcPhysicalValues.hpPressure = Drv_ADC_ConvertChannel(BSP_ADC_CH_HP_PRE, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_HAND_NTC);
-    s_adcPhysicalValues.handNTC = Drv_ADC_ConvertChannel(BSP_ADC_CH_HAND_NTC, rawValue);
-
-    rawValue = Drv_ADC_ReadChannel(BSP_ADC_CH_HARD_VER);
-    s_adcPhysicalValues.verId = Drv_ADC_ConvertChannel(BSP_ADC_CH_HARD_VER, rawValue);
-
-    rawValue = Drv_ADC_ReadVoutRaw();
-    s_adcPhysicalValues.vout = Drv_ADC_GetVoutValue(rawValue);
-
-    s_adcPhysicalValues.updateTickMs = Drv_Delay_GetTickMs();
+    switch (channel) {
+        case BSP_ADC_CH_US_I:
+            s_adcPhysicalValues.usCurrent = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_RF_I:
+            s_adcPhysicalValues.rfCurrent = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_Heat_REF02:
+            s_adcPhysicalValues.heatRef02 = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_Heat_REF01:
+            s_adcPhysicalValues.heatRef01 = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_ESW_U:
+            s_adcPhysicalValues.eswVoltage = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_ESW_I:
+            s_adcPhysicalValues.eswCurrent = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_HP_PRE:
+            s_adcPhysicalValues.hpPressure = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_HAND_NTC:
+            s_adcPhysicalValues.handNTC = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_HARD_VER:
+            s_adcPhysicalValues.verId = Drv_ADC_ConvertChannel(channel, rawValue);
+            break;
+        case BSP_ADC_CH_VOUT:
+            s_adcPhysicalValues.vout = Drv_ADC_GetVoutValue(rawValue);
+            break;
+        default:
+            break;
+    }
 }
 
 void Drv_ADC_Init(void)
@@ -263,21 +267,27 @@ void Drv_ADC_Init(void)
     s_adcProcessTimer.timeout_ms = 0u;
     s_adcProcessTimer.running = false;
     s_adcPhysicalValues.updateTickMs = 0u;
-    BSP_ADC_RequestScan();
+    s_currentChannel = (BSP_ADC_Channel_t)0;
 }
 
 void Drv_ADC_Process(void)
 {
-    // 4ms period for ADC processing; 10 channels complete one full round in 40ms
+    uint16_t rawValue;
+
     if (Drv_Timer_Tick(&s_adcProcessTimer, DRV_ADC_PROCESS_PERIOD_MS) == false) {
         return;
     }
 
-    if (BSP_ADC_IsDataReady() != 0u) {
-        Drv_ADC_UpdatePhysicalValues();
-    }
+    /* Sample one channel per 4ms tick (round-robin, 10 channels in 40ms) */
+    BSP_ADC_SampleOneChannel(s_currentChannel);
+    rawValue = BSP_ADC_ReadRaw(s_currentChannel);
+    Drv_ADC_UpdateOneChannel(s_currentChannel, rawValue);
 
-    BSP_ADC_RequestScan();
+    s_currentChannel++;
+    if (s_currentChannel >= BSP_ADC_CH_MAX) {
+        s_currentChannel = (BSP_ADC_Channel_t)0;
+        s_adcPhysicalValues.updateTickMs = Drv_Delay_GetTickMs();
+    }
 }
 
 uint16_t Drv_ADC_ReadChannel(BSP_ADC_Channel_t channel)

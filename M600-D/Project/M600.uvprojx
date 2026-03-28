@@ -15,16 +15,16 @@
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>GD32F103RC</Device>
+          <Device>GD32F103VK</Device>
           <Vendor>GigaDevice</Vendor>
           <PackID>GigaDevice.GD32F10x_DFP.2.0.3</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
-          <Cpu>IRAM(0x20000000,0x0000C000) IROM(0x08000000,0x00040000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000,0x00018000) IROM(0x08000000,0x00300000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F10x_HD -FS08000000 -FL040000 -FP0($$Device:GD32F103RC$Flash\GD32F10x_HD.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F10x_XD -FS08000000 -FL0300000 -FP0($$Device:GD32F103VK$Flash\GD32F10x_XD.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:GD32F103RC$Device\Include\gd32f10x.h</RegisterFile>
+          <RegisterFile>$$Device:GD32F103VK$Device\Include\gd32f10x.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -34,7 +34,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:GD32F103RC$SVD\GD32F10x\GD32F10x_HD.svd</SFDFile>
+          <SFDFile>$$Device:GD32F103VK$SVD\GD32F10x\GD32F10x_XD.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -139,7 +139,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -246,12 +246,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0xc000</Size>
+                <Size>0x18000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x300000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -276,7 +276,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x300000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -301,7 +301,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0xc000</Size>
+                <Size>0x18000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -612,6 +612,11 @@
               <FileName>drv_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\DRV\drv_usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_temp_module.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\DRV\drv_temp_module.c</FilePath>
             </File>
             <File>
               <FileName>drv_wdg.c</FileName>

@@ -18,13 +18,21 @@
 #include "drv_si5351.h"
 #include "drv_delay.h"
 #include <string.h>
+#include "drv_temp_module.h"
 
 static RF_CtrlInfo_t s_RFCtrlInfo;
 
 static void App_RadioFreq_UpdateHeadTemp(void)
 {
+    static int16_t s_ObjectTempCentiC = 0;
+    //static int16_t s_AmbientTempCentiC = 0;
     if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY) {
-        s_RFCtrlInfo.HeadTemp = Drv_ADC_GetRealValue(BSP_ADC_CH_HAND_NTC);
+        Drv_TempModule_Data_t tempData;
+        if (Drv_TempModule_GetLatest(&tempData)) {
+            s_ObjectTempCentiC = tempData.object_temp_centi_c;
+            //s_AmbientTempCentiC = tempData.ambient_temp_centi_c;
+            s_RFCtrlInfo.HeadTemp = (uint16_t)(s_ObjectTempCentiC/10);
+        }
     }
 }
 
@@ -317,21 +325,18 @@ bool App_RadioFreq_IsHeadTempNormal(void)
     bool isNormal = true;
     uint16_t temp = s_RFCtrlInfo.HeadTemp;
     s_RFCtrlInfo.HeadTemp = temp;
-
-    if(TreatGetRunFlag()) {
-        return true;
-    }
-    
+  
     if(s_RFCtrlInfo.HeadTemp > s_RFCtrlInfo.TempLimit)
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
         LOG_W("RF: Head temperature too high: %d (limit: %d)",
               s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
-        isNormal = false;
+        s_RFCtrlInfo.OverTempFlag = true;
     }
     else
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
+        s_RFCtrlInfo.OverTempFlag = false;
     }
 
     return isNormal;
@@ -400,6 +405,7 @@ void App_RadioFreq_Process(void)
                 Drv_SI5351_SetComplementaryPWM(true);
                 Drv_IODevice_ChangeChannel(CHANNEL_RF_US_READY);
                 App_RadioFreq_ChangeState(E_RF_RUN_WORKING);
+                s_RFCtrlInfo.OverTempFlag = false;
             }
             break;
 
@@ -460,4 +466,8 @@ RF_RunState_EnumDef App_RadioFreq_GetRunState(void)
     return s_RFCtrlInfo.runState;
 }
 
+bool App_RadioFreq_IsOverTemp()
+{
+    return s_RFCtrlInfo.OverTempFlag;
+}
 /**************************End of file********************************/

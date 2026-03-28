@@ -24,13 +24,11 @@ static const uint8_t s_adc_hw_ch[] = {
  * - After each mux switch, discard the first conversion.
  * - Average the following stable conversions.
  */
-#define BSP_ADC_SETTLE_DISCARD_COUNT  1u
-#define BSP_ADC_STABLE_SAMPLE_COUNT   2u
+#define BSP_ADC_SETTLE_DISCARD_COUNT  4u
+#define BSP_ADC_STABLE_SAMPLE_COUNT   4u
 
 static uint16_t s_adc_read_buffer[BSP_ADC_CH_MAX];  /* Application read buffer */
 static volatile uint8_t s_adc_buffer_ready = 0;     /* Buffer ready flag */
-static uint8_t s_adc_next_channel = 0u;             /* Round-robin channel index */
-
 static uint16_t BSP_ADC_ReadSingleConversion(void)
 {
     ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
@@ -46,15 +44,24 @@ static uint16_t BSP_ADC_ReadSettledChannel(BSP_ADC_Channel_t ch)
     uint32_t accumulated = 0u;
     uint8_t sampleIndex;
 
-    ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[ch], 1u, BSP_ADC_SAMPLE_TIME);
+    /* Discard phase: minimum sample time to pre-charge cap with minimal pin loading.
+     * 1.5 cycles = 125 ns per sample switch closure. */
+    ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[ch], 1u, ADC_SampleTime_1Cycles5);
 
     for (sampleIndex = 0u; sampleIndex < BSP_ADC_SETTLE_DISCARD_COUNT; sampleIndex++) {
         (void)BSP_ADC_ReadSingleConversion();
     }
 
+    /* Stable phase: proper sample time for accurate conversion.
+     * 7.5 cycles = 625 ns, 7.1 tau for 10 kohm source (99.9 % settled). */
+    ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[ch], 1u, BSP_ADC_SAMPLE_TIME);
+
     for (sampleIndex = 0u; sampleIndex < BSP_ADC_STABLE_SAMPLE_COUNT; sampleIndex++) {
         accumulated += (uint32_t)BSP_ADC_ReadSingleConversion();
     }
+
+    /* Park mux on internal VREFINT channel to stop loading the external pin. */
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_17, 1u, BSP_ADC_SAMPLE_TIME);
 
     return (uint16_t)((accumulated + (BSP_ADC_STABLE_SAMPLE_COUNT / 2u)) / BSP_ADC_STABLE_SAMPLE_COUNT);
 }
@@ -66,15 +73,11 @@ static void BSP_ADC_SampleOneChannelInternal(BSP_ADC_Channel_t channel)
     s_adc_buffer_ready = 1u;
 }
 
-static void BSP_ADC_PrimeAllChannelsInternal(void)
+void BSP_ADC_SampleOneChannel(BSP_ADC_Channel_t ch)
 {
-    uint8_t channelIndex;
-
-    for (channelIndex = 0u; channelIndex < BSP_ADC_CH_MAX; channelIndex++) {
-        BSP_ADC_SampleOneChannelInternal((BSP_ADC_Channel_t)channelIndex);
+    if (ch < BSP_ADC_CH_MAX) {
+        BSP_ADC_SampleOneChannelInternal(ch);
     }
-
-    s_adc_next_channel = 0u;
 }
 
 static float BSP_ADC_ConvertToVoltageV(uint16_t raw)
@@ -123,14 +126,16 @@ void BSP_ADC_Init(void)
     ADC_InitStructure.ADC_NbrOfChannel       = 1u;
     ADC_Init(ADC1, &ADC_InitStructure);
 
-    /* ADC timing at max sample time to reduce high-source-impedance error.
-     * ADC clock = PCLK2 / 6. With STM32F103 PCLK2 typically at 72 MHz,
-     * ADCCLK = 12 MHz, so 1 cycle = 1 / 12 MHz = 83.3 ns.
-     * ADC_SampleTime_239Cycles5 means 239.5 sampling cycles, about 19.96 us.
-     * Including the fixed 12.5 conversion cycles, one full conversion is
-     * 252 cycles total, about 21.00 us per sample.
+    /* ADC timing: split sample-time strategy.
+     * ADCCLK = PCLK2 / 6 = 12 MHz (83.3 ns / cycle).
+     * Discard phase uses ADC_SampleTime_1Cycles5 (125 ns) for minimal loading.
+     * Stable phase uses ADC_SampleTime_7Cycles5 (625 ns, 7.1 tau for 10 kohm).
+     * One stable conversion = (7.5 + 12.5) / 12 MHz = 1.67 us.
      */
     ADC_RegularChannelConfig(ADC1, s_adc_hw_ch[BSP_ADC_CH_RF_I], 1u, BSP_ADC_SAMPLE_TIME);
+
+    /* Enable internal VREFINT so we can park the mux there between conversions. */
+    ADC_TempSensorVrefintCmd(ENABLE);
 
     /* Enable ADC */
     ADC_Cmd(ADC1, ENABLE);
@@ -139,8 +144,8 @@ void BSP_ADC_Init(void)
     ADC_StartCalibration(ADC1);
     while (ADC_GetCalibrationStatus(ADC1)) { }
 
-    /* Prime all channels once at startup so callers do not see zeroed samples. */
-    BSP_ADC_PrimeAllChannelsInternal();
+    /* Prime HAND_NTC once at startup for isolation testing. */
+    BSP_ADC_SampleOneChannelInternal(BSP_ADC_CH_HAND_NTC);
 }
 
 uint16_t BSP_ADC_ReadRaw(BSP_ADC_Channel_t ch)
@@ -174,11 +179,7 @@ const uint16_t* BSP_ADC_GetDmaBuffer(void)
 
 void BSP_ADC_RequestScan(void)
 {
-    BSP_ADC_SampleOneChannelInternal((BSP_ADC_Channel_t)s_adc_next_channel);
-    s_adc_next_channel++;
-    if (s_adc_next_channel >= (uint8_t)BSP_ADC_CH_MAX) {
-        s_adc_next_channel = 0u;
-    }
+    BSP_ADC_SampleOneChannelInternal(BSP_ADC_CH_HAND_NTC);
 }
 
 uint8_t BSP_ADC_IsDataReady(void)

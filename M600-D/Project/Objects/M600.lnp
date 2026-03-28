@@ -42,6 +42,7 @@
 ".\objects\drv_si5351.o"
 ".\objects\drv_tim.o"
 ".\objects\drv_usart.o"
+".\objects\drv_temp_module.o"
 ".\objects\drv_wdg.o"
 ".\objects\drv_soft_i2c.o"
 ".\objects\drv_24c02.o"

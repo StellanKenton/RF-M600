@@ -160,7 +160,7 @@ void BSP_Init(void)
     BSP_TIM1_Init();
     BSP_TIM2_Init();
     BSP_USART1_Init(115200);
-    BSP_USART2_Init(115200);
+    BSP_USART2_Init(9600);
     //BSP_I2C1_Init();
     //BSP_I2C2_Init();
     /* BSP_IWDG_Init();  optional, enable when using IWDG */

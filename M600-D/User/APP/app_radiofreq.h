@@ -61,6 +61,7 @@ typedef struct
     RF_RunState_EnumDef runState;
     Treat_Times_EnumDef TreatCountsState;
     bool isWaitReturn;
+    bool OverTempFlag;
     uint16_t Voltage;              
     uint16_t VoltageTarget;        
     uint16_t CurrentHigh;        
@@ -90,6 +91,7 @@ void App_RadioFreq_SetWorkParams(void);
 RF_GetStatus_Reply_t *App_RadioFreq_GetStatus(void);
 RF_RunState_EnumDef App_RadioFreq_GetRunState(void);
 void App_RadioFreq_ChangeState(RF_RunState_EnumDef newState);
+bool App_RadioFreq_IsOverTemp(void);
 
 #ifdef __cplusplus
 }

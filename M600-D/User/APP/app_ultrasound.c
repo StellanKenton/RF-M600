@@ -344,15 +344,11 @@ bool App_UltraSound_IsCurrentNormal(void)
     }
     return isNormal;
 }
-
+void App_Ultra_RunChangeLevel();
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
     uint16_t temp = s_USCtrlInfo.HeadTemp;
-
-    if(TreatGetRunFlag()) {
-        return true;
-    }
 
     if(temp > s_USCtrlInfo.TempLimit)
     {
@@ -367,6 +363,7 @@ bool App_UltraSound_IsHeadTempNormal(void)
     }
     else
     {
+        App_Ultra_RunChangeLevel();
         s_USCtrlInfo.ErrorCode = E_US_ERROR_NONE;
     }
     return isNormal;
@@ -440,7 +437,6 @@ void App_Ultrasound_Process(void)
             App_UltraSound_IsHeadTempNormal() == false ){
               App_Ultrasound_ChangeState(E_US_RUN_STOP);
             }
-			App_Ultra_RunChangeLevel();
             break;
         case E_US_RUN_STOP:
 			s_USCtrlInfo.WorkLevel = 0;
@@ -505,7 +501,7 @@ void App_Ultrasound_SetHighFreqPowerHandle10us(void)
         s_activeWindowUs = 0U;
         s_lastWorkLevel = 0xFFU;
         if(probeStatus == E_IODEVICE_MODE_RADIO_FREQUENCY) {
-            enableOutput = (App_RadioFreq_GetRunState() == E_RF_RUN_WORKING);
+            enableOutput = ((App_RadioFreq_GetRunState() == E_RF_RUN_WORKING)&&(App_RadioFreq_IsOverTemp() == false));
             if(enableOutput != s_outputEnabled) {
                 Drv_IO_HighFreqPowerOutput(enableOutput);
                 s_outputEnabled = enableOutput;

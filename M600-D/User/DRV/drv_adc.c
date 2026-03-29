@@ -8,6 +8,7 @@
 
 #define ADC_RESOLUTION  4096u
 #define VOUT_DIVIDER_NUMERATOR  15.3529f
+#define ESW_VOLTAGE_FULL_SCALE_MV  103300u
 #define NTC_SERIES_R    10000u  /* series R with NTC, ohm */
 #define NTC_RAW_OPEN    3900u   /* ADC raw > this: NTC open */
 #define NTC_RAW_SHORT   50u     /* ADC raw < this: NTC short */
@@ -90,8 +91,15 @@ static uint16_t Drv_ADC_GetHeatRef01Value(uint16_t raw)
 
 static uint16_t Drv_ADC_GetESWVoltageValue(uint16_t raw)
 {
-    (void)raw;
-    return 0u;
+    uint32_t voltageMv;
+
+    /* ESW divider: Vadc = Vesw * 3.3 / 103.3, raw = Vadc / 3.3 * 4096. */
+    voltageMv = ((uint32_t)raw * ESW_VOLTAGE_FULL_SCALE_MV + (ADC_RESOLUTION / 2u)) / ADC_RESOLUTION;
+    if (voltageMv > 0xFFFFu) {
+        voltageMv = 0xFFFFu;
+    }
+
+    return (uint16_t)voltageMv;
 }
 
 static uint16_t Drv_ADC_GetESWCurrentValue(uint16_t raw)

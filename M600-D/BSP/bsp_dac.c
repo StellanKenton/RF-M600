@@ -24,7 +24,7 @@ void BSP_DAC_Init(void)
     DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Enable;
     DAC_Init(DAC_Channel_1, &DAC_InitStructure);
     DAC_Cmd(DAC_Channel_1, ENABLE);
-    DAC_SetChannel1Data(DAC_Align_12b_R, 0);
+    DAC_SetChannel1Data(DAC_Align_12b_R, 4095);
 }
 
 void BSP_DAC_SetValue(uint16_t value)

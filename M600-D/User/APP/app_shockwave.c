@@ -387,9 +387,6 @@ bool App_Shockwave_IsHeadTempNormal(void)
     s_SWCtrlInfo.HeadTemp = temp;
     bool isNormal = true;
     
-    if(TreatGetRunFlag()) {
-        return true;
-    }
     if(temp > s_SWCtrlInfo.TempLimit)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_TEMP_TOO_HIGH;

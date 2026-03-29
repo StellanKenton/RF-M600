@@ -18,6 +18,82 @@
 #include <string.h>
 
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
+static int16_t App_NegPrsHeat_PressureToScaledKpa(int8_t pressure_kpa);
+
+static bool App_NegPrsHeat_IsWorkStateParamsValid(const Heat_SetWorkState_Send_t *pWorkState)
+{
+    if(pWorkState == NULL)
+    {
+        return false;
+    }
+
+    if(pWorkState->work_time == 0 || pWorkState->work_time > NPH_WORK_TIME_MAX)
+    {
+        return false;
+    }
+
+    if(pWorkState->temp_limit < PARAM_TEMP_MIN || pWorkState->temp_limit > PARAM_TEMP_MAX)
+    {
+        return false;
+    }
+
+    if(pWorkState->pressure < NPH_PRESSURE_MIN_KPA || pWorkState->pressure > NPH_PRESSURE_MAX_KPA)
+    {
+        return false;
+    }
+
+    if(pWorkState->suck_time < (NPH_SUCK_TIME_MIN_MS / 10U) ||
+       pWorkState->suck_time > (NPH_SUCK_TIME_MAX_MS / 10U))
+    {
+        return false;
+    }
+
+    if(pWorkState->release_time < (NPH_RELEASE_TIME_MIN_MS / 10U) ||
+       pWorkState->release_time > (NPH_RELEASE_TIME_MAX_MS / 10U))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static bool App_NegPrsHeat_IsWorkStateParamChanged(const Heat_SetWorkState_Send_t *pNewWorkState,
+                                                   const Heat_SetWorkState_Send_t *pOldWorkState)
+{
+    if(pNewWorkState == NULL || pOldWorkState == NULL)
+    {
+        return false;
+    }
+
+    return (pNewWorkState->work_time != pOldWorkState->work_time) ||
+           (pNewWorkState->pressure != pOldWorkState->pressure) ||
+           (pNewWorkState->suck_time != pOldWorkState->suck_time) ||
+           (pNewWorkState->release_time != pOldWorkState->release_time) ||
+           (pNewWorkState->temp_limit != pOldWorkState->temp_limit);
+}
+
+static void App_NegPrsHeat_ApplyWorkStateParams(bool syncTreatCounts, bool resetOutputs)
+{
+    s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
+    s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
+    s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;
+    s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;
+    s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
+
+    if(syncTreatCounts)
+    {
+        s_NPHCtrlInfo.TreatCounts = (uint32_t)s_NPHCtrlInfo.Trans.RxWorkState.work_time * 1000U;  /* s -> 10ms */
+    }
+
+    if(resetOutputs)
+    {
+        s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
+        s_NPHCtrlInfo.motorState = false;
+        s_NPHCtrlInfo.heatControlActive = false;
+        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+        Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+    }
+}
 
 static void App_NegPrsHeat_LoadConfig(const NPH_TreatParams_t *pParams)
 {
@@ -110,10 +186,24 @@ void App_NegPrsHeat_UpdateStatus(void)
 void App_NegPrsHeat_RxDataHandle(void)
 {
     Heat_TransData_t *pTransData = App_Comm_GetHeatTransData();
+    Heat_SetWorkState_Send_t lastRxWorkState = s_NPHCtrlInfo.Trans.RxWorkState;
 
     /* RxWorkState and WorkTimeHandle are processed in WorkTimeHandle() */
     s_NPHCtrlInfo.Trans.RxWorkState = pTransData->RxWorkState;
     s_NPHCtrlInfo.Trans.RxConfig = pTransData->RxConfig;
+
+    if(App_NegPrsHeat_IsWorkStateParamChanged(&s_NPHCtrlInfo.Trans.RxWorkState, &lastRxWorkState) &&
+       App_NegPrsHeat_IsWorkStateParamsValid(&s_NPHCtrlInfo.Trans.RxWorkState))
+    {
+        bool syncTreatCounts = (s_NPHCtrlInfo.Trans.RxWorkState.work_time != lastRxWorkState.work_time);
+
+        App_NegPrsHeat_ApplyWorkStateParams(syncTreatCounts, false);
+        LOG_I("NPH work-state params updated: state=%d, time=%d, temp=%d, pressure=%d, suck=%d, release=%d",
+              s_NPHCtrlInfo.runState, s_NPHCtrlInfo.Trans.RxWorkState.work_time,
+              s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.Pressure,
+              s_NPHCtrlInfo.SuckTime, s_NPHCtrlInfo.ReleaseTime);
+    }
+
     /* Memory config has been validated and persisted; apply it to runtime state. */
     if(pTransData->flag.bits.Sync_Config)
     {
@@ -152,11 +242,7 @@ void App_NegPrsHeat_WorkTimeHandle(void)
         case E_TREAT_TIMES_POWER_ON:
             if(s_NPHCtrlInfo.Trans.RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatRemainTimes > 0)
             {
-                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> 10ms */
-                s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
-                s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
-                s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;
-                s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;
+                App_NegPrsHeat_ApplyWorkStateParams(true, false);
                 s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatRemainTimes - 1;
                 s_NPHCtrlInfo.TreatRemainTimes--;
@@ -167,11 +253,7 @@ void App_NegPrsHeat_WorkTimeHandle(void)
         case E_TREAT_TIMES_RESET:
             if(s_NPHCtrlInfo.Trans.RxWorkState.work_time > 0 && s_NPHCtrlInfo.TreatRemainTimes > 0)
             {
-                s_NPHCtrlInfo.TreatCounts = s_NPHCtrlInfo.Trans.RxWorkState.work_time * 1000;  /* s -> 10ms */
-                s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
-                s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
-                s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;
-                s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;
+                App_NegPrsHeat_ApplyWorkStateParams(true, false);
                 s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_WORKING;
                 s_NPHCtrlInfo.TreatParams.TreatRemainTimes = s_NPHCtrlInfo.TreatRemainTimes - 1;
                 s_NPHCtrlInfo.TreatRemainTimes--;
@@ -268,6 +350,12 @@ bool App_NegPrsHeat_StartCheck()
         return false;
     }
 
+    if(s_NPHCtrlInfo.Trans.RxWorkState.temp_limit < PARAM_TEMP_MIN ||
+       s_NPHCtrlInfo.Trans.RxWorkState.temp_limit > PARAM_TEMP_MAX) {
+        s_NPHCtrlInfo.ErrorCode = E_NPH_ERROR_INVALID_PARAMS;
+        return false;
+    }
+
     /* 3. pressure in 10~100 KPa */
     if(s_NPHCtrlInfo.Trans.RxWorkState.pressure < NPH_PRESSURE_MIN_KPA ||
        s_NPHCtrlInfo.Trans.RxWorkState.pressure > NPH_PRESSURE_MAX_KPA) {
@@ -313,22 +401,7 @@ bool App_NegPrsHeat_StartCheck()
 
 void App_NegPrsHeat_SetWorkParams(void)
 {
-    s_NPHCtrlInfo.WorkTempLimit = s_NPHCtrlInfo.Trans.RxWorkState.temp_limit;
-    s_NPHCtrlInfo.Pressure = s_NPHCtrlInfo.Trans.RxWorkState.pressure;
-    s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;  /* unit: 10ms */
-    s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;  /* unit: 10ms */
-
-    /* Convert target pressure to kPa*100 for vacuum closed-loop compare */
-    s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
-
-    /* Init vacuum and motor off */
-    s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
-    s_NPHCtrlInfo.motorState = false;
-    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
-
-    /* Init heat control off */
-    s_NPHCtrlInfo.heatControlActive = false;
-    Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);
+    App_NegPrsHeat_ApplyWorkStateParams(false, true);
 
     LOG_I("NPH: Work params set - temp_limit=%d, work_time=%d, pressure=%d, suck=%d, release=%d",
           s_NPHCtrlInfo.WorkTempLimit, s_NPHCtrlInfo.TreatCounts,
@@ -448,8 +521,8 @@ void App_NegPrsHeat_ControlTemperature(void)
 void App_NegPrsHeat_ProcessVacuum(void)
 {
     int16_t targetPressure;
-	uint32_t maintainElapsed;
-	uint32_t maintainTimeMs;
+    uint32_t suckElapsed;
+    uint32_t suckTimeMs;
 	uint32_t releaseElapsed;
 	uint32_t releaseTimeMs;
     uint32_t currentTime = Drv_Delay_GetTickMs();
@@ -464,17 +537,30 @@ void App_NegPrsHeat_ProcessVacuum(void)
             s_NPHCtrlInfo.vacuumStateStartTime = currentTime;
             s_NPHCtrlInfo.suckStartTime = currentTime;
             s_NPHCtrlInfo.motorState = true;
+            Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 0);
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
             LOG_I("NPH: Start sucking, target pressure: %d KPa", s_NPHCtrlInfo.Pressure);
             break;
 
         case E_NPH_VACUUM_STATE_SUCKING:
-            /* Compare real pressure value (kPa*100); when currentPressure >= target, go to maintain */
+            /* Suck phase duration follows host config; timeout forces release even if target is not reached. */
+            suckElapsed = currentTime - s_NPHCtrlInfo.suckStartTime;
+            suckTimeMs = (uint32_t)s_NPHCtrlInfo.SuckTime * 10U;
             targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
 
-            if(currentPressure >= targetPressure)
+            if(suckElapsed >= suckTimeMs)
             {
-                /* Target reached, enter maintain */
+                s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_RELEASING;
+                s_NPHCtrlInfo.releaseStartTime = currentTime;
+                s_NPHCtrlInfo.motorState = false;
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
+                Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 1);
+                    LOG_I("NPH: Suck timeout at %lu ms, start releasing (pressure=%d, target=%d)",
+                        (unsigned long)suckElapsed, currentPressure, targetPressure);
+            }
+            else if(currentPressure >= targetPressure)
+            {
+                /* Target reached early; keep the remaining suck window in maintain control. */
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_MAINTAIN;
                 s_NPHCtrlInfo.maintainStartTime = currentTime;
                 LOG_I("NPH: Target pressure reached (%d KPa), start maintaining", s_NPHCtrlInfo.Pressure);
@@ -491,20 +577,20 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
 
         case E_NPH_VACUUM_STATE_MAINTAIN:
-            /* Maintain time: SuckTime in 10ms units -> ms */
-            maintainElapsed = currentTime - s_NPHCtrlInfo.maintainStartTime;
-            maintainTimeMs = s_NPHCtrlInfo.SuckTime * 10-10;  /* 10ms -> ms */
+            /* Total suck window still follows configured suck time from the suction start. */
+            suckElapsed = currentTime - s_NPHCtrlInfo.suckStartTime;
+            suckTimeMs = (uint32_t)s_NPHCtrlInfo.SuckTime * 10U;
 
-            if(maintainElapsed >= maintainTimeMs)
+            if(suckElapsed >= suckTimeMs)
             {
-                /* Maintain done, start release */
+                /* Configured suck time reached, start release. */
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_RELEASING;
                 s_NPHCtrlInfo.releaseStartTime = currentTime;
                 s_NPHCtrlInfo.motorState = false;
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 0);
                 /* Open release valve: set CTR_HP_LOSE */
                 Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_LOSE, 1);
-                LOG_I("NPH: Maintain time reached, start releasing");
+                LOG_I("NPH: Configured suck time reached, start releasing");
             }
             else
             {
@@ -534,7 +620,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
         	case E_NPH_VACUUM_STATE_RELEASING:
             /* Release time: ReleaseTime in 10ms -> ms */
             releaseElapsed = currentTime - s_NPHCtrlInfo.releaseStartTime;
-            releaseTimeMs = s_NPHCtrlInfo.ReleaseTime * 10-10;  /* 10ms -> ms */
+            releaseTimeMs = (uint32_t)s_NPHCtrlInfo.ReleaseTime * 10U;  /* 10ms -> ms */
 
             if(releaseElapsed >= releaseTimeMs)
             {

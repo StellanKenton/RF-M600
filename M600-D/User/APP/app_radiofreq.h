@@ -32,6 +32,7 @@ extern "C" {
 #define RF_CURRENT_THRESHOLD_MV    50          ///< Current threshold (0.5V = 500mV)
 #define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< Current monitor period (10ms)
 #define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< Temp monitor period (1s)
+#define RF_LEVEL_RAMP_PERIOD_MS        200U   ///< Work level ramp period (1s/level)
 
 /* Voltage per level: level 1-20 maps to 11-30V */
 #define RF_VOLTAGE_PER_LEVEL_MV    ((RF_VOLTAGE_MAX_MV - RF_VOLTAGE_MIN_MV) / RF_WORK_LEVEL_MAX)
@@ -82,6 +83,7 @@ typedef struct
     /* Timestamp for periodic monitor */
     uint32_t lastCurrentMonitorTime;   ///< Last current monitor tick (ms)
     uint32_t lastTempMonitorTime;      ///< Last temp monitor tick (ms)
+    uint32_t LastLevelRampTime;        ///< Last work level ramp tick (ms)
 } RF_CtrlInfo_t;
 
 void App_RadioFreq_Init(void);

@@ -20,7 +20,7 @@
 #define TEMP_COMM_TIMEOUT_MS         2000u
 #define TEMP_TIMEOUT_OBJECT_TEMP     20000  /* 200.00 deg C in centi-C */
 
-static const uint8_t s_tempCmdAutoOutput[] = {0xA5u, 0x51u, 0xF6u};
+static const uint8_t s_tempCmdAutoOutput[] = {0xA5u, 0x51u, 0xF6u}; // {0xA5u, 0x45u, 0xEAu};//
 
 static Drv_TempModule_Data_t s_tempData;
 static bool     s_tempDataValid;

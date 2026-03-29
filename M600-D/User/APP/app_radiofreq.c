@@ -21,6 +21,8 @@
 #include "drv_temp_module.h"
 
 static RF_CtrlInfo_t s_RFCtrlInfo;
+static void App_RaidoFreq_RunChangeLevel(bool isOverTemp);
+static void App_RadioFreq_ApplyOutputVoltage(void);
 
 static void App_RadioFreq_LoadConfig(const RF_TreatParams_t *pParams)
 {
@@ -288,34 +290,44 @@ void App_RadioFreq_SetWorkParams(void)
     s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
     s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
-    Drv_DAC_SetVoltage(s_RFCtrlInfo.VoltageTarget);
+    s_RFCtrlInfo.LastLevelRampTime = Drv_Delay_GetTickMs();
+    App_RadioFreq_ApplyOutputVoltage();
     Drv_Delay_ms(100);
     LOG_I("RF: Work params set - level=%d, time=%d, voltage_target=%d",
           s_RFCtrlInfo.WorkLevel, s_RFCtrlInfo.TreatRemainTimes, s_RFCtrlInfo.VoltageTarget);
 }
 
-bool App_RadioFreq_IsCurrentNormal(void)
+static void App_RadioFreq_ApplyOutputVoltage(void)
 {
     uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_RF_I);
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
-    uint16_t newVoltage;
-    bool isNormal = true;
-
+    uint16_t newVoltage = s_RFCtrlInfo.VoltageTarget;
+#if  0
+    static uint16_t debugcurrent;
+    current = debugcurrent;
+#endif
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
-            newVoltage = RF_VOLTAGE_INIT_MV;
             LOG_I("RF: Current too low (%d mV), voltage set to 7V", current);
         }
-    } else {
-        newVoltage = s_RFCtrlInfo.VoltageTarget;
+        newVoltage = RF_VOLTAGE_INIT_MV;
+        s_RFCtrlInfo.WorkLevel = 0;
     }
 
     if(newVoltage != currentVoltage) {
         Drv_DAC_SetVoltage(newVoltage);
-        s_RFCtrlInfo.Voltage = newVoltage;
     }
+
+    s_RFCtrlInfo.Voltage = newVoltage;
+}
+
+bool App_RadioFreq_IsCurrentNormal(void)
+{
+    bool isNormal = true;
+
+    App_RadioFreq_ApplyOutputVoltage();
 
     return isNormal;
 }
@@ -324,20 +336,29 @@ bool App_RadioFreq_IsHeadTempNormal(void)
 {
     bool isNormal = true;
     uint16_t temp = s_RFCtrlInfo.HeadTemp;
+    bool isOverTemp = (temp > s_RFCtrlInfo.TempLimit);
     s_RFCtrlInfo.HeadTemp = temp;
   
-    if(s_RFCtrlInfo.HeadTemp > s_RFCtrlInfo.TempLimit)
+    if(isOverTemp)
     {
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_TEMP_TOO_HIGH;
-        LOG_W("RF: Head temperature too high: %d (limit: %d)",
-              s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
+        if(s_RFCtrlInfo.OverTempFlag == false) {
+            LOG_W("RF: Head temperature too high: %d (limit: %d)",
+                  s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
+        }
         s_RFCtrlInfo.OverTempFlag = true;
     }
     else
     {
+        if(s_RFCtrlInfo.OverTempFlag) {
+            LOG_I("RF: Head temperature recovered: %d (limit: %d)",
+                  s_RFCtrlInfo.HeadTemp, s_RFCtrlInfo.TempLimit);
+        }
         s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
         s_RFCtrlInfo.OverTempFlag = false;
     }
+
+    App_RaidoFreq_RunChangeLevel(isOverTemp);
 
     return isNormal;
 }
@@ -353,16 +374,42 @@ void App_RadioFreq_CheckProbe(void)
     }
 }
 
-void App_RaidoFreq_RunChangeLevel()
+void App_RaidoFreq_RunChangeLevel(bool isOverTemp)
 {
-    if(s_RFCtrlInfo.WorkLevel != s_RFCtrlInfo.Trans.RxWorkState.work_level) 
-    {
-        if(s_RFCtrlInfo.Trans.RxWorkState.work_level <= 20) {
-            s_RFCtrlInfo.WorkLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
+    uint8_t targetLevel = s_RFCtrlInfo.Trans.RxWorkState.work_level;
+    uint32_t now = Drv_Delay_GetTickMs();
+
+    if(targetLevel > RF_WORK_LEVEL_MAX) {
+        targetLevel = RF_WORK_LEVEL_MAX;
+    }
+
+    if(s_RFCtrlInfo.WorkLevel > targetLevel) {
+        s_RFCtrlInfo.WorkLevel = targetLevel;
+        s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
+        s_RFCtrlInfo.LastLevelRampTime = now;
+        LOG_I("RF: Work level synced down to host target: %d", s_RFCtrlInfo.WorkLevel);
+        return;
+    }
+
+    if((now - s_RFCtrlInfo.LastLevelRampTime) < RF_LEVEL_RAMP_PERIOD_MS) {
+        return;
+    }
+
+    if(isOverTemp) {
+        if(s_RFCtrlInfo.WorkLevel > 0U) {
+            s_RFCtrlInfo.WorkLevel--;
             s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
-            s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
-            Drv_DAC_SetVoltage(s_RFCtrlInfo.VoltageTarget);
+            s_RFCtrlInfo.LastLevelRampTime = now;
+            LOG_W("RF: Auto reduce level to: %d", s_RFCtrlInfo.WorkLevel);
         }
+        return;
+    }
+
+    if((targetLevel > 0U) && (s_RFCtrlInfo.WorkLevel < targetLevel)) {
+        s_RFCtrlInfo.WorkLevel++;  // Ramp up faster when not over temp
+        s_RFCtrlInfo.VoltageTarget = App_RadioFreq_CalculateVoltage(s_RFCtrlInfo.WorkLevel);
+        s_RFCtrlInfo.LastLevelRampTime = now;
+        LOG_I("RF: Auto recover level to: %d", s_RFCtrlInfo.WorkLevel);
     }
 }
 
@@ -405,17 +452,18 @@ void App_RadioFreq_Process(void)
             break;
 
         case E_RF_RUN_WORKING:
-            if(App_RadioFreq_StartCheck() == false ||
-               App_RadioFreq_IsCurrentNormal() == false ||
-               App_RadioFreq_IsHeadTempNormal() == false) {
-                App_RadioFreq_ChangeState(E_RF_RUN_STOP);
+            if(App_RadioFreq_StartCheck() == false){
+               App_RadioFreq_ChangeState(E_RF_RUN_STOP);
             }
-            App_RaidoFreq_RunChangeLevel();
+            App_RadioFreq_IsHeadTempNormal();
+            App_RadioFreq_IsCurrentNormal();
             break;
 
         case E_RF_RUN_STOP:
             s_RFCtrlInfo.WorkLevel = 0;
 			s_RFCtrlInfo.Trans.RxWorkState.work_state = 0;
+            s_RFCtrlInfo.OverTempFlag = false;
+            s_RFCtrlInfo.LastLevelRampTime = 0U;
             Drv_SI5351_SetComplementaryPWM(false);
             Drv_IODevice_ChangeChannel(CHANNEL_RF_US_CLOSE);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
@@ -447,6 +495,7 @@ void App_RadioFreq_Init(void)
     s_RFCtrlInfo.TreatRemainTimes = 0;
     s_RFCtrlInfo.TreatCounts = 0;
     s_RFCtrlInfo.Voltage = RF_VOLTAGE_INIT_MV;
+    s_RFCtrlInfo.LastLevelRampTime = 0U;
 
     LOG_I("Radio Frequency module initialized");
 }

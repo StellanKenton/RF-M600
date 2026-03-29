@@ -78,6 +78,7 @@ typedef struct
     bool PreheatEnable;            
     uint16_t PreheatTempLimit;    
     uint16_t PreheatTime;        
+    uint16_t PreheatRemainTime;
     
     uint16_t WorkTempLimit;        
     uint16_t TreatRemainTimes;           
@@ -93,6 +94,7 @@ typedef struct
     
     bool heatControlActive;        
     uint32_t lastTempMonitorTime;  
+    uint32_t lastPreheatTick;
     uint32_t tempErrorStartTime;   
     uint16_t lastTemp;             
     

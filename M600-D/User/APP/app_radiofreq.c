@@ -388,7 +388,7 @@ void App_RadioFreq_Process(void)
             s_RFCtrlInfo.Voltage = 700;     // 7.00V
             s_RFCtrlInfo.VoltageTarget = 700;
             // 1.00MHz
-            Drv_SI5351_SetFrequency(1000);
+            Drv_SI5351_SetFrequency(RF_FREQUENCY_KHZ);
             Drv_IODevice_ChangeChannel(CHANNEL_RF);
             App_RadioFreq_ChangeState(E_RF_RUN_IDLE);
             Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HEAT_HP, 0);

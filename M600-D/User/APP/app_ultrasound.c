@@ -570,10 +570,10 @@ void App_Ultrasound_SetHighFreqPowerHandle10us(void)
         s_activeWindowUs = 0U;
         s_lastWorkLevel = 0xFFU;
         if(probeStatus == E_IODEVICE_MODE_RADIO_FREQUENCY) {
-            enableOutput = ((App_RadioFreq_GetRunState() == E_RF_RUN_WORKING)&&(App_RadioFreq_IsOverTemp() == false));
+            enableOutput = (App_RadioFreq_GetRunState() == E_RF_RUN_WORKING);
             if(enableOutput != s_outputEnabled) {
                 Drv_IO_HighFreqPowerOutput(enableOutput);
-                s_outputEnabled = enableOutput;
+                s_outputEnabled = enableOutput; 
             }
             return;
         } else {

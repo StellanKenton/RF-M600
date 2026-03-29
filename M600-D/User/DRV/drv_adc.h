@@ -27,7 +27,7 @@ typedef struct {
     uint16_t heatRef01;
     uint16_t eswVoltage;
     uint16_t eswCurrent;
-    uint16_t hpPressure;
+    int16_t hpPressure;
     uint16_t handNTC;
     uint16_t verId;
     uint16_t vout;
@@ -39,6 +39,7 @@ void Drv_ADC_Init(void);
 void Drv_ADC_Process(void);
 uint16_t Drv_ADC_ReadChannel(BSP_ADC_Channel_t channel);
 uint16_t Drv_ADC_GetRealValue(BSP_ADC_Channel_t channel);
+int16_t Drv_ADC_GetHPPressureRealValue(void);
 uint16_t Drv_ADC_ReadVoutRaw(void);
 uint16_t Drv_ADC_GetVoutRealValue(void);
 const Drv_ADC_PhysicalValues_t *Drv_ADC_GetPhysicalValues(void);

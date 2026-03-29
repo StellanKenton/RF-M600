@@ -25,7 +25,7 @@ extern "C" {
 
 /* NPH parameter limits: work time(s), pressure(KPa), suck/release(ms), temp monitor */
 #define NPH_WORK_TIME_MAX           3600        
-#define NPH_PRESSURE_MIN_KPA        10          
+#define NPH_PRESSURE_MIN_KPA        -10          
 #define NPH_PRESSURE_MAX_KPA        100         
 #define NPH_SUCK_TIME_MIN_MS        100         
 #define NPH_SUCK_TIME_MAX_MS        60000       
@@ -81,7 +81,7 @@ typedef struct
     
     uint16_t WorkTempLimit;        
     uint16_t TreatRemainTimes;           
-    uint8_t Pressure;             
+    int8_t Pressure;             
     uint16_t SuckTime;             
     uint16_t ReleaseTime;          
     uint16_t HeadTemp;             
@@ -97,8 +97,8 @@ typedef struct
     uint16_t lastTemp;             
     
     uint32_t vacuumStateStartTime; 
-    uint16_t targetPressure;       
-    uint16_t currentPressure;      
+    int16_t targetPressure;        
+    int16_t currentPressure;       
     uint32_t suckStartTime;        
     uint32_t maintainStartTime;   
     uint32_t releaseStartTime;     

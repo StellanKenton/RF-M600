@@ -18,6 +18,12 @@
 #define NTC_TEMP_MAX_C       105
 #define NTC_TEMP_SCALE       10
 #define DRV_ADC_PROCESS_PERIOD_MS  4u
+#define HP_PRESSURE_NEG_FULL_MV    500u
+#define HP_PRESSURE_ZERO_MV        2000u
+#define HP_PRESSURE_POS_FULL_MV    4500u
+#define HP_PRESSURE_FULL_SCALE_PSI_X100  1500
+#define HP_PRESSURE_KPA_X100_PER_PSI_X100_NUM  6895
+#define HP_PRESSURE_KPA_X100_PER_PSI_X100_DEN  1000
 
 /* NTC 10R table: -40~105C, per 1C, from spec (10R NTC) */
 static const uint32_t s_ntc_temp_table[] = {
@@ -46,6 +52,7 @@ static BSP_ADC_Channel_t s_currentChannel;
 static uint16_t Drv_ADC_ConvertChannel(BSP_ADC_Channel_t channel, uint16_t raw);
 static uint16_t Drv_ADC_GetCachedPhysicalValue(BSP_ADC_Channel_t channel);
 static void Drv_ADC_UpdateOneChannel(BSP_ADC_Channel_t channel, uint16_t rawValue);
+static int16_t Drv_ADC_GetHPPressureValue(uint16_t raw);
 
 static BSP_ADC_Channel_t Dal_NTC_MapChannel(NTC_Type_EnumDef ntcType)
 {
@@ -110,10 +117,39 @@ static uint16_t Drv_ADC_GetESWCurrentValue(uint16_t raw)
     return 0u;
 }
 
-static uint16_t Drv_ADC_GetHPPressureValue(uint16_t raw)
+static int16_t Drv_ADC_GetHPPressureValue(uint16_t raw)
 {
-    (void)raw;
-    return 0u;
+    uint32_t sensorVoltageMv;
+    int32_t pressurePsiX100;
+    int32_t pressureKpaX100;
+
+    sensorVoltageMv = ((uint32_t)raw * BSP_ADC_REF_MV + (ADC_RESOLUTION / 2u)) / ADC_RESOLUTION;
+
+    if (sensorVoltageMv <= HP_PRESSURE_NEG_FULL_MV) {
+        pressurePsiX100 = -HP_PRESSURE_FULL_SCALE_PSI_X100;
+    } else if (sensorVoltageMv < HP_PRESSURE_ZERO_MV) {
+        pressurePsiX100 = ((int32_t)sensorVoltageMv - (int32_t)HP_PRESSURE_ZERO_MV) *
+                          HP_PRESSURE_FULL_SCALE_PSI_X100 /
+                          ((int32_t)HP_PRESSURE_ZERO_MV - (int32_t)HP_PRESSURE_NEG_FULL_MV);
+    } else if (sensorVoltageMv >= HP_PRESSURE_POS_FULL_MV) {
+        pressurePsiX100 = HP_PRESSURE_FULL_SCALE_PSI_X100;
+    } else {
+        pressurePsiX100 = ((int32_t)sensorVoltageMv - (int32_t)HP_PRESSURE_ZERO_MV) *
+                          HP_PRESSURE_FULL_SCALE_PSI_X100 /
+                          ((int32_t)HP_PRESSURE_POS_FULL_MV - (int32_t)HP_PRESSURE_ZERO_MV);
+    }
+
+    if (pressurePsiX100 >= 0) {
+        pressureKpaX100 = (pressurePsiX100 * HP_PRESSURE_KPA_X100_PER_PSI_X100_NUM +
+                           (HP_PRESSURE_KPA_X100_PER_PSI_X100_DEN / 2)) /
+                          HP_PRESSURE_KPA_X100_PER_PSI_X100_DEN;
+    } else {
+        pressureKpaX100 = (pressurePsiX100 * HP_PRESSURE_KPA_X100_PER_PSI_X100_NUM -
+                           (HP_PRESSURE_KPA_X100_PER_PSI_X100_DEN / 2)) /
+                          HP_PRESSURE_KPA_X100_PER_PSI_X100_DEN;
+    }
+
+    return (int16_t)(-pressureKpaX100);
 }
 
 static uint16_t Drv_ADC_GetHandNTCValue(uint16_t raw)
@@ -191,7 +227,7 @@ static uint16_t Drv_ADC_ConvertChannel(BSP_ADC_Channel_t channel, uint16_t raw)
         case BSP_ADC_CH_ESW_I:
             return Drv_ADC_GetESWCurrentValue(raw);
         case BSP_ADC_CH_HP_PRE:
-            return Drv_ADC_GetHPPressureValue(raw);
+            return 0u;
         case BSP_ADC_CH_HAND_NTC:
             return Drv_ADC_GetHandNTCValue(raw);
         case BSP_ADC_CH_HARD_VER:
@@ -255,7 +291,7 @@ static void Drv_ADC_UpdateOneChannel(BSP_ADC_Channel_t channel, uint16_t rawValu
             s_adcPhysicalValues.eswCurrent = Drv_ADC_ConvertChannel(channel, rawValue);
             break;
         case BSP_ADC_CH_HP_PRE:
-            s_adcPhysicalValues.hpPressure = Drv_ADC_ConvertChannel(channel, rawValue);
+            s_adcPhysicalValues.hpPressure = Drv_ADC_GetHPPressureValue(rawValue);
             break;
         case BSP_ADC_CH_HAND_NTC:
             s_adcPhysicalValues.handNTC = Drv_ADC_ConvertChannel(channel, rawValue);
@@ -312,6 +348,11 @@ uint16_t Drv_ADC_ReadChannel(BSP_ADC_Channel_t channel)
 uint16_t Drv_ADC_GetRealValue(BSP_ADC_Channel_t channel)
 {
     return Drv_ADC_GetCachedPhysicalValue(channel);
+}
+
+int16_t Drv_ADC_GetHPPressureRealValue(void)
+{
+    return s_adcPhysicalValues.hpPressure;
 }
 
 uint16_t Drv_ADC_ReadVoutRaw(void)

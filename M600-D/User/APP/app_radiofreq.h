@@ -24,7 +24,7 @@ extern "C" {
 #include "app_treatmgr.h"
 
 /* RF working frequency 1MHz */
-#define RF_FREQUENCY_KHZ           1000        ///< RF frequency (kHz)
+#define RF_FREQUENCY_KHZ           500        ///< RF frequency (kHz)
 #define RF_WORK_LEVEL_MAX          20          ///< Work level (0-20)
 #define RF_VOLTAGE_MIN_MV          1100       ///< Min output voltage (11V = 11000mV)
 #define RF_VOLTAGE_MAX_MV          3000       ///< Max output voltage (30V = 30000mV)

@@ -52,11 +52,11 @@ static void App_NegPrsHeat_UpdateHeadTemp(void)
 }
 
 /**
- * @brief Convert pressure KPa to ADC voltage
+ * @brief Convert target pressure KPa to kPa*100 for closed-loop compare
  * @param pressure_kpa Pressure in KPa (10-100)
- * @retval Target ADC voltage in mV
+ * @retval Target pressure in kPa*100
  */
-static uint16_t App_NegPrsHeat_PressureToVoltage(uint8_t pressure_kpa)
+static int16_t App_NegPrsHeat_PressureToScaledKpa(int8_t pressure_kpa)
 {
 
     if(pressure_kpa < NPH_PRESSURE_MIN_KPA) {
@@ -66,24 +66,7 @@ static uint16_t App_NegPrsHeat_PressureToVoltage(uint8_t pressure_kpa)
         pressure_kpa = NPH_PRESSURE_MAX_KPA;
     }
 
-    return (pressure_kpa * 3300) / 100;
-}
-
-/**
- * @brief Convert ADC voltage to pressure KPa
- * @param voltage_mv ADC voltage in mV
- * @retval Pressure in KPa
- */
-static uint8_t App_NegPrsHeat_VoltageToPressure(uint16_t voltage_mv)
-{
-    uint8_t pressure = (voltage_mv * 100) / 3300;
-    if(pressure < NPH_PRESSURE_MIN_KPA) {
-        pressure = NPH_PRESSURE_MIN_KPA;
-    }
-    if(pressure > NPH_PRESSURE_MAX_KPA) {
-        pressure = NPH_PRESSURE_MAX_KPA;
-    }
-    return pressure;
+    return (int16_t)((int16_t)pressure_kpa * 100);
 }
 
 void App_NegPrsHeat_UpdateStatus(void)
@@ -335,8 +318,8 @@ void App_NegPrsHeat_SetWorkParams(void)
     s_NPHCtrlInfo.SuckTime = s_NPHCtrlInfo.Trans.RxWorkState.suck_time;  /* unit: 10ms */
     s_NPHCtrlInfo.ReleaseTime = s_NPHCtrlInfo.Trans.RxWorkState.release_time;  /* unit: 10ms */
 
-    /* Convert target pressure to ADC voltage */
-    s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
+    /* Convert target pressure to kPa*100 for vacuum closed-loop compare */
+    s_NPHCtrlInfo.targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
 
     /* Init vacuum and motor off */
     s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_IDLE;
@@ -464,15 +447,14 @@ void App_NegPrsHeat_ControlTemperature(void)
 
 void App_NegPrsHeat_ProcessVacuum(void)
 {
-	uint16_t targetVoltage;
+    int16_t targetPressure;
 	uint32_t maintainElapsed;
 	uint32_t maintainTimeMs;
 	uint32_t releaseElapsed;
 	uint32_t releaseTimeMs;
-//	int16_t voltageDiff;
     uint32_t currentTime = Drv_Delay_GetTickMs();
-    uint16_t pressureVoltage = Drv_ADC_GetRealValue(BSP_ADC_CH_HP_PRE);
-    s_NPHCtrlInfo.currentPressure = App_NegPrsHeat_VoltageToPressure(pressureVoltage);
+    int16_t currentPressure = Drv_ADC_GetRealValue(BSP_ADC_CH_HP_PRE);
+    s_NPHCtrlInfo.currentPressure = currentPressure;
 
     switch(s_NPHCtrlInfo.vacuumState)
     {
@@ -487,12 +469,10 @@ void App_NegPrsHeat_ProcessVacuum(void)
             break;
 
         case E_NPH_VACUUM_STATE_SUCKING:
-            /* Compare ADC pressure voltage with target; when currentPressure >= target, go to maintain */
-            targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
-            if(TreatGetRunFlag()) {
-                pressureVoltage = targetVoltage+1;
-            }
-            if(pressureVoltage >= targetVoltage)
+            /* Compare real pressure value (kPa*100); when currentPressure >= target, go to maintain */
+            targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
+
+            if(currentPressure >= targetPressure)
             {
                 /* Target reached, enter maintain */
                 s_NPHCtrlInfo.vacuumState = E_NPH_VACUUM_STATE_MAINTAIN;
@@ -529,13 +509,10 @@ void App_NegPrsHeat_ProcessVacuum(void)
             else
             {
                 /* Maintain pressure: re-suck if below target, stop if above */
-                targetVoltage = App_NegPrsHeat_PressureToVoltage(s_NPHCtrlInfo.Pressure);
-//                voltageDiff = (pressureVoltage > targetVoltage) ?
-//                                       (pressureVoltage - targetVoltage) :
-//                                       (targetVoltage - pressureVoltage);
-                uint16_t thresholdVoltage = App_NegPrsHeat_PressureToVoltage(5);  /* 5KPa threshold */
+                int16_t thresholdPressure = App_NegPrsHeat_PressureToScaledKpa(5);  /* 5KPa threshold */
+                targetPressure = App_NegPrsHeat_PressureToScaledKpa(s_NPHCtrlInfo.Pressure);
 
-                if(pressureVoltage < targetVoltage - thresholdVoltage)  /* Below target: motor on */
+                if(currentPressure < targetPressure - thresholdPressure)  /* Below target: motor on */
                 {
                     if(!s_NPHCtrlInfo.motorState)
                     {
@@ -543,7 +520,7 @@ void App_NegPrsHeat_ProcessVacuum(void)
                         Drv_IODevice_WritePin(E_GPIO_OUT_CTR_HP_MOTOR, 1);
                     }
                 }
-                else if(pressureVoltage > targetVoltage + thresholdVoltage)  /* Above target: motor off */
+                else if(currentPressure > targetPressure + thresholdPressure)  /* Above target: motor off */
                 {
                     if(s_NPHCtrlInfo.motorState)
                     {

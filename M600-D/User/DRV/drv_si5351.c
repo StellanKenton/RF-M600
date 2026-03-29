@@ -25,9 +25,9 @@ void Drv_SI5351_Init(void)
 uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
 {
     // Set the frequency of the SI5351
-    if(frequency <= 800)
+    if(frequency <= 500)
     {
-        frequency = 800;
+        frequency = 500;
     }
     else if(frequency > 1600)
     {

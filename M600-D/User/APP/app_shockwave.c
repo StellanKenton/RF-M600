@@ -20,6 +20,27 @@
 
 static SW_CtrlInfo_t s_SWCtrlInfo;
 
+static void App_Shockwave_LoadConfig(const SW_TreatParams_t *pParams)
+{
+    if(pParams == NULL)
+    {
+        return;
+    }
+
+    s_SWCtrlInfo.TreatParams = *pParams;
+    s_SWCtrlInfo.TempLimit = pParams->TempLimit;
+    s_SWCtrlInfo.TreatCounts = pParams->TreatRemainTimes;
+    s_SWCtrlInfo.CurrentHigh_ESW_P = pParams->CurrentHigh_ESW_P;
+    s_SWCtrlInfo.CurrentLow_ESW_P = pParams->CurrentLow_ESW_P;
+    s_SWCtrlInfo.CurrentHigh_ESW_N = pParams->CurrentHigh_ESW_N;
+    s_SWCtrlInfo.CurrentLow_ESW_N = pParams->CurrentLow_ESW_N;
+}
+
+static void App_Shockwave_ApplyRuntimeConfig(const SW_TreatParams_t *pParams)
+{
+    App_Shockwave_LoadConfig(pParams);
+}
+
 static void App_Shockwave_UpdateHeadTemp(void)
 {
     if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_SHOCKWAVE) {
@@ -112,23 +133,21 @@ void App_Shockwave_RxDataHandle(void)
     {
         const SW_TreatParams_t *pParams = App_Memory_GetSWParams();
 
-        s_SWCtrlInfo.TreatParams = *pParams;
         if(s_SWCtrlInfo.runState != E_SW_RUN_WORKING)
         {
-            s_SWCtrlInfo.TempLimit = pParams->TempLimit;
-            s_SWCtrlInfo.TreatCounts = pParams->TreatRemainTimes;
-            s_SWCtrlInfo.CurrentHigh_ESW_P = pParams->CurrentHigh_ESW_P;
-            s_SWCtrlInfo.CurrentLow_ESW_P = pParams->CurrentLow_ESW_P;
-            s_SWCtrlInfo.CurrentHigh_ESW_N = pParams->CurrentHigh_ESW_N;
-            s_SWCtrlInfo.CurrentLow_ESW_N = pParams->CurrentLow_ESW_N;
+            App_Shockwave_LoadConfig(pParams);
+        }
+        else
+        {
+            App_Shockwave_ApplyRuntimeConfig(pParams);
         }
 
         pTransData->flag.bits.Sync_Config = 0;
-        LOG_I("SW config synced: temp=%d, remain=%d, ESW_P=[%d, %d], ESW_N=[%d, %d], runtime_updated=%d",
+        LOG_I("SW config synced: temp=%d, remain=%d, ESW_P=[%d, %d], ESW_N=[%d, %d], runtime_applied=%d",
               pParams->TempLimit, pParams->TreatRemainTimes,
               pParams->CurrentLow_ESW_P, pParams->CurrentHigh_ESW_P,
               pParams->CurrentLow_ESW_N, pParams->CurrentHigh_ESW_N,
-              s_SWCtrlInfo.runState != E_SW_RUN_WORKING);
+              s_SWCtrlInfo.runState == E_SW_RUN_WORKING);
     }
 }
 
@@ -387,6 +406,10 @@ bool App_Shockwave_IsHeadTempNormal(void)
     s_SWCtrlInfo.HeadTemp = temp;
     bool isNormal = true;
     
+    if(TreatGetRunFlag()) {
+        return true;
+    }
+    
     if(temp > s_SWCtrlInfo.TempLimit)
     {
         s_SWCtrlInfo.ErrorCode = E_SW_ERROR_TEMP_TOO_HIGH;
@@ -521,13 +544,7 @@ void App_Shockwave_Process(void)
             s_SWCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             {
                 const SW_TreatParams_t *pParams = App_Memory_GetSWParams();
-                s_SWCtrlInfo.TreatParams = *pParams;
-                s_SWCtrlInfo.TempLimit = pParams->TempLimit;
-                s_SWCtrlInfo.TreatCounts = pParams->TreatRemainTimes;
-                s_SWCtrlInfo.CurrentHigh_ESW_P = pParams->CurrentHigh_ESW_P;
-                s_SWCtrlInfo.CurrentLow_ESW_P = pParams->CurrentLow_ESW_P;
-                s_SWCtrlInfo.CurrentHigh_ESW_N = pParams->CurrentHigh_ESW_N;
-                s_SWCtrlInfo.CurrentLow_ESW_N = pParams->CurrentLow_ESW_N;
+                App_Shockwave_LoadConfig(pParams);
 
                 LOG_I("SW: Parameters loaded - temp_limit=%d, remain_times=%d, ESW_P=[%d, %d], ESW_N=[%d, %d]",
                       s_SWCtrlInfo.TempLimit, s_SWCtrlInfo.TreatCounts,

@@ -19,6 +19,31 @@
 
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
 
+static void App_NegPrsHeat_LoadConfig(const NPH_TreatParams_t *pParams)
+{
+    if(pParams == NULL)
+    {
+        return;
+    }
+
+    s_NPHCtrlInfo.TreatParams = *pParams;
+    s_NPHCtrlInfo.TempLimit = pParams->TempLimit;
+    s_NPHCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+    s_NPHCtrlInfo.PreheatEnable = (pParams->PreheatEnable == 1);
+    s_NPHCtrlInfo.PreheatTempLimit = pParams->PreheatTempLimit;
+    s_NPHCtrlInfo.PreheatTime = pParams->PreheatTime;
+    s_NPHCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
+    s_NPHCtrlInfo.Trans.RxConfig.remain_treatment_count = pParams->TreatRemainTimes;
+    s_NPHCtrlInfo.Trans.RxConfig.preheat_state = pParams->PreheatEnable;
+    s_NPHCtrlInfo.Trans.RxConfig.preheat_temp_limit = pParams->PreheatTempLimit;
+    s_NPHCtrlInfo.Trans.RxConfig.work_time = pParams->PreheatTime;
+}
+
+static void App_NegPrsHeat_ApplyRuntimeConfig(const NPH_TreatParams_t *pParams)
+{
+    App_NegPrsHeat_LoadConfig(pParams);
+}
+
 static void App_NegPrsHeat_UpdateHeadTemp(void)
 {
     if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
@@ -110,22 +135,21 @@ void App_NegPrsHeat_RxDataHandle(void)
     if(pTransData->flag.bits.Sync_Config)
     {
         const NPH_TreatParams_t *pParams = App_Memory_GetNPHParams();
-        bool runtimeCanUpdate = (s_NPHCtrlInfo.runState != E_NPH_RUN_WORKING);
 
-        s_NPHCtrlInfo.TreatParams = *pParams;
-        if(runtimeCanUpdate)
+        if(s_NPHCtrlInfo.runState != E_NPH_RUN_WORKING)
         {
-            s_NPHCtrlInfo.TempLimit = pParams->TempLimit;
-            s_NPHCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-            s_NPHCtrlInfo.PreheatEnable = (pParams->PreheatEnable == 1);
-            s_NPHCtrlInfo.PreheatTempLimit = pParams->PreheatTempLimit;
-            s_NPHCtrlInfo.PreheatTime = pParams->PreheatTime;
+            App_NegPrsHeat_LoadConfig(pParams);
+        }
+        else
+        {
+            App_NegPrsHeat_ApplyRuntimeConfig(pParams);
         }
 
         pTransData->flag.bits.Sync_Config = 0;
-        LOG_I("NPH config synced: temp=%d, remain=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d, runtime_updated=%d",
+        LOG_I("NPH config synced: temp=%d, remain=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d, runtime_applied=%d",
               pParams->TempLimit, pParams->TreatRemainTimes, pParams->PreheatEnable,
-              pParams->PreheatTempLimit, pParams->PreheatTime, runtimeCanUpdate);
+              pParams->PreheatTempLimit, pParams->PreheatTime,
+              s_NPHCtrlInfo.runState == E_NPH_RUN_WORKING);
     }
 }
 
@@ -565,12 +589,7 @@ void App_NegPrsHeat_Process(void)
             s_NPHCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             {
                 const NPH_TreatParams_t *pParams = App_Memory_GetNPHParams();
-                s_NPHCtrlInfo.TreatParams = *pParams;
-                s_NPHCtrlInfo.TempLimit = pParams->TempLimit;
-                s_NPHCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-                s_NPHCtrlInfo.PreheatEnable = (pParams->PreheatEnable == 1);
-                s_NPHCtrlInfo.PreheatTempLimit = pParams->PreheatTempLimit;
-                s_NPHCtrlInfo.PreheatTime = pParams->PreheatTime;
+                App_NegPrsHeat_LoadConfig(pParams);
 
                 LOG_I("NPH: Parameters loaded - temp_limit=%d, remain_times=%d, preheat_enable=%d, preheat_temp=%d, preheat_time=%d",
                       s_NPHCtrlInfo.TempLimit, s_NPHCtrlInfo.TreatRemainTimes,

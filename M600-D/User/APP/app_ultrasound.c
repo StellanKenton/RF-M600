@@ -22,7 +22,7 @@
 
 static US_CtrlInfo_t s_USCtrlInfo;
 
-static void App_Ultra_RunChangeLevel(void);
+static void App_Ultra_RunChangeLevel(bool isOverTemp);
 void App_Ultrasound_SetFrequency(uint16_t frequency);
 
 static void App_UltraSound_LoadConfig(const US_TreatParams_t *pParams)
@@ -314,6 +314,7 @@ void App_UltraSound_SetWorkParams(void)
 
     // Configure work voltage and frequency
     App_Ultrasound_SetFrequency(s_USCtrlInfo.Frequency);
+    s_USCtrlInfo.LastLevelRampTime = Drv_Delay_GetTickMs();
     // Set initial work voltage
     Drv_DAC_SetVoltage(s_USCtrlInfo.Voltage);
     // delay 100ms
@@ -391,23 +392,27 @@ bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
     uint16_t temp = s_USCtrlInfo.HeadTemp;
+    bool isOverTemp = (temp > s_USCtrlInfo.TempLimit);
 
-    if(temp > s_USCtrlInfo.TempLimit)
+    if(isOverTemp)
     {
         s_USCtrlInfo.ErrorCode = E_US_ERROR_TEMP_TOO_HIGH;
-        // Temp over limit, auto reduce level (min 0)
-        if(s_USCtrlInfo.WorkLevel > 0)
-        {
+        if(s_USCtrlInfo.OverTempFlag == false) {
             LOG_W("Head temperature too high: %d (limit: %d)", temp, s_USCtrlInfo.TempLimit);
-            s_USCtrlInfo.WorkLevel--;
-            LOG_W("Auto reduce level to: %d", s_USCtrlInfo.WorkLevel);
         }
+        s_USCtrlInfo.OverTempFlag = true;
     }
     else
     {
-        App_Ultra_RunChangeLevel();
+        if(s_USCtrlInfo.OverTempFlag) {
+            LOG_I("US: Head temperature recovered: %d (limit: %d)", temp, s_USCtrlInfo.TempLimit);
+        }
+        s_USCtrlInfo.OverTempFlag = false;
         s_USCtrlInfo.ErrorCode = E_US_ERROR_NONE;
     }
+
+    App_Ultra_RunChangeLevel(isOverTemp);
+
     return isNormal;
 }
 
@@ -422,13 +427,39 @@ void App_Ultrasound_CheckProbe(void)
     }
 }
 
-void App_Ultra_RunChangeLevel()
+void App_Ultra_RunChangeLevel(bool isOverTemp)
 {
-    if(s_USCtrlInfo.WorkLevel != s_USCtrlInfo.Trans.RxWorkState.work_level) 
-    {
-        if(s_USCtrlInfo.Trans.RxWorkState.work_level <= 40) {
-            s_USCtrlInfo.WorkLevel = s_USCtrlInfo.Trans.RxWorkState.work_level;
+    uint8_t targetLevel = s_USCtrlInfo.Trans.RxWorkState.work_level;
+    uint32_t now = Drv_Delay_GetTickMs();
+
+    if(targetLevel > WORK_LEVEL_MAX) {
+        targetLevel = WORK_LEVEL_MAX;
+    }
+
+    if(s_USCtrlInfo.WorkLevel > targetLevel) {
+        s_USCtrlInfo.WorkLevel = targetLevel;
+        s_USCtrlInfo.LastLevelRampTime = now;
+        LOG_I("US: Work level synced down to host target: %d", s_USCtrlInfo.WorkLevel);
+        return;
+    }
+
+    if((now - s_USCtrlInfo.LastLevelRampTime) < US_LEVEL_RAMP_PERIOD_MS) {
+        return;
+    }
+
+    if(isOverTemp) {
+        if(s_USCtrlInfo.WorkLevel > 0U) {
+            s_USCtrlInfo.WorkLevel--;
+            s_USCtrlInfo.LastLevelRampTime = now;
+            LOG_W("US: Auto reduce level to: %d", s_USCtrlInfo.WorkLevel);
         }
+        return;
+    }
+
+    if(s_USCtrlInfo.WorkLevel < targetLevel) {
+        s_USCtrlInfo.WorkLevel++;
+        s_USCtrlInfo.LastLevelRampTime = now;
+        LOG_I("US: Auto recover level to: %d", s_USCtrlInfo.WorkLevel);
     }
 }
 
@@ -468,13 +499,15 @@ void App_Ultrasound_Process(void)
         case E_US_RUN_WORKING:
             // Check all conditions
             if(App_UltraSound_StartCheck() == false ||
-            App_UltraSound_IsCurrentNormal() == false ||
-            App_UltraSound_IsHeadTempNormal() == false ){
-              App_Ultrasound_ChangeState(E_US_RUN_STOP);
+                App_UltraSound_IsCurrentNormal() == false ||
+                App_UltraSound_IsHeadTempNormal() == false ){
+                App_Ultrasound_ChangeState(E_US_RUN_STOP);
             }
             break;
         case E_US_RUN_STOP:
 			s_USCtrlInfo.WorkLevel = 0;
+            s_USCtrlInfo.OverTempFlag = false;
+			s_USCtrlInfo.LastLevelRampTime = 0U;
 			s_USCtrlInfo.Trans.RxWorkState.work_state = 0;
             // Close output channel
             Drv_IODevice_ChangeChannel(CHANNEL_RF_US_CLOSE);
@@ -504,6 +537,7 @@ void App_Ultrasound_Init(void)
     s_USCtrlInfo.ErrorCode = E_US_ERROR_NONE;
     s_USCtrlInfo.WorkLevel = 0;
     s_USCtrlInfo.TreatCounts = 0;
+    s_USCtrlInfo.LastLevelRampTime = 0U;
 
     LOG_I("Ultrasound module initialized");
 }

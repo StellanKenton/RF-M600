@@ -28,6 +28,7 @@ extern "C" {
 #define PULSE_REPEAT_TIME_MIN_MS     0.5f    
 #define PULSE_REPEAT_TIME_MAX_MS     20     
 #define WORK_LEVEL_MAX               40      
+#define US_LEVEL_RAMP_PERIOD_MS      1000U
 
 #define VOLTAGE_ADJUST_LIMIT_MV       2000    
 
@@ -60,6 +61,7 @@ typedef struct
     US_RunState_EnumDef runState;
     Treat_Times_EnumDef TreatCountsState;
     bool isWaitReturn;
+    bool OverTempFlag;
     uint16_t Voltage;              ///< Current output voltage (mV)
     uint16_t VoltageBase;          ///< Base voltage from config (mV), used for over-limit check
     uint16_t CurrentHigh;
@@ -74,6 +76,7 @@ typedef struct
     
     uint8_t ErrorCode;
     uint8_t StartCheckStep;
+    uint32_t LastLevelRampTime;
     
     US_TreatParams_t TreatParams;
     UltraSound_TransData_t Trans;

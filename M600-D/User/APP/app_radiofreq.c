@@ -22,6 +22,29 @@
 
 static RF_CtrlInfo_t s_RFCtrlInfo;
 
+static void App_RadioFreq_LoadConfig(const RF_TreatParams_t *pParams)
+{
+    if(pParams == NULL)
+    {
+        return;
+    }
+
+    s_RFCtrlInfo.TreatParams = *pParams;
+    s_RFCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
+    s_RFCtrlInfo.Trans.RxConfig.Current_HighLimit = pParams->CurrentHigh;
+    s_RFCtrlInfo.Trans.RxConfig.Current_LowLimit = pParams->CurrentLow;
+    s_RFCtrlInfo.Trans.RxConfig.remain_treatment_count = pParams->TreatRemainTimes;
+    s_RFCtrlInfo.TempLimit = pParams->TempLimit;
+    s_RFCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+    s_RFCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+    s_RFCtrlInfo.CurrentLow = pParams->CurrentLow;
+}
+
+static void App_RadioFreq_ApplyRuntimeConfig(const RF_TreatParams_t *pParams)
+{
+    App_RadioFreq_LoadConfig(pParams);
+}
+
 static void App_RadioFreq_UpdateHeadTemp(void)
 {
     static int16_t s_ObjectTempCentiC = 0;
@@ -105,19 +128,19 @@ void App_RadioFreq_RxDataHandle(void)
     {
         const RF_TreatParams_t *pParams = App_Memory_GetRFParams();
 
-        s_RFCtrlInfo.TreatParams = *pParams;
         if(s_RFCtrlInfo.runState != E_RF_RUN_WORKING)
         {
-            s_RFCtrlInfo.TempLimit = pParams->TempLimit;
-            s_RFCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-            s_RFCtrlInfo.CurrentHigh = pParams->CurrentHigh;
-            s_RFCtrlInfo.CurrentLow = pParams->CurrentLow;
+            App_RadioFreq_LoadConfig(pParams);
+        }
+        else
+        {
+            App_RadioFreq_ApplyRuntimeConfig(pParams);
         }
 
         pTransData->flag.bits.Sync_Config = 0;
-        LOG_I("RF config synced: temp=%d, current=[%d, %d], remain=%d, runtime_updated=%d",
+        LOG_I("RF config synced: temp=%d, current=[%d, %d], remain=%d, runtime_applied=%d",
               pParams->TempLimit, pParams->CurrentLow, pParams->CurrentHigh,
-              pParams->TreatRemainTimes, s_RFCtrlInfo.runState != E_RF_RUN_WORKING);
+              pParams->TreatRemainTimes, s_RFCtrlInfo.runState == E_RF_RUN_WORKING);
     }
 }
 
@@ -357,12 +380,7 @@ void App_RadioFreq_Process(void)
             s_RFCtrlInfo.TreatCountsState = E_TREAT_TIMES_POWER_ON;
             {
                 const RF_TreatParams_t *pParams = App_Memory_GetRFParams();
-                s_RFCtrlInfo.TreatParams = *pParams;
-                s_RFCtrlInfo.TempLimit = pParams->TempLimit;
-                s_RFCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-                s_RFCtrlInfo.CurrentHigh = pParams->CurrentHigh;
-                s_RFCtrlInfo.CurrentLow = pParams->CurrentLow;
-                s_RFCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
+                App_RadioFreq_LoadConfig(pParams);
                 LOG_I("RF: Parameters loaded - temp_limit=%d, remain_times=%d, current_range=[%d, %d]",
                       s_RFCtrlInfo.TempLimit, s_RFCtrlInfo.TreatRemainTimes,
                       s_RFCtrlInfo.CurrentLow, s_RFCtrlInfo.CurrentHigh);

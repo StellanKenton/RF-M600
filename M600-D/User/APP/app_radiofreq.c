@@ -275,46 +275,23 @@ bool App_RadioFreq_IsCurrentNormal(void)
 {
     uint16_t current = Drv_ADC_GetRealValue(BSP_ADC_CH_RF_I);
     uint16_t currentVoltage = Drv_DAC_GetVoltage();
-    uint16_t newVoltage = currentVoltage;
+    uint16_t newVoltage;
     bool isNormal = true;
-
-    if(TreatGetRunFlag()) {
-        return true;
-    }
 
     if(current < RF_CURRENT_THRESHOLD_MV)
     {
         if(currentVoltage != RF_VOLTAGE_INIT_MV)
         {
             newVoltage = RF_VOLTAGE_INIT_MV;
-            Drv_DAC_SetVoltage(newVoltage);
-            s_RFCtrlInfo.Voltage = newVoltage;
             LOG_I("RF: Current too low (%d mV), voltage set to 7V", current);
         }
-        s_RFCtrlInfo.ErrorCode = E_RF_ERROR_CURRENT_TOO_LOW;
+    } else {
+        newVoltage = s_RFCtrlInfo.VoltageTarget;
     }
-    else if(current >= s_RFCtrlInfo.CurrentLow)
-    {
-        if(currentVoltage != s_RFCtrlInfo.VoltageTarget)
-        {
-            newVoltage = s_RFCtrlInfo.VoltageTarget;
-            Drv_DAC_SetVoltage(newVoltage);
-            s_RFCtrlInfo.Voltage = newVoltage;
-            LOG_I("RF: Current normal (%d mV), voltage set to %d mV (level %d)",
-                  current, newVoltage, s_RFCtrlInfo.WorkLevel);
-        }
-        s_RFCtrlInfo.ErrorCode = E_RF_ERROR_NONE;
-    }
-    else
-    {
-        if(currentVoltage != RF_VOLTAGE_INIT_MV)
-        {
-            newVoltage = RF_VOLTAGE_INIT_MV;
-            Drv_DAC_SetVoltage(newVoltage);
-            s_RFCtrlInfo.Voltage = newVoltage;
-            LOG_I("RF: Current below range (%d mV), voltage set to 7V", current);
-        }
-        s_RFCtrlInfo.ErrorCode = E_RF_ERROR_CURRENT_TOO_LOW;
+
+    if(newVoltage != currentVoltage) {
+        Drv_DAC_SetVoltage(newVoltage);
+        s_RFCtrlInfo.Voltage = newVoltage;
     }
 
     return isNormal;

@@ -333,9 +333,6 @@ bool App_NegPrsHeat_IsHeadTempNormal(void)
     uint16_t temp = s_NPHCtrlInfo.HeadTemp;
     uint32_t currentTime = Drv_Delay_GetTickMs();
     bool isNormal = true;
-    if(TreatGetRunFlag()) {
-        return true;
-    }
     /* Invalid NTC read (sensor error) */
     if(temp == 0xFFFF || temp == 0xEEFF)
     {

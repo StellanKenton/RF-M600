@@ -22,6 +22,44 @@
 
 static US_CtrlInfo_t s_USCtrlInfo;
 
+static void App_Ultra_RunChangeLevel(void);
+void App_Ultrasound_SetFrequency(uint16_t frequency);
+
+static void App_UltraSound_LoadConfig(const US_TreatParams_t *pParams)
+{
+    if(pParams == NULL)
+    {
+        return;
+    }
+
+    s_USCtrlInfo.TreatParams = *pParams;
+    s_USCtrlInfo.Trans.RxConfig.frequency = pParams->Frequency;
+    s_USCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
+    s_USCtrlInfo.Trans.RxConfig.voltage = pParams->Voltage;
+    s_USCtrlInfo.Trans.RxConfig.Current_HighLimit = pParams->CurrentHigh;
+    s_USCtrlInfo.Trans.RxConfig.Current_LowLimit = pParams->CurrentLow;
+    s_USCtrlInfo.Trans.RxConfig.remain_treatment_count = pParams->TreatRemainTimes;
+    s_USCtrlInfo.Frequency = pParams->Frequency;
+    s_USCtrlInfo.TempLimit = pParams->TempLimit;
+    s_USCtrlInfo.Voltage = pParams->Voltage;
+    s_USCtrlInfo.VoltageBase = pParams->Voltage;
+    s_USCtrlInfo.CurrentHigh = pParams->CurrentHigh;
+    s_USCtrlInfo.CurrentLow = pParams->CurrentLow;
+    s_USCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
+}
+
+static void App_UltraSound_ApplyRuntimeConfig(const US_TreatParams_t *pParams)
+{
+    if(pParams == NULL)
+    {
+        return;
+    }
+
+    App_UltraSound_LoadConfig(pParams);
+    App_Ultrasound_SetFrequency(s_USCtrlInfo.Frequency);
+    Drv_DAC_SetVoltage(s_USCtrlInfo.Voltage);
+}
+
 static void App_UltraSound_UpdateHeadTemp(void)
 {
     if(App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_ULTRASOUND) {
@@ -75,21 +113,19 @@ void App_UltraSound_RxDataHandle(void)
     {
         const US_TreatParams_t *pParams = App_Memory_GetUSParams();
 
-        s_USCtrlInfo.TreatParams = *pParams;
         if(s_USCtrlInfo.runState != E_US_RUN_WORKING)
         {
-            s_USCtrlInfo.Frequency = pParams->Frequency;
-            s_USCtrlInfo.TempLimit = pParams->TempLimit;
-            s_USCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-            s_USCtrlInfo.CurrentHigh = pParams->CurrentHigh;
-            s_USCtrlInfo.CurrentLow = pParams->CurrentLow;
-            s_USCtrlInfo.VoltageBase = pParams->Voltage;
+            App_UltraSound_LoadConfig(pParams);
+        }
+        else
+        {
+            App_UltraSound_ApplyRuntimeConfig(pParams);
         }
 
         pTransData->flag.bits.Sync_Config = 0;
-        LOG_I("US config synced: freq=%d, temp=%d, voltage=%d, remain=%d, runtime_updated=%d",
+        LOG_I("US config synced: freq=%d, temp=%d, voltage=%d, remain=%d, runtime_applied=%d",
               pParams->Frequency, pParams->TempLimit, pParams->Voltage,
-              pParams->TreatRemainTimes, s_USCtrlInfo.runState != E_US_RUN_WORKING);
+              pParams->TreatRemainTimes, s_USCtrlInfo.runState == E_US_RUN_WORKING);
     }
 }
 
@@ -265,9 +301,16 @@ void App_UltraSound_SetWorkParams(void)
     // Set work parameters
     s_USCtrlInfo.WorkLevel = s_USCtrlInfo.Trans.RxWorkState.work_level;
     s_USCtrlInfo.Voltage = s_USCtrlInfo.Trans.RxConfig.voltage;
-    s_USCtrlInfo.VoltageBase = s_USCtrlInfo.Trans.RxConfig.voltage;  // Save base voltage for over-limit check
+    s_USCtrlInfo.VoltageBase = s_USCtrlInfo.Trans.RxConfig.voltage;
     s_USCtrlInfo.Frequency = s_USCtrlInfo.Trans.RxConfig.frequency;
     s_USCtrlInfo.TempLimit = s_USCtrlInfo.Trans.RxConfig.temp_limit;
+    s_USCtrlInfo.CurrentHigh = s_USCtrlInfo.Trans.RxConfig.Current_HighLimit;
+    s_USCtrlInfo.CurrentLow = s_USCtrlInfo.Trans.RxConfig.Current_LowLimit;
+    s_USCtrlInfo.TreatParams.Frequency = s_USCtrlInfo.Trans.RxConfig.frequency;
+    s_USCtrlInfo.TreatParams.TempLimit = s_USCtrlInfo.Trans.RxConfig.temp_limit;
+    s_USCtrlInfo.TreatParams.Voltage = s_USCtrlInfo.Trans.RxConfig.voltage;
+    s_USCtrlInfo.TreatParams.CurrentHigh = s_USCtrlInfo.Trans.RxConfig.Current_HighLimit;
+    s_USCtrlInfo.TreatParams.CurrentLow = s_USCtrlInfo.Trans.RxConfig.Current_LowLimit;
 
     // Configure work voltage and frequency
     App_Ultrasound_SetFrequency(s_USCtrlInfo.Frequency);
@@ -338,13 +381,12 @@ bool App_UltraSound_IsCurrentNormal(void)
     {
         // Voltage over limit, report error
         s_USCtrlInfo.ErrorCode = E_US_ERROR_VOLTAGE_OVER_LIMIT;
-        LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: ±%d mV)",
+        LOG_E("Voltage adjust over limit: %d mV (base: %d mV, limit: %d mV)",
               newVoltage, s_USCtrlInfo.VoltageBase, VOLTAGE_ADJUST_LIMIT_MV);
         isNormal = false;
     }
     return isNormal;
 }
-void App_Ultra_RunChangeLevel();
 bool App_UltraSound_IsHeadTempNormal(void)
 {
     bool isNormal = true;
@@ -405,14 +447,7 @@ void App_Ultrasound_Process(void)
         case E_US_RUN_INIT:
             {
                 const US_TreatParams_t *pParams = App_Memory_GetUSParams();
-                s_USCtrlInfo.TreatParams = *pParams;
-                s_USCtrlInfo.Trans.RxConfig.frequency = pParams->Frequency;
-                s_USCtrlInfo.Trans.RxConfig.temp_limit = pParams->TempLimit;
-                s_USCtrlInfo.Trans.RxConfig.voltage = pParams->Voltage;
-                s_USCtrlInfo.TreatRemainTimes = pParams->TreatRemainTimes;
-                s_USCtrlInfo.CurrentHigh = pParams->CurrentHigh;
-                s_USCtrlInfo.CurrentLow = pParams->CurrentLow;
-                s_USCtrlInfo.VoltageBase = pParams->Voltage;
+                App_UltraSound_LoadConfig(pParams);
             }
 			// Switch relay pwr_control1 to ultrasound channel
             Drv_IODevice_ChangeChannel(CHANNEL_US);

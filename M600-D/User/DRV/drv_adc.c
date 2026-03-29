@@ -68,13 +68,15 @@ static uint16_t Drv_ADC_GetUSCurrentValue(uint16_t raw)
 
 static uint16_t Drv_ADC_GetRFCurrentValue(uint16_t raw)
 {
+    uint16_t RFCurrent;
     // <= 0.5V
     if(raw <= 620) {
         s_adcPhysicalValues.isContactSkin = false;
     } else {
         s_adcPhysicalValues.isContactSkin = true;
     }
-    return 0u;
+    RFCurrent = raw*330/4096;
+    return RFCurrent;
 }
 
 static uint16_t Drv_ADC_GetHeatRef02Value(uint16_t raw)

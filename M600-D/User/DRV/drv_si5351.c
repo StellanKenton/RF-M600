@@ -29,9 +29,9 @@ uint16_t Drv_SI5351_SetFrequency(uint16_t frequency)
     {
         frequency = 800;
     }
-    else if(frequency > 1300)
+    else if(frequency > 1600)
     {
-        frequency = 1300;
+        frequency = 1600;
     }
     // Set the frequency of the SI5351
     PWM_Generate(frequency*2);

@@ -29,7 +29,7 @@ extern "C" {
 #define RF_VOLTAGE_MIN_MV          1100       ///< Min output voltage (11V = 11000mV)
 #define RF_VOLTAGE_MAX_MV          3000       ///< Max output voltage (30V = 30000mV)
 #define RF_VOLTAGE_INIT_MV         700        ///< Init/standby voltage (7V = 7000mV)
-#define RF_CURRENT_THRESHOLD_MV    500         ///< Current threshold (0.5V = 500mV)
+#define RF_CURRENT_THRESHOLD_MV    50          ///< Current threshold (0.5V = 500mV)
 #define RF_CURRENT_MONITOR_PERIOD_MS   10      ///< Current monitor period (10ms)
 #define RF_TEMP_MONITOR_PERIOD_MS      1000    ///< Temp monitor period (1s)
 

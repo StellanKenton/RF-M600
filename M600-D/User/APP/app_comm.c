@@ -474,6 +474,8 @@ static void App_Comm_ReplyHeatStatus(void)
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.error_code;
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_treatment_count & 0xFF;
     TxData[DataLen++] = s_AppCommInfo.Heat.TxStatus.remain_treatment_count >> 8;
+    TxData[DataLen++] = (uint16_t)s_AppCommInfo.Heat.TxStatus.current_pressure_kpa & 0xFF;
+    TxData[DataLen++] = (uint16_t)s_AppCommInfo.Heat.TxStatus.current_pressure_kpa >> 8;
     App_Comm_CreateAndSend(PROTOCOL_MODULE_HEAT, PROTOCOL_CMD_GET_STATUS, TxData, DataLen);
 }
 

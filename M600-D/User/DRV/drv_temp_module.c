@@ -20,7 +20,7 @@
 #define TEMP_COMM_TIMEOUT_MS         2000u
 #define TEMP_TIMEOUT_OBJECT_TEMP     20000  /* 200.00 deg C in centi-C */
 
-static const uint8_t s_tempCmdAutoOutput[] = {0xA5u, 0x51u, 0xF6u}; // {0xA5u, 0x45u, 0xEAu};//
+static const uint8_t s_tempCmdAutoOutput[] = {0xA5u, 0x55u, 0xFAu}; 
 
 static Drv_TempModule_Data_t s_tempData;
 static bool     s_tempDataValid;
@@ -98,7 +98,7 @@ static void Drv_TempModule_RecvData(void)
     uint8_t  dataLen  = rxBuf[3];
     uint16_t frameLen = (uint16_t)dataLen + 5u;   /* header(2)+type(1)+len(1)+data(N)+chk(1) */
 
-    /* Sanity ¨C prevent local buffer overflow */
+    /* Sanity ï¿½C prevent local buffer overflow */
     if (frameLen > sizeof(rxBuf)) {
         CBuff_Pop(pRxBuffer, rxBuf, 2u);
         return;
@@ -118,7 +118,7 @@ static void Drv_TempModule_RecvData(void)
     /* Peek the complete frame */
     CBuff_Read(pRxBuffer, rxBuf, frameLen);
 
-    /* Checksum: low-8-bit sum of Byte0 ¡­ Byte(3+dataLen) */
+    /* Checksum: low-8-bit sum of Byte0 ï¿½ï¿½ Byte(3+dataLen) */
     uint8_t checksum = 0;
     for (uint16_t i = 0; i < (uint16_t)(4u + dataLen); i++) {
         checksum += rxBuf[i];
@@ -167,14 +167,14 @@ void Drv_TempModule_Process(void)
 
     /* RecvData resets s_commTimeoutMs to 0 on successful frame parse.
      * If it was NOT reset, increment the offline counter only when the
-     * current probe is RF ¨C other modes don't rely on this sensor.  */
+     * current probe is RF ï¿½C other modes don't rely on this sensor.  */
     if (s_commTimeoutMs == prevTimeout) {
         if (Drv_IODevice_GetProbeStatus() == E_IODEVICE_MODE_RADIO_FREQUENCY) {
             s_commTimeoutMs += TEMP_PROCESS_INTERVAL_MS;
         }
     }
 
-    /* RF offline timeout: 2 s with no temp data ¡ú force 200.00 ¡ãC */
+    /* RF offline timeout: 2 s with no temp data ï¿½ï¿½ force 200.00 ï¿½ï¿½C */
     if (s_commTimeoutMs >= TEMP_COMM_TIMEOUT_MS) {
         s_commTimeoutMs = TEMP_COMM_TIMEOUT_MS;   /* clamp */
         s_tempData.object_temp_centi_c = TEMP_TIMEOUT_OBJECT_TEMP;

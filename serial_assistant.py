@@ -762,6 +762,9 @@ class SerialAssistant:
                     result.append(f"连接状态: {self.get_conn_state_name(conn_state)}")
                     result.append(f"错误码: 0x{error_code:02X}")
                     result.append(f"剩余治疗次数: {remain_treatment_count}")
+                    if len(payload) >= 23:
+                        current_pressure_kpa = struct.unpack_from('<h', payload, 21)[0]
+                        result.append(f"实时负压: {current_pressure_kpa} KPa")
         elif cmd == PROTOCOL_CMD_SET_CONFIG:
             if module == PROTOCOL_MODULE_ULTRASOUND:
                 if len(payload) >= 6:
@@ -915,7 +918,9 @@ class SerialAssistant:
                 ("连接状态", self.get_conn_state_name(conn_state)),
                 ("错误码", f"0x{error_code:02X}"),
                 ("剩余治疗次数", str(remain_treatment_count)),
-            ]
+            ] + ([
+                ("实时负压", f"{struct.unpack_from('<h', payload, 21)[0]} KPa"),
+            ] if len(payload) >= 23 else [])
 
         return []
 

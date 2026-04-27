@@ -19,6 +19,7 @@
 
 static NPH_CtrlInfo_t s_NPHCtrlInfo;
 static int16_t App_NegPrsHeat_PressureToScaledKpa(int8_t pressure_kpa);
+static int16_t App_NegPrsHeat_GetCurrentPressureKpa(void);
 
 static bool App_NegPrsHeat_IsWorkStartRequested(void)
 {
@@ -185,6 +186,24 @@ static int16_t App_NegPrsHeat_PressureToScaledKpa(int8_t pressure_kpa)
     return (int16_t)((int16_t)pressure_kpa * 100);
 }
 
+static int16_t App_NegPrsHeat_GetCurrentPressureKpa(void)
+{
+    int16_t pressureKpaX100;
+
+    if(App_TreatMgr_GetProbeStatus() != E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT) {
+        return 0;
+    }
+
+    pressureKpaX100 = Drv_ADC_GetHPPressureRealValue();
+    s_NPHCtrlInfo.currentPressure = pressureKpaX100;
+
+    if(pressureKpaX100 >= 0) {
+        return (int16_t)((pressureKpaX100 + 50) / 100);
+    }
+
+    return (int16_t)((pressureKpaX100 - 50) / 100);
+}
+
 void App_NegPrsHeat_UpdateStatus(void)
 {
     // Update work state
@@ -208,6 +227,7 @@ void App_NegPrsHeat_UpdateStatus(void)
     s_NPHCtrlInfo.Trans.TxStatus.preheat_temp_limit = s_NPHCtrlInfo.PreheatTempLimit;
     s_NPHCtrlInfo.Trans.TxStatus.remain_preheat_time = s_NPHCtrlInfo.PreheatRemainTime;
     s_NPHCtrlInfo.Trans.TxStatus.remain_treatment_count = s_NPHCtrlInfo.TreatRemainTimes;
+    s_NPHCtrlInfo.Trans.TxStatus.current_pressure_kpa = App_NegPrsHeat_GetCurrentPressureKpa();
 
     /* Get probe/foot state from treatmgr and update conn_state */
     bool headConnected = (App_TreatMgr_GetProbeStatus() == E_IODEVICE_MODE_NEGATIVE_PRESSURE_HEAT);
